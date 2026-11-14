@@ -11,3 +11,7 @@ def ensure_indexes(db: Database) -> None:
     db.merchants.create_index([("brand_id", ASCENDING)])
     db.sync_runs.create_index([("customer_id", ASCENDING), ("started_at", DESCENDING)])
     db.sync_runs.create_index([("ok", ASCENDING), ("started_at", DESCENDING)])
+    db.company_emissions.create_index([("brand_id", ASCENDING), ("data_year", DESCENDING)])
+    db.labor_cases.create_index([("brand_id", ASCENDING)])
+    db.pipeline_runs.create_index([("source", ASCENDING), ("started_at", DESCENDING)])
+    db.pipeline_runs.create_index([("source", ASCENDING), ("loaded_brands", ASCENDING)])

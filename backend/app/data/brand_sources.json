@@ -1,0 +1,124 @@
+{
+  "amazon": {
+    "dol": {
+      "name_patterns": [
+        "AMAZON"
+      ],
+      "naics_prefixes": [
+        "454",
+        "455",
+        "492",
+        "493"
+      ]
+    }
+  },
+  "apple": {
+    "dol": {
+      "name_patterns": [
+        "APPLE STORE",
+        "APPLE INC",
+        "APPLE RETAIL"
+      ],
+      "naics_prefixes": [
+        "443",
+        "449",
+        "334"
+      ]
+    }
+  },
+  "chipotle": {
+    "carbon_factor": "limited_service_restaurant",
+    "dol": {
+      "name_patterns": [
+        "CHIPOTLE"
+      ],
+      "naics_prefixes": [
+        "7225",
+        "7222"
+      ]
+    }
+  },
+  "hm": {
+    "dol": {
+      "name_patterns": [
+        "H & M",
+        "H&M"
+      ],
+      "naics_prefixes": [
+        "448",
+        "458"
+      ]
+    }
+  },
+  "nike": {
+    "carbon_factor": "footwear",
+    "dol": {
+      "name_patterns": [
+        "NIKE"
+      ],
+      "naics_prefixes": [
+        "448",
+        "458",
+        "316"
+      ]
+    }
+  },
+  "shell": {
+    "climate_trace_owner": "E100000000746",
+    "dol": {
+      "name_patterns": [
+        "SHELL"
+      ],
+      "naics_prefixes": [
+        "447",
+        "457"
+      ]
+    }
+  },
+  "starbucks": {
+    "carbon_factor": "coffee_shop",
+    "dol": {
+      "name_patterns": [
+        "STARBUCKS"
+      ],
+      "naics_prefixes": [
+        "7225",
+        "7222"
+      ]
+    }
+  },
+  "target": {
+    "dol": {
+      "name_patterns": [
+        "TARGET STORE",
+        "TARGET CORP"
+      ],
+      "naics_prefixes": [
+        "452",
+        "455"
+      ]
+    }
+  },
+  "traderjoes": {
+    "dol": {
+      "name_patterns": [
+        "TRADER JOE"
+      ],
+      "naics_prefixes": [
+        "445"
+      ]
+    }
+  },
+  "walmart": {
+    "dol": {
+      "name_patterns": [
+        "WAL-MART",
+        "WALMART"
+      ],
+      "naics_prefixes": [
+        "452",
+        "455"
+      ]
+    }
+  }
+}

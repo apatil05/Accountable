@@ -7,6 +7,7 @@ from contextlib import asynccontextmanager
 from fastapi import APIRouter, Depends, FastAPI, Header, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from pydantic import ValidationError
 from pymongo.database import Database
 from pymongo.errors import PyMongoError
 
@@ -16,13 +17,15 @@ from .db.client import get_db, ping
 from .db.indexes import ensure_indexes
 from .models import (
     Alternative,
+    CompanyEmissions,
     EthicsReport,
+    LaborSummary,
     Purchase,
     SpendingSummary,
     SupplyChain,
     UserProfile,
 )
-from .services import aggregation, ethics, ingest, nessie, supply_chain
+from .services import aggregation, ethics, ingest, labor, nessie, supply_chain
 
 logger = logging.getLogger(__name__)
 
@@ -164,9 +167,7 @@ def get_profile(db: Database = Depends(get_database)):
 
 @router.put("/profile", response_model=UserProfile)
 def put_profile(profile: UserProfile, db: Database = Depends(get_database)):
-    saved = store.save_profile(db, _customer_id(None), profile)
-    ethics._cache.clear()  # personalized scores depend on weights
-    return saved
+    return store.save_profile(db, _customer_id(None), profile)
 
 
 @router.get("/merchants/{merchant_id}/ethics", response_model=EthicsReport)
@@ -174,7 +175,7 @@ def merchant_ethics(merchant_id: str, db: Database = Depends(get_database)):
     brand = _brand_or_404(db, merchant_id)
     if brand.get("is_junk"):
         raise HTTPException(404, "Test or placeholder records are not researched")
-    report = ethics.get_report(brand["_id"], brand["name"], store.load_profile(db, _customer_id(None)))
+    report = ethics.get_report(db, brand["_id"], brand["name"], store.load_profile(db, _customer_id(None)))
     if not report:
         raise HTTPException(404, "No ethics data yet for this merchant")
     return report
@@ -183,7 +184,7 @@ def merchant_ethics(merchant_id: str, db: Database = Depends(get_database)):
 @router.get("/merchants/{merchant_id}/supply-chain", response_model=SupplyChain)
 def merchant_supply_chain(merchant_id: str, db: Database = Depends(get_database)):
     _brand_or_404(db, merchant_id)
-    chain = supply_chain.get_supply_chain(merchant_id)
+    chain = supply_chain.get_supply_chain(db, merchant_id)
     if not chain:
         raise HTTPException(404, "No supply chain data yet for this merchant")
     return chain
@@ -196,11 +197,32 @@ def merchant_alternatives(merchant_id: str, db: Database = Depends(get_database)
     return supply_chain.get_alternatives(brand.get("categories", []), prefer_local)
 
 
+@router.get("/merchants/{merchant_id}/emissions", response_model=list[CompanyEmissions])
+def merchant_emissions(merchant_id: str, db: Database = Depends(get_database)):
+    """Company-level emissions facts (reported or independently estimated), newest year first."""
+    _brand_or_404(db, merchant_id)
+    facts = []
+    for doc in repos.get_company_emissions(db, merchant_id):
+        try:
+            facts.append(CompanyEmissions(**doc))
+        except ValidationError:
+            # Only possible if someone edits the database by hand; skip it rather than fail the page.
+            logger.error("invalid company_emissions document %s", doc.get("_id"))
+    return facts
+
+
+@router.get("/merchants/{merchant_id}/labor", response_model=LaborSummary)
+def merchant_labor(merchant_id: str, db: Database = Depends(get_database)):
+    """Totals of concluded US Department of Labor wage and hour cases for this brand."""
+    _brand_or_404(db, merchant_id)
+    return labor.summarize(db, merchant_id)
+
+
 @router.get("/supply-chains", response_model=list[SupplyChain])
 def all_supply_chains(customer_id: str | None = None, db: Database = Depends(get_database)):
     """Everything the user buys, for the big 'where your money goes' map."""
     ids = repos.distinct_brand_ids(db, _customer_id(customer_id))
-    return [c for i in ids if (c := supply_chain.get_supply_chain(i))]
+    return supply_chain.get_supply_chains(db, ids)
 
 
 def create_app() -> FastAPI:

@@ -19,6 +19,16 @@ export const CATEGORY_LABELS: Record<EthicsCategory, string> = {
   privacy: "Data & privacy",
 };
 
+/** Spend-based estimate: dollars spent x a US industry-average factor. Label it "estimated". */
+export interface CarbonEstimate {
+  kg_co2e: number;
+  factor_id: string;
+  factor_label: string;
+  confidence: "high" | "medium" | "low";
+  data_year: number;
+  includes_use_phase: boolean;
+}
+
 export interface MerchantSummary {
   merchant_id: string;
   name: string;
@@ -27,6 +37,7 @@ export interface MerchantSummary {
   purchase_count: number;
   last_purchase: string;
   personalized_score: number | null;
+  carbon: CarbonEstimate | null;
 }
 
 export interface SpendingSummary {
@@ -34,6 +45,59 @@ export interface SpendingSummary {
   total_spent: number;
   merchant_count: number;
   merchants: MerchantSummary[];
+  estimated_kg_co2e: number | null;
+}
+
+/** Where a fact came from. Show source_name, locator and data_year next to every number. */
+export interface Provenance {
+  source: "company_report" | "climate_trace" | "dol_whd" | "epa_useeio" | "manual";
+  source_name: string;
+  source_url: string | null;
+  locator: string | null;
+  data_year: number;
+  retrieved_at: string;
+  method: "api" | "download" | "pdf_verified" | "manual";
+  kind: "reported" | "estimated" | "enforcement_record";
+  license: string | null;
+  sha256: string | null;
+}
+
+/** Tonnes CO2e. null = not disclosed (never treat as zero). */
+export interface EmissionsFigures {
+  scope1: number | null;
+  scope2_market: number | null;
+  scope2_location: number | null;
+  scope12_market: number | null;
+  scope3: number | null;
+  total: number | null;
+  owned_assets: number | null;
+}
+
+export interface CompanyEmissions {
+  brand_id: string;
+  data_year: number;
+  status: "reported" | "not_reported";
+  reason: string | null;
+  unit: "tCO2e";
+  figures: EmissionsFigures | null;
+  provenance: Provenance;
+}
+
+/** Concluded US Department of Labor wage and hour cases. loaded=false means never fetched. */
+export interface LaborSummary {
+  merchant_id: string;
+  loaded: boolean;
+  case_count: number;
+  violations: number;
+  employees_affected: number;
+  back_wages: number;
+  penalties: number;
+  child_labor_cases: number;
+  earliest_finding: string | null;
+  latest_finding: string | null;
+  source_name: string;
+  source_url: string;
+  note: string;
 }
 
 export interface UserProfile {
