@@ -10,12 +10,12 @@ import Values from "./pages/Values";
 // Public pages draw their own chrome; the app pages share the top bar.
 const PUBLIC = ["/", "/login", "/register"];
 // Pages that own the whole viewport (globe backdrops) skip the centered content column.
-const FULL_BLEED = ["/dashboard", "/map"];
+const FULL_BLEED = ["/dashboard", "/map", "/values"];
 
 export default function App() {
   const { pathname } = useLocation();
   const isPublic = PUBLIC.includes(pathname);
-  const fullBleed = isPublic || FULL_BLEED.includes(pathname);
+  const fullBleed = isPublic || FULL_BLEED.includes(pathname) || pathname.startsWith("/merchant/");
 
   // Globe pages paint the whole document dark, so no light ground ever shows past their edges.
   useEffect(() => {

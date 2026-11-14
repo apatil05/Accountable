@@ -6,7 +6,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { api } from "../api/client";
 import type { SpendingSummary, SupplyChain, SupplyChainStage } from "../api/types";
 import Globe, { type StopRef } from "../components/Globe";
-import { findNearbyPlace, mapLinkFor, type PlaceInfo } from "../lib/places";
+import StopDetail from "../components/StopDetail";
 
 const usd = (n: number) => n.toLocaleString("en-US", { style: "currency", currency: "USD" });
 
@@ -151,41 +151,6 @@ export default function MapPage() {
           {coarse ? "Drag to spin · + and − to zoom · tap a stop for details" : "Drag to spin · scroll to zoom · click a stop for details"}
         </p>
       </section>
-    </div>
-  );
-}
-
-// Facts about one stop, plus the "learn about this place" slot (fills in once places.ts is wired up).
-function StopDetail({ stage }: { stage: SupplyChainStage }) {
-  const [place, setPlace] = useState<PlaceInfo | null>(null);
-  useEffect(() => {
-    let live = true;
-    setPlace(null);
-    findNearbyPlace({ lat: stage.lat, lng: stage.lng, place: stage.place }).then((p) => live && setPlace(p));
-    return () => {
-      live = false;
-    };
-  }, [stage.lat, stage.lng, stage.place]);
-
-  return (
-    <div className="stop-detail" aria-live="polite">
-      <h2>{stage.place}</h2>
-      <p className="stop-stage">{stage.stage} · example stop, not verified</p>
-      {stage.description && <p>{stage.description}</p>}
-      <p className="stop-coords">
-        About {Math.abs(stage.lat).toFixed(1)}° {stage.lat >= 0 ? "N" : "S"}, {Math.abs(stage.lng).toFixed(1)}° {stage.lng >= 0 ? "E" : "W"} ·{" "}
-        <a href={mapLinkFor(stage)} target="_blank" rel="noreferrer">Open in OpenStreetMap</a>
-      </p>
-      {place && (
-        <div className="place-info">
-          {place.thumbnailUrl && <img src={place.thumbnailUrl} alt="" />}
-          <div>
-            <p className="place-title">Near here: {place.title}{place.distanceKm != null && ` (${Math.round(place.distanceKm)} km)`}</p>
-            {place.summary && <p>{place.summary}</p>}
-            <a href={place.url} target="_blank" rel="noreferrer">Read on Wikipedia</a>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
