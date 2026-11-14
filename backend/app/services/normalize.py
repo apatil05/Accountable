@@ -30,7 +30,7 @@ FUZZY_THRESHOLD = 90
 MIN_PREFIX_ALIAS_LEN = 4
 MIN_FUZZY_LEN = 5
 
-JUNK_TOKENS = frozenset({"demo", "test", "sandbox", "fictional", "placeholder"})
+JUNK_TOKENS = frozenset({"demo", "test", "sandbox", "fictional", "placeholder", "simulated", "probe"})
 GENERIC_NAMES = frozenset({"bar", "online store", "boba shop", "shop", "store", "demo"})
 
 _BRACKETS = re.compile(r"\([^)]*\)|\[[^\]]*\]")
@@ -41,6 +41,8 @@ _LEGAL_SUFFIX = re.compile(r"\b(inc|llc|ltd|corp|corporation|co|sa de cv)\b\.?")
 _NOT_NAME_CHARS = re.compile(r"[^a-z0-9&\- ]")
 _APOSTROPHES = re.compile(r"['’‘`]")
 _WORD = re.compile(r"[a-z0-9]+")
+# Machine-generated ids inside a name ("atl-ad1d246c3cc32858e79acd5c"): 12+ hex chars with a digit.
+_HASH_LIKE = re.compile(r"\b(?=[0-9a-f]*\d)[0-9a-f]{12,}\b")
 
 MatchMethod = Literal["alias", "prefix", "fuzzy", "local", "junk"]
 
@@ -123,7 +125,12 @@ def _known(index: BrandIndex, brand_id: str, method: MatchMethod, score: float) 
 
 def _is_junk(raw: str, cleaned: str) -> bool:
     lowered = raw.casefold()
-    return "@" in lowered or cleaned in GENERIC_NAMES or bool(JUNK_TOKENS & set(_WORD.findall(lowered)))
+    return (
+        "@" in lowered
+        or cleaned in GENERIC_NAMES
+        or bool(_HASH_LIKE.search(lowered))
+        or bool(JUNK_TOKENS & set(_WORD.findall(lowered)))
+    )
 
 
 def resolve_brand(raw_name: str | None, index: BrandIndex) -> BrandMatch:

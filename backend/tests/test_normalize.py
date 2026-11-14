@@ -75,6 +75,36 @@ def test_resolve_known_brands(index, raw, brand_id, method):
     assert not match.is_junk
 
 
+# Brands found missing when the normalizer was run over 6,724 real Nessie enterprise merchants.
+@pytest.mark.parametrize(
+    "raw, brand_id",
+    [
+        ("Delta Air Lines", "delta"),
+        ("Publix Super Market", "publix"),
+        ("H-E-B", "heb"),
+        ("Domino's", "dominos"),
+        ("Torchy's Tacos", "torchys"),
+        ("Sam's Club (demo)", "samsclub"),  # a real brand with a "(demo)" suffix must not become junk
+        ("Sam's Club Durham (fictional demo club)", "samsclub"),
+        ("iCloud", "apple"),
+        ("Mint Mobile", "mintmobile"),
+        ("Planet Fitness", "planetfitness"),
+        ("Taco Bell", "tacobell"),
+        ("Home Lepot", "homedepot"),
+        ("Pret A Manger", "pret"),
+        ("Steam", "steam"),
+    ],
+)
+def test_brands_found_in_the_real_dataset(index, raw, brand_id):
+    match = normalize.resolve_brand(raw, index)
+    assert (match.brand_id, match.is_junk) == (brand_id, False)
+
+
+@pytest.mark.parametrize("raw", ["Steam Cleaning Co", "Zoom Photo Studio", "Notion Cafe", "Boots And Saddles", "Staples Of Italy"])
+def test_ambiguous_new_brands_do_not_swallow_local_businesses(index, raw):
+    assert normalize.resolve_brand(raw, index).method == "local"
+
+
 @pytest.mark.parametrize("raw", ["Apple Orchard Cafe", "Target Practice Supply", "Shell Beach Bakery", "Subway Tile Outlet"])
 def test_strict_brands_do_not_prefix_match(index, raw):
     # Ambiguous common words must not swallow unrelated local businesses.
@@ -94,6 +124,12 @@ def test_strict_brands_do_not_prefix_match(index, raw):
         "Online store",
         "Bar",
         "Runway sandbox: Alibaba.com",
+        # machine-generated test merchants seen in the real dataset
+        "atl-ad1d246c3cc32858e79acd5c",
+        "Scurry Sample Campus Market s-07d865efbaf86ffdb825",
+        "Simulated restaurant",
+        "ZZ Flow Probe Merchant",
+        "Pharmacy (demo history)",
     ],
 )
 def test_junk_is_flagged(index, raw):
@@ -152,6 +188,14 @@ def test_brand_categories_win_over_raw_label(category_map):
         (None, ["Other"]),
         ("", ["Other"]),
         ("totally-unknown-label", ["Other"]),
+        ("auto", ["Transport"]),
+        ("hotel", ["Travel"]),
+        ("flight", ["Travel"]),
+        ("pharmacy", ["Health"]),
+        ("books", ["Shopping"]),
+        ("fitness", ["Health"]),
+        ("university", ["Education"]),
+        ("home_improvement", ["Shopping"]),
         (["Food", "Coffee"], ["Food", "Coffee"]),
         (["shopping", "Shopping"], ["Shopping"]),
     ],
