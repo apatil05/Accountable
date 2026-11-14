@@ -4,13 +4,19 @@ import pytest
 from fastapi.testclient import TestClient
 from pymongo.errors import ServerSelectionTimeoutError
 
+from app import config, main
 from app.main import app, get_database
 from app.models import UserProfile
 from app.services import ingest, nessie
 
+TOKEN = "t" * 32
+AUTH = {"X-Admin-Token": TOKEN}
+
 
 @pytest.fixture
-def client(db):
+def client(db, monkeypatch):
+    monkeypatch.setattr(config, "ADMIN_TOKEN", TOKEN)
+    monkeypatch.setattr(main, "sync_guard", main.SyncGuard(cooldown_seconds=0))
     ingest.sync_customer(db, "cust_demo")
     app.dependency_overrides[get_database] = lambda: db
     try:
@@ -66,14 +72,15 @@ def test_supply_chains_cover_every_demo_brand(client):
 
 
 def test_sync_endpoint_is_idempotent(client, db):
-    first = client.post("/api/sync").json()
+    first = client.post("/api/sync", headers=AUTH).json()
     before = db.purchases.count_documents({})
-    second = client.post("/api/sync").json()
+    second = client.post("/api/sync", headers=AUTH).json()
     assert (first["purchases"], second["purchases"]) == (60, 60)
     assert db.purchases.count_documents({}) == before
 
 
-def test_invalid_customer_id_is_rejected(client):
+def test_invalid_customer_id_is_rejected(client, monkeypatch):
+    monkeypatch.setattr(config, "ALLOW_CUSTOMER_OVERRIDE", True)
     assert client.get("/api/spending/summary", params={"customer_id": "../etc/passwd"}).status_code == 400
 
 
@@ -82,7 +89,7 @@ def test_nessie_failure_becomes_502_without_leaking_details(client, monkeypatch)
         raise nessie.NessieError("Nessie returned HTTP 503")
 
     monkeypatch.setattr(ingest, "sync_customer", fail)
-    response = client.post("/api/sync")
+    response = client.post("/api/sync", headers=AUTH)
     assert response.status_code == 502
     assert response.json() == {"detail": "Nessie returned HTTP 503"}
 
@@ -92,7 +99,7 @@ def test_database_outage_becomes_503_without_leaking_details(client, monkeypatch
         raise ServerSelectionTimeoutError("cluster0-shard-00-00.abc12.mongodb.net:27017: timed out")
 
     monkeypatch.setattr(ingest, "sync_customer", down)
-    response = client.post("/api/sync")
+    response = client.post("/api/sync", headers=AUTH)
     assert response.status_code == 503
     assert response.json() == {"detail": "The database is temporarily unavailable"}
     assert "mongodb.net" not in response.text
