@@ -16,7 +16,7 @@ KEY = "secret-dol-key"
 
 def _row(case_id, trade="CHIPOTLE MEXICAN GRILL", naics="722513", bw=1234.5, cmp=500.0, cl=None, **extra):
     row = {"case_id": case_id, "trade_nm": trade, "legal_name": "CHIPOTLE SERVICES LLC", "st_cd": "MA",
-           "naic_cd": naics, "findings_start_date": "2021-01-01", "findings_end_date": "2022-12-31 00:00:00",
+           "naic_cd": naics, "findings_start_date": "2025-01-01", "findings_end_date": "2025-12-31 00:00:00",
            "case_violtn_cnt": 3, "ee_violtd_cnt": 12, "bw_atp_amt": bw, "flsa_cmp_assd_amt": cmp, "cmp_assd_cnt": 7, **extra}
     if cl is not None:
         row["flsa_cl_violtn_cnt"] = cl
@@ -63,7 +63,7 @@ def test_cases_are_matched_paginated_and_filtered_by_industry(db, monkeypatch):
     assert ids == {"chipotle:1", "chipotle:2", "chipotle:3"}  # case 4 is a farm, not the restaurant chain
     doc = db.labor_cases.find_one({"_id": "chipotle:1"})
     assert (doc["back_wages_cents"], doc["penalties_cents"], doc["state"]) == (123450, 50000, "MA")
-    assert doc["findings_end"].year == 2022
+    assert doc["findings_end"].year == 2025
     assert doc["provenance"]["kind"] == "enforcement_record"
 
 
@@ -73,7 +73,7 @@ def test_summary_totals_cases(db, monkeypatch):
     s = labor.summarize(db, "chipotle")
     assert (s.loaded, s.case_count, s.violations, s.employees_affected) == (True, 2, 6, 24)
     assert (s.back_wages, s.penalties, s.child_labor_cases) == (1334.5, 1000.0, 1)
-    assert (s.earliest_finding, s.latest_finding) == ("2021-01-01", "2022-12-31")
+    assert (s.earliest_finding, s.latest_finding) == ("2025-01-01", "2025-12-31")
 
 
 def test_a_loaded_brand_with_no_cases_differs_from_an_unloaded_one(db, monkeypatch):
@@ -159,3 +159,20 @@ def test_labor_endpoint(db, monkeypatch):
         assert TestClient(app).get("/api/merchants/nope/labor").status_code == 404
     finally:
         app.dependency_overrides.clear()
+
+
+def test_load_can_be_limited_to_some_brands_with_progress_and_pauses(db, monkeypatch):
+    monkeypatch.setattr(labor, "PAGE_SIZE", 2)
+    fake, sleeps, progress = FakeDol({"CHIPOTLE": [_row(1)]}), [], []
+    with httpx.Client(transport=httpx.MockTransport(fake)) as client:
+        report = labor.load(db, client, api_key=KEY, now=lambda: NOW, sleep=sleeps.append,
+                            only=["chipotle", "nike"], pause=1.5, progress=lambda b, msg: progress.append((b, msg)))
+    assert report.written == 1
+    assert [b for b, _ in progress] == ["chipotle", "nike"]  # nothing else fetched
+    assert "1 case" in progress[0][1]
+    assert sleeps == [1.5]  # a pause between brands, not before the first
+
+
+def test_unknown_brand_names_are_refused():
+    with pytest.raises(labor.DolError, match="nope"):
+        labor.load(None, None, api_key=KEY, only=["nope"])  # type: ignore[arg-type]

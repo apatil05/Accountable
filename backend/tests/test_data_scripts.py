@@ -51,14 +51,16 @@ def test_load_data_routes_each_source(monkeypatch):
     calls = []
     monkeypatch.setattr(load_data.company_reports, "load_reports", lambda db, entries, fetch: calls.append("reports"))
     monkeypatch.setattr(load_data.climate_trace, "load", lambda db, client, year: calls.append(("trace", year)))
-    monkeypatch.setattr(load_data.labor, "load", lambda db, client, api_key: calls.append("dol"))
+    monkeypatch.setattr(load_data, "run_labor", lambda db, client, source, *a, **k: calls.append(source))
     for source in load_data.SOURCES:
         load_data.run_source(None, None, source, 2025)
-    assert calls == ["reports", ("trace", 2025), "dol"]
+    assert calls == ["reports", ("trace", 2025), "dol", "osha", "nlrb"]
+    assert load_data._chosen("labor") == ("dol", "osha", "nlrb")
 
 
-def test_load_data_exits_nonzero_without_a_dol_key(db, monkeypatch, capsys):
+def test_load_data_api_mode_needs_a_dol_key(db, tmp_path, monkeypatch, capsys):
+    monkeypatch.setattr(load_data.labordata, "CACHE_DIR", tmp_path / "cache")  # never touch the real cache
     monkeypatch.setattr(load_data, "get_db", lambda: db)
     monkeypatch.setattr(load_data.config, "DOL_API_KEY", "")
-    assert load_data.main(["dol"]) == 1
+    assert load_data.main(["dol", "--api"]) == 1
     assert "DOL_API_KEY" in capsys.readouterr().err

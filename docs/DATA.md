@@ -25,7 +25,9 @@ Owner: Person A. Read this before adding a data source or showing a new number i
 | Estimated CO2e of the user's spending | Supply Chain GHG Emission Factors v1.4.0 (Cornerstone/EPA lineage, 2023 data, CC BY 4.0) + BLS CPI-U + EPA tailpipe CO2 + EIA gas price | estimated | `app/data/emission_factors.json` (committed) | `python -m scripts.build_emission_factors <xlsx>` (once per factor release) |
 | Company-reported emissions (Scope 1/2/3) | Each company's sustainability report PDF | reported, `pdf_verified` | `company_emissions` | `python -m scripts.load_data reports` |
 | Emissions of owned facilities (Shell) | Climate TRACE API (no key) | estimated | `company_emissions` | `python -m scripts.load_data climate_trace` |
-| Wage and hour cases (back wages, penalties, child labor) | US DOL WHD enforcement API (free key) | enforcement_record | `labor_cases` | `python -m scripts.load_data dol` |
+| Wage and hour cases (back wages, penalties, child labor) | DOL Wage and Hour Division, via labordata's nightly `whisard.db` | enforcement_record | `labor_cases` | `python -m scripts.load_data dol` |
+| Workplace safety (inspections, serious/willful/repeat violations, penalties, accident-driven inspections) | OSHA, via labordata's nightly `osha_enforcement.db` | enforcement_record | `osha_inspections` | `python -m scripts.load_data osha` |
+| Right to organize (unfair labor practice charges with outcomes, union election petitions, certifications) | NLRB, via labordata's nightly `nlrb.db` | enforcement_record (charges are allegations) | `nlrb_cases` | `python -m scripts.load_data nlrb` |
 | Ethics research, supply chains | Gemini (Person B / D) | cached research | `ethics_reports`, `supply_chains` | `python -m scripts.prewarm` |
 
 Not built yet (waiting on the supply chain decision): ILAB child/forced labor goods list matched against
@@ -38,6 +40,19 @@ supply chain stage countries, Open Supply Hub factories.
 | `GET /api/spending/summary` | adds `carbon` per merchant and `estimated_kg_co2e` in total |
 | `GET /api/merchants/{id}/emissions` | `CompanyEmissions[]`, newest year first, every source |
 | `GET /api/merchants/{id}/labor` | `LaborSummary` (`loaded: false` = never fetched, which is not "zero cases") |
+
+## Labor data: storage, freshness, refresh
+
+- **Source files:** [labordata](https://github.com/labordata) rebuilds SQLite copies of DOL Wage and Hour, OSHA,
+  and NLRB data every night from the official agencies. No key and no rate limit (the DOL API rate-limits hard;
+  `load_data dol --api` still exists as a fallback).
+- **Storage:** files are downloaded to `backend/.cache/labordata/` (gitignored; OSHA is ~7 GB unzipped),
+  queried, and deleted after the run (`--keep-cache` keeps them). Only matched records go to Atlas.
+- **Window:** only the last two years are loaded and shown (`labordata.LOOKBACK_YEARS`).
+- **Matching:** brand name patterns from `brand_sources.json` must match as whole words ("SHELL" does not match
+  "BOMBSHELL"), plus the brand's NAICS prefixes for wages and OSHA. Cases include franchisees.
+- **Refresh in the cloud:** `.github/workflows/nightly-data.yml` runs `load_data all` every night on GitHub's
+  runner (needs the `MONGODB_URI` repository secret). Run it by hand from the Actions tab.
 
 ## Carbon estimate methodology
 
