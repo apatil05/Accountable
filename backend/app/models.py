@@ -62,7 +62,6 @@ class UserProfile(BaseModel):
     # 0 = don't care, 5 = deal-breaker
     weights: dict[str, int] = Field(default_factory=lambda: {c: 3 for c in CATEGORIES})
     stances: str = ""  # free-text, fed to the research engine as context
-    trusted_sources: list[str] = []
     prefer_local: bool = True
 
 

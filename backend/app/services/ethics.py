@@ -67,7 +67,7 @@ _RESEARCH_PROMPT = """Research the ethical track record of the company "{merchan
 Use Google Search. Cover each of these areas, citing concrete, verifiable facts (prefer the last 10 years), both positive and negative.
 Find at least 5 distinct facts per area, each from a specific source:
 {areas}
-{sources}
+
 Source quality: prefer government and court records, regulators, established news outlets,
 and recognized ratings organizations, then the company's own reports. Prefer freely readable web
 articles over PDFs and paywalled pages. Never use forums or social media (Reddit, X, Facebook,
@@ -137,14 +137,9 @@ def research_with_gemini(merchant_name: str, profile: UserProfile) -> list[Categ
 
     client = gemini.client()
     areas = "\n".join(f"- {k}: {v}" for k, v in _AREAS.items())
-    sources_hint = (
-        f"Prefer these sources when they cover the topic: {', '.join(profile.trusted_sources)}.\n"
-        if profile.trusted_sources
-        else ""
-    )
     resp = client.models.generate_content(
         model=config.GEMINI_MODEL,
-        contents=_RESEARCH_PROMPT.format(merchant=merchant_name, areas=areas, sources=sources_hint),
+        contents=_RESEARCH_PROMPT.format(merchant=merchant_name, areas=areas),
         config=types.GenerateContentConfig(tools=[types.Tool(google_search=types.GoogleSearch())]),
     )
     text = resp.text or ""
@@ -293,7 +288,7 @@ def _verified_categories(
     categories = [c.model_copy(deep=True) for c in raw]
     complete = True
     if data_source == "gemini":
-        categories, complete = validation.validate_claims(merchant_name, categories, profile.trusted_sources)
+        categories, complete = validation.validate_claims(merchant_name, categories)
     # Unvalidated claims are never shown (CLAUDE.md). Mock placeholders are all unvalidated,
     # so mock categories end up with no claims but keep their mock scores for the offline demo.
     for c in categories:
@@ -315,8 +310,8 @@ def _verified_categories(
 # ---------- research cache ----------
 
 
-def _research_key(merchant_id: str, profile: UserProfile) -> str:
-    return merchant_id + "|" + ",".join(sorted(s.strip().lower() for s in profile.trusted_sources))
+def _research_key(merchant_id: str) -> str:
+    return merchant_id
 
 
 def _now() -> str:
@@ -324,7 +319,7 @@ def _now() -> str:
 
 
 def _research(merchant_id: str, merchant_name: str, profile: UserProfile) -> tuple[list[CategoryScore], str, str] | None:
-    key = _research_key(merchant_id, profile)
+    key = _research_key(merchant_id)
     with _locks_guard:
         lock = _research_locks.setdefault(key, threading.Lock())
     with lock:  # one research call per merchant even with concurrent requests
@@ -378,7 +373,7 @@ def get_report(
         return None
     raw_categories, data_source, researched_at = research
     categories, complete = _verified_categories(
-        _research_key(merchant_id, profile), merchant_name, raw_categories, data_source, profile
+        _research_key(merchant_id), merchant_name, raw_categories, data_source, profile
     )
     personalized = scoring.personalized(categories, profile)
     report = EthicsReport(

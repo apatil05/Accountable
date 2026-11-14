@@ -28,7 +28,7 @@ A live run on Starbucks (2026-11-14) produced 18 claims and all 18 came back `va
 | --- | --- |
 | Bar for `validated=True` | Page fetched, page mentions the merchant, AND a Gemini judge reading the page says it supports the claim, with a verbatim quote that code finds in the page |
 | Failed claims | Hidden from the report and excluded from scoring |
-| Source quality | Blocklist forums/social; tier the rest; user's `trusted_sources` move up one tier. Tiers only affect wording and confidence, not scoring |
+| Source quality | Blocklist forums/social; tier the rest. Tiers only affect wording and confidence, not scoring |
 | Low-tier sources (company, advocacy, law firm, unknown) | Validated if supported, but the judge rewrites the claim with attribution ("A lawsuit alleges...", "Starbucks says...") |
 | "supported" vs "partial" | Rewording or adding attribution is still "supported". "partial" only when a specific detail (number, date, scope, actor) had to be removed or corrected; the rewritten claim must be fully supported |
 | Category fit | The judge names the category each claim is evidence about. "none" (not about the merchant's conduct) fails the claim; a different category moves it there |
@@ -73,7 +73,7 @@ research_with_gemini            (grounded search, 4-6 claims/area, steered sourc
   -> scoring.overall / personalized / verdict (skip None)
 ```
 
-Profile-independent results (research, then validated + rescored categories) are cached per merchant + trusted sources, so changing weights in `PUT /api/profile` only recomputes scores and the verdict.
+Profile-independent results (research, then validated + rescored categories) are cached per merchant, so changing weights in `PUT /api/profile` only recomputes scores and the verdict.
 
 ## Domain tiers
 

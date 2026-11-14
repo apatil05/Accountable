@@ -65,10 +65,10 @@ Four tracks, each with one owner and clear files. Names TBD; claim one in the gr
 
 ### Person B: Research engine (Gemini + validation + scoring) ★ highest risk, start first
 **Owns:** `services/ethics.py`, `services/validation.py`, `services/scoring.py`.
-1. **Gemini research** in `research_with_gemini()` using the `google-genai` SDK with the **Google Search grounding** tool. One call per merchant, prompt asks for each of the 6 categories: score 0-100, 2-sentence summary, 2-4 claims each with a source URL. Pass the user's `trusted_sources` and `stances` as context.
+1. **Gemini research** in `research_with_gemini()` using the `google-genai` SDK with the **Google Search grounding** tool. One call per merchant, prompt asks for each of the 6 categories: score 0-100, 2-sentence summary, 2-4 claims each with a source URL. Pass the user's `stances` as context.
    - If the model won't combine search grounding with a strict JSON schema, do two calls: (a) grounded research in free text, (b) "convert this to JSON matching this schema."
    - Pull real URLs from the response's grounding metadata rather than trusting URLs written in the text. Grounding URLs may be redirect links; resolve them before validating.
-2. **Validation (feature 4, starred):** the LLM never sets `validated`. For each claim: URL resolves (200), page text mentions the merchant, domain not on a blocklist, bonus if domain is in the user's trusted sources. Stretch: a second "judge" Gemini call that reads the fetched page and answers "does this page support the claim? yes/no + quote."
+2. **Validation (feature 4, starred):** the LLM never sets `validated`. For each claim: URL resolves (200), page text mentions the merchant, domain not on a blocklist. Stretch: a second "judge" Gemini call that reads the fetched page and answers "does this page support the claim? yes/no + quote."
 3. **Scoring:** a category's score should get less weight when most of its claims are unverified. Decide what weight 5 ("deal-breaker") means (e.g. cap the overall score if that category < 40).
 4. **Caching:** research is slow and costs money. Cache per merchant (Person A's DB) and pre-warm the demo merchants before judging.
 5. Keep a small eval set: 5 merchants where we know the right answer, to sanity-check the prompt.

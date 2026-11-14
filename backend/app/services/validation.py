@@ -26,7 +26,6 @@ import socket
 import threading
 import time
 import unicodedata
-from collections.abc import Sequence
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
 from html.parser import HTMLParser
@@ -105,23 +104,18 @@ def _slug(s: str) -> str:
     return re.sub(r"[^a-z0-9]", "", _fold(s))
 
 
-def domain_tier(url: str, merchant: str, trusted: Sequence[str] = ()) -> int | None:
+def domain_tier(url: str, merchant: str) -> int | None:
     """None = blocked. 1 regulator/court, 2 news/ratings, 3 company, 4 other."""
     host = _host(url)
     if not host or _matches(host, BLOCKED):
         return None
     if host.endswith(TIER1_SUFFIXES) or _matches(host, TIER1):
-        tier = 1
-    elif _matches(host, TIER2):
-        tier = 2
-    elif any(_slug(n) and _slug(n) in host.replace(".", "").replace("-", "") for n in [merchant, *ALIASES.get(merchant, [])]):
-        tier = 3
-    else:
-        tier = 4
-    trusted_hosts = {_host(t if "//" in t else "https://" + t) for t in trusted}
-    if tier > 1 and _matches(host, {t for t in trusted_hosts if t}):
-        tier -= 1
-    return tier
+        return 1
+    if _matches(host, TIER2):
+        return 2
+    if any(_slug(n) and _slug(n) in host.replace(".", "").replace("-", "") for n in [merchant, *ALIASES.get(merchant, [])]):
+        return 3
+    return 4
 
 
 # ---------- text normalization ----------
@@ -430,13 +424,13 @@ class _Item:
         return self.cat.category
 
 
-def _validate_source(merchant: str, url: str, items: list[_Item], trusted: Sequence[str]) -> bool:
+def _validate_source(merchant: str, url: str, items: list[_Item]) -> bool:
     """Validate every claim that cites `url`, in place. Returns False if the judge call failed
     (claims are then left unvalidated and the caller must not cache the report)."""
     t0 = time.monotonic()
     page = fetch_page(url)
     t_fetch = time.monotonic() - t0
-    tier = domain_tier(page.url, merchant, trusted)
+    tier = domain_tier(page.url, merchant)
     if tier is None:
         for it in items:
             _log(merchant, it, page.url, None, "blocked", None, False)
@@ -512,7 +506,7 @@ def _log(merchant, it: _Item, url, tier, method, j: _Judged | None, ok: bool) ->
 
 
 def validate_claims(
-    merchant_name: str, categories: list[CategoryScore], trusted_sources: Sequence[str] = ()
+    merchant_name: str, categories: list[CategoryScore]
 ) -> tuple[list[CategoryScore], bool]:
     """Sets claim.validated (and may rewrite claim text) in place.
     Returns (categories, complete); complete=False means a judge call failed."""
@@ -528,7 +522,7 @@ def validate_claims(
 
     with ThreadPoolExecutor(max_workers=8) as pool:
         results = list(
-            pool.map(lambda kv: _validate_source(merchant_name, kv[0], kv[1], trusted_sources), by_url.items())
+            pool.map(lambda kv: _validate_source(merchant_name, kv[0], kv[1]), by_url.items())
         )
 
     # Move claims the judge filed under a different category, if that category exists in the report.

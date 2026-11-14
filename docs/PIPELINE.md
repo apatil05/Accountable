@@ -102,7 +102,7 @@ Code: `research_with_gemini()` in `ethics.py`.
 **Then code takes over:**
 - Source numbers are mapped to URLs from Google's metadata. URLs never come from text the model wrote, so it cannot invent a link.
 - Google's redirect links are resolved to the real page with a plain HTTP request.
-- The result is cached per merchant (and the user's trusted sources) in `_research_cache`.
+- The result is cached per merchant in `_research_cache`.
 
 Takes about 80-130 seconds.
 
@@ -121,7 +121,6 @@ We download the page ourselves: HTML is stripped to text, PDFs are read with `py
 - **Tier 2:** established news, trade press and ratings groups (about 90 domains).
 - **Tier 3:** the company's own site (the domain contains the merchant's name or an alias).
 - **Tier 4:** everything else: advocacy groups, law firms, blogs, unknown sites.
-- A domain in the user's `trusted_sources` moves up one tier.
 
 The tier controls how the claim is worded (step 2d) and its confidence number. It does not change scoring directly.
 

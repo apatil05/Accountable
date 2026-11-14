@@ -8,7 +8,6 @@ const WEIGHT_LABELS = ["Don't care", "A little", "Somewhat", "Matters", "A lot",
 
 export default function Values() {
   const [p, setP] = useState<UserProfile | null>(null);
-  const [source, setSource] = useState("");
   const [saved, setSaved] = useState(false);
 
   useEffect(() => {
@@ -19,12 +18,6 @@ export default function Values() {
   const update = (patch: Partial<UserProfile>) => {
     setSaved(false);
     setP({ ...p, ...patch });
-  };
-
-  const addSource = () => {
-    const s = source.trim();
-    if (s && !p.trusted_sources.includes(s)) update({ trusted_sources: [...p.trusted_sources, s] });
-    setSource("");
   };
 
   return (
@@ -59,26 +52,6 @@ export default function Values() {
           value={p.stances}
           onChange={(e) => update({ stances: e.target.value })}
         />
-      </div>
-
-      <div className="card">
-        <h3>Sources you trust</h3>
-        <div className="chips">
-          {p.trusted_sources.map((s) => (
-            <button key={s} className="chip" onClick={() => update({ trusted_sources: p.trusted_sources.filter((x) => x !== s) })}>
-              {s} ×
-            </button>
-          ))}
-        </div>
-        <div className="inline-input">
-          <input
-            placeholder="e.g. reuters.com"
-            value={source}
-            onChange={(e) => setSource(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && addSource()}
-          />
-          <button onClick={addSource}>Add</button>
-        </div>
       </div>
 
       <label className="card toggle">

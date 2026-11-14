@@ -38,7 +38,6 @@ export interface UserProfile {
   name: string;
   weights: Record<string, number>;
   stances: string;
-  trusted_sources: string[];
   prefer_local: boolean;
 }
 
