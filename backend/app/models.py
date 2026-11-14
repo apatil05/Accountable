@@ -4,13 +4,12 @@ Change a model here -> update types.ts in the same PR."""
 from datetime import date, datetime
 from typing import Literal, Optional
 
-from pydantic import BaseModel, Field, field_validator, model_validator
+from pydantic import BaseModel, Field, PrivateAttr, field_validator, model_validator
 
 # The ethical dimensions a user can weigh. Keep in sync with the frontend.
 EthicsCategory = Literal[
     "labor",
     "environment",
-    "political",
     "animal_welfare",
     "community",
     "privacy",
@@ -73,7 +72,7 @@ class SpendingSummary(BaseModel):
 MIN_DATA_YEAR = 1990
 MAX_DATA_YEAR = 2100
 
-SourceName = Literal["company_report", "climate_trace", "dol_whd", "epa_useeio", "manual"]
+SourceName = Literal["company_report", "climate_trace", "dol_whd", "epa_useeio", "manual", "osha", "nlrb"]
 
 
 class Provenance(BaseModel):
@@ -167,11 +166,83 @@ class LaborCase(BaseModel):
     provenance: Provenance
 
 
+class OshaInspection(BaseModel):
+    activity_nr: str = Field(min_length=1, max_length=20)
+    brand_id: str
+    establishment: str = ""
+    city: Optional[str] = None
+    state: Optional[str] = Field(None, max_length=2)
+    naics: Optional[str] = None
+    opened: date
+    closed: Optional[date] = None
+    inspection_type: str = ""  # OSHA code: A accident, M fatality/catastrophe, B complaint, H planned, ...
+    after_accident: bool = False  # opened because of an accident, fatality or catastrophe
+    serious: int = Field(0, ge=0)
+    willful: int = Field(0, ge=0)
+    repeat: int = Field(0, ge=0)
+    other: int = Field(0, ge=0)
+    initial_penalty_cents: int = Field(0, ge=0)
+    current_penalty_cents: int = Field(0, ge=0)  # after settlement or contest
+    provenance: Provenance
+
+
+class NlrbCase(BaseModel):
+    case_number: str = Field(min_length=1, max_length=20)
+    brand_id: str
+    name: str = ""
+    case_type: Literal["CA", "RC", "RM", "RD"]  # CA = charge against employer; R* = election petitions
+    city: Optional[str] = None
+    state: Optional[str] = Field(None, max_length=2)
+    filed: date
+    closed: Optional[date] = None
+    status: str = ""
+    outcome: Literal["open", "remedied", "dismissed_or_withdrawn", "other"] = "open"
+    reason_closed: Optional[str] = None
+    allegations: list[str] = Field(default_factory=list, max_length=10)
+    certified_union: Optional[str] = None
+    url: Optional[str] = None
+    provenance: Provenance
+
+
+class SafetySummary(BaseModel):
+    """OSHA inspections opened in the window, with what they found."""
+
+    loaded: bool
+    inspections: int = 0
+    after_accident: int = 0
+    serious: int = 0
+    willful: int = 0
+    repeat: int = 0
+    penalties: float = 0.0  # current (after settlement) penalties, dollars
+    source_name: str = "U.S. Occupational Safety and Health Administration enforcement data"
+    source_url: str = "https://www.osha.gov/ords/imis/establishment.html"
+
+
+class OrganizingSummary(BaseModel):
+    """NLRB unfair labor practice charges against the employer and union election petitions."""
+
+    loaded: bool
+    charges: int = 0  # CA cases: allegations, not findings
+    charges_open: int = 0
+    charges_remedied: int = 0  # settled or withdrawn after the employer remedied it
+    charges_dismissed: int = 0  # dismissed or withdrawn without a remedy
+    top_allegations: list[str] = Field(default_factory=list)
+    petitions: int = 0  # RC/RM: workers or employer asked for a union election
+    unions_certified: int = 0  # election won, union certified
+    elections_union_lost: int = 0  # election held, no union majority
+    decertification_petitions: int = 0  # RD
+    source_name: str = "U.S. National Labor Relations Board case data"
+    source_url: str = "https://www.nlrb.gov/search/case"
+
+
 class LaborSummary(BaseModel):
-    """Facts only: counts and dollar totals of concluded DOL Wage and Hour cases."""
+    """Facts only, last two years: wage cases, workplace safety, and the right to organize."""
 
     merchant_id: str
-    loaded: bool  # False = never fetched for this brand (different from zero cases)
+    window_start: Optional[str] = None  # ISO date; everything below is from on or after it
+    safety: Optional[SafetySummary] = None
+    organizing: Optional[OrganizingSummary] = None
+    loaded: bool  # wages: False = never fetched for this brand (different from zero cases)
     case_count: int = 0
     violations: int = 0
     employees_affected: int = 0
@@ -196,7 +267,6 @@ class UserProfile(BaseModel):
     # 0 = don't care, 5 = deal-breaker
     weights: dict[str, int] = Field(default_factory=lambda: {c: 3 for c in CATEGORIES})
     stances: str = Field("", max_length=2000)  # free-text, fed to the research engine as context
-    trusted_sources: list[str] = Field(default_factory=list, max_length=20)
     prefer_local: bool = True
 
     @field_validator("weights")
@@ -209,13 +279,6 @@ class UserProfile(BaseModel):
             raise ValueError("weights must be between 0 and 5")
         return weights
 
-    @field_validator("trusted_sources")
-    @classmethod
-    def _sources_are_short(cls, sources: list[str]) -> list[str]:
-        if any(len(s) > 200 for s in sources):
-            raise ValueError("each trusted source must be 200 characters or fewer")
-        return sources
-
 
 # ---------- Ethics research ----------
 class Claim(BaseModel):
@@ -224,13 +287,32 @@ class Claim(BaseModel):
     source_name: Optional[str] = None
     confidence: float = 0.0  # 0-1, from the LLM
     validated: bool = False  # set by services/validation.py, never by the LLM
+    # Internal only (not serialized), set by services/validation.py and used by scoring.category_score:
+    _event_year: int = PrivateAttr(default=0)  # year of the event, 0 = unknown
+    _direction: str = PrivateAttr(default="")  # "positive" / "negative" (neutral claims are dropped)
+    _severity: str = PrivateAttr(default="")  # "minor" / "notable" / "major"
+    _tier: int = PrivateAttr(default=0)  # source tier 1-4 (validation.domain_tier), 0 = unknown
 
 
 class CategoryScore(BaseModel):
     category: str
-    score: float  # 0-100, higher = better
+    score: Optional[float] = None  # 0-100, higher = better; None = not enough verified evidence
     summary: str
     claims: list[Claim] = []
+
+
+VerdictLabel = Literal["aligns", "mixed", "against"]
+
+
+class ValuesVerdict(BaseModel):
+    """Bottom line for the user. The label is computed by services/scoring.py,
+    never by the LLM; Gemini may only write the blurb that explains it."""
+
+    label: VerdictLabel
+    headline: str  # fixed per label, e.g. "We think Starbucks aligns with your values"
+    blurb: str  # 2-3 sentences
+    deal_breakers: list[str] = []  # weight-5 categories that forced "against"
+    source: Literal["gemini", "template"] = "template"
 
 
 class EthicsReport(BaseModel):
@@ -239,6 +321,7 @@ class EthicsReport(BaseModel):
     overall_score: float
     personalized_score: float
     categories: list[CategoryScore]
+    verdict: ValuesVerdict
     data_source: Literal["mock", "gemini"] = "mock"
     researched_at: Optional[str] = None
 

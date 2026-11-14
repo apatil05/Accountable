@@ -30,20 +30,6 @@
     ]
    },
    {
-    "category": "political",
-    "score": 81,
-    "summary": "Placeholder. The Gemini research engine will replace this with a sourced summary of Starbucks's political record.",
-    "claims": [
-     {
-      "text": "Example claim (mock data, not real research).",
-      "source_url": null,
-      "source_name": null,
-      "confidence": 0.5,
-      "validated": false
-     }
-    ]
-   },
-   {
     "category": "animal_welfare",
     "score": 49,
     "summary": "Placeholder. The Gemini research engine will replace this with a sourced summary of Starbucks's animal welfare record.",
@@ -107,20 +93,6 @@
     "category": "environment",
     "score": 36,
     "summary": "Placeholder. The Gemini research engine will replace this with a sourced summary of Amazon's environment record.",
-    "claims": [
-     {
-      "text": "Example claim (mock data, not real research).",
-      "source_url": null,
-      "source_name": null,
-      "confidence": 0.5,
-      "validated": false
-     }
-    ]
-   },
-   {
-    "category": "political",
-    "score": 34,
-    "summary": "Placeholder. The Gemini research engine will replace this with a sourced summary of Amazon's political record.",
     "claims": [
      {
       "text": "Example claim (mock data, not real research).",
@@ -206,20 +178,6 @@
     ]
    },
    {
-    "category": "political",
-    "score": 78,
-    "summary": "Placeholder. The Gemini research engine will replace this with a sourced summary of Walmart's political record.",
-    "claims": [
-     {
-      "text": "Example claim (mock data, not real research).",
-      "source_url": null,
-      "source_name": null,
-      "confidence": 0.5,
-      "validated": false
-     }
-    ]
-   },
-   {
     "category": "animal_welfare",
     "score": 62,
     "summary": "Placeholder. The Gemini research engine will replace this with a sourced summary of Walmart's animal welfare record.",
@@ -283,20 +241,6 @@
     "category": "environment",
     "score": 25,
     "summary": "Placeholder. The Gemini research engine will replace this with a sourced summary of Target's environment record.",
-    "claims": [
-     {
-      "text": "Example claim (mock data, not real research).",
-      "source_url": null,
-      "source_name": null,
-      "confidence": 0.5,
-      "validated": false
-     }
-    ]
-   },
-   {
-    "category": "political",
-    "score": 34,
-    "summary": "Placeholder. The Gemini research engine will replace this with a sourced summary of Target's political record.",
     "claims": [
      {
       "text": "Example claim (mock data, not real research).",
@@ -382,20 +326,6 @@
     ]
    },
    {
-    "category": "political",
-    "score": 45,
-    "summary": "Placeholder. The Gemini research engine will replace this with a sourced summary of Nike's political record.",
-    "claims": [
-     {
-      "text": "Example claim (mock data, not real research).",
-      "source_url": null,
-      "source_name": null,
-      "confidence": 0.5,
-      "validated": false
-     }
-    ]
-   },
-   {
     "category": "animal_welfare",
     "score": 85,
     "summary": "Placeholder. The Gemini research engine will replace this with a sourced summary of Nike's animal welfare record.",
@@ -459,20 +389,6 @@
     "category": "environment",
     "score": 57,
     "summary": "Placeholder. The Gemini research engine will replace this with a sourced summary of Apple's environment record.",
-    "claims": [
-     {
-      "text": "Example claim (mock data, not real research).",
-      "source_url": null,
-      "source_name": null,
-      "confidence": 0.5,
-      "validated": false
-     }
-    ]
-   },
-   {
-    "category": "political",
-    "score": 85,
-    "summary": "Placeholder. The Gemini research engine will replace this with a sourced summary of Apple's political record.",
     "claims": [
      {
       "text": "Example claim (mock data, not real research).",
@@ -558,20 +474,6 @@
     ]
    },
    {
-    "category": "political",
-    "score": 54,
-    "summary": "Placeholder. The Gemini research engine will replace this with a sourced summary of Chipotle's political record.",
-    "claims": [
-     {
-      "text": "Example claim (mock data, not real research).",
-      "source_url": null,
-      "source_name": null,
-      "confidence": 0.5,
-      "validated": false
-     }
-    ]
-   },
-   {
     "category": "animal_welfare",
     "score": 82,
     "summary": "Placeholder. The Gemini research engine will replace this with a sourced summary of Chipotle's animal welfare record.",
@@ -635,20 +537,6 @@
     "category": "environment",
     "score": 80,
     "summary": "Placeholder. The Gemini research engine will replace this with a sourced summary of Trader Joe's's environment record.",
-    "claims": [
-     {
-      "text": "Example claim (mock data, not real research).",
-      "source_url": null,
-      "source_name": null,
-      "confidence": 0.5,
-      "validated": false
-     }
-    ]
-   },
-   {
-    "category": "political",
-    "score": 68,
-    "summary": "Placeholder. The Gemini research engine will replace this with a sourced summary of Trader Joe's's political record.",
     "claims": [
      {
       "text": "Example claim (mock data, not real research).",
@@ -734,20 +622,6 @@
     ]
    },
    {
-    "category": "political",
-    "score": 50,
-    "summary": "Placeholder. The Gemini research engine will replace this with a sourced summary of Shell's political record.",
-    "claims": [
-     {
-      "text": "Example claim (mock data, not real research).",
-      "source_url": null,
-      "source_name": null,
-      "confidence": 0.5,
-      "validated": false
-     }
-    ]
-   },
-   {
     "category": "animal_welfare",
     "score": 31,
     "summary": "Placeholder. The Gemini research engine will replace this with a sourced summary of Shell's animal welfare record.",
@@ -811,20 +685,6 @@
     "category": "environment",
     "score": 28,
     "summary": "Placeholder. The Gemini research engine will replace this with a sourced summary of H&M's environment record.",
-    "claims": [
-     {
-      "text": "Example claim (mock data, not real research).",
-      "source_url": null,
-      "source_name": null,
-      "confidence": 0.5,
-      "validated": false
-     }
-    ]
-   },
-   {
-    "category": "political",
-    "score": 37,
-    "summary": "Placeholder. The Gemini research engine will replace this with a sourced summary of H&M's political record.",
     "claims": [
      {
       "text": "Example claim (mock data, not real research).",

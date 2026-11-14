@@ -3,7 +3,6 @@
 export const CATEGORIES = [
   "labor",
   "environment",
-  "political",
   "animal_welfare",
   "community",
   "privacy",
@@ -13,7 +12,6 @@ export type EthicsCategory = (typeof CATEGORIES)[number];
 export const CATEGORY_LABELS: Record<EthicsCategory, string> = {
   labor: "Labor & workers",
   environment: "Environment",
-  political: "Political spending",
   animal_welfare: "Animal welfare",
   community: "Local community",
   privacy: "Data & privacy",
@@ -50,7 +48,7 @@ export interface SpendingSummary {
 
 /** Where a fact came from. Show source_name, locator and data_year next to every number. */
 export interface Provenance {
-  source: "company_report" | "climate_trace" | "dol_whd" | "epa_useeio" | "manual";
+  source: "company_report" | "climate_trace" | "dol_whd" | "epa_useeio" | "manual" | "osha" | "nlrb";
   source_name: string;
   source_url: string | null;
   locator: string | null;
@@ -83,9 +81,42 @@ export interface CompanyEmissions {
   provenance: Provenance;
 }
 
-/** Concluded US Department of Labor wage and hour cases. loaded=false means never fetched. */
+/** OSHA inspections opened in the window. loaded=false means never checked. */
+export interface SafetySummary {
+  loaded: boolean;
+  inspections: number;
+  after_accident: number;
+  serious: number;
+  willful: number;
+  repeat: number;
+  penalties: number;
+  source_name: string;
+  source_url: string;
+}
+
+/** NLRB charges against the employer (allegations, with outcomes) and union election petitions. */
+export interface OrganizingSummary {
+  loaded: boolean;
+  charges: number;
+  charges_open: number;
+  charges_remedied: number;
+  charges_dismissed: number;
+  top_allegations: string[];
+  petitions: number;
+  unions_certified: number;
+  elections_union_lost: number;
+  decertification_petitions: number;
+  source_name: string;
+  source_url: string;
+}
+
+/** Last two years (from window_start): wage cases, workplace safety, right to organize.
+ *  loaded=false means never checked (not the same as zero). */
 export interface LaborSummary {
   merchant_id: string;
+  window_start: string | null;
+  safety: SafetySummary | null;
+  organizing: OrganizingSummary | null;
   loaded: boolean;
   case_count: number;
   violations: number;
@@ -104,7 +135,6 @@ export interface UserProfile {
   name: string;
   weights: Record<string, number>;
   stances: string;
-  trusted_sources: string[];
   prefer_local: boolean;
 }
 
@@ -118,9 +148,19 @@ export interface Claim {
 
 export interface CategoryScore {
   category: EthicsCategory;
-  score: number;
+  score: number | null; // null = not enough verified evidence
   summary: string;
   claims: Claim[];
+}
+
+export type VerdictLabel = "aligns" | "mixed" | "against";
+
+export interface ValuesVerdict {
+  label: VerdictLabel;
+  headline: string;
+  blurb: string;
+  deal_breakers: string[];
+  source: "gemini" | "template";
 }
 
 export interface EthicsReport {
@@ -129,6 +169,7 @@ export interface EthicsReport {
   overall_score: number;
   personalized_score: number;
   categories: CategoryScore[];
+  verdict: ValuesVerdict;
   data_source: "mock" | "gemini";
   researched_at: string | null;
 }

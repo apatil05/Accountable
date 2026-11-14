@@ -32,7 +32,7 @@ MONGODB_URI = os.getenv("MONGODB_URI", "")
 MONGODB_DB = os.getenv("MONGODB_DB", "accountable")
 
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
-GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
+GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-3.8-flash")
 
 # US Department of Labor open data (wage and hour cases). Only `python -m scripts.load_data dol`
 # needs it; the API itself never calls DOL. Free key: https://dataportal.dol.gov/api-keys

@@ -16,16 +16,17 @@ silenced here and errors are reported by type and status only, never by URL.
 
 import json
 import logging
+import sqlite3
 import time
 from datetime import date, datetime
-from typing import Any, Callable, Optional
+from typing import Any, Callable, Iterable, Optional
 
 import httpx
 from pymongo.database import Database
 
 from ..db import repos
 from ..models import LaborCase, LaborSummary
-from . import brand_sources, pipeline
+from . import brand_sources, labordata, nlrb, osha, pipeline
 from .brand_sources import DolMatch
 
 # httpx logs full request URLs at INFO, and the DOL key is in the URL.
@@ -111,6 +112,31 @@ def fetch_rows(client: httpx.Client, api_key: str, match: DolMatch,
     raise DolError(f"more than {MAX_PAGES * PAGE_SIZE} matching rows; narrow the name patterns")
 
 
+WHISARD_CASES_SQL = """
+SELECT c.case_id, c.trade_nm, c.legal_name, c.st_cd, c.naic_cd, c.findings_start_date,
+       c.findings_end_date, c.case_violtn_cnt, c.ee_violtd_cnt, c.bw_atp_amt, c.cmp_assd,
+       (SELECT COALESCE(SUM(v.violations), 0) FROM violations v
+         WHERE v.case_id = c.case_id AND v.type = 'flsa_cl') AS child_labor
+FROM cases c
+WHERE ({names}) AND c.findings_end_date >= ? AND c.findings_end_date < ?
+"""
+
+
+def whisard_rows(conn: sqlite3.Connection, match: DolMatch, since: date) -> list[dict]:
+    """Cases from the nightly whisard.db, shaped like DOL API rows so to_case() handles both."""
+    patterns = labordata.like_patterns(match.name_patterns)
+    names = " OR ".join(["UPPER(c.trade_nm) LIKE ? OR UPPER(c.legal_name) LIKE ?"] * len(patterns))
+    params = [p for p in patterns for _ in range(2)] + [since.isoformat(), f"{date.today().year + 2}"]
+    rows = []
+    for r in conn.execute(WHISARD_CASES_SQL.format(names=names), params):
+        if not (labordata.whole_word_match(r["trade_nm"], match.name_patterns)
+                or labordata.whole_word_match(r["legal_name"], match.name_patterns)):
+            continue
+        rows.append({**{k: r[k] for k in r.keys() if k not in ("cmp_assd", "child_labor")},
+                     "flsa_cmp_assd_amt": r["cmp_assd"], CHILD_LABOR_FIELD: r["child_labor"]})
+    return rows
+
+
 def _in_industry(row: dict, match: DolMatch) -> bool:
     code = str(row.get("naic_cd") or "")
     return any(code.startswith(p) for p in match.naics_prefixes)
@@ -141,7 +167,7 @@ def _penalty_cents(row: dict) -> int:
     return sum(_cents(v) for k, v in row.items() if k.endswith(PENALTY_SUFFIX))
 
 
-def to_case(row: dict, brand_id: str, retrieved_at: datetime) -> dict:
+def to_case(row: dict, brand_id: str, retrieved_at: datetime, method: str = "api") -> dict:
     end = _date(row.get("findings_end_date"))
     child = row.get(CHILD_LABOR_FIELD)
     return {
@@ -165,7 +191,7 @@ def to_case(row: dict, brand_id: str, retrieved_at: datetime) -> dict:
             "locator": f"case {row.get('case_id')}",
             "data_year": (end or retrieved_at.date()).year,
             "retrieved_at": retrieved_at,
-            "method": "api",
+            "method": method,
             "kind": "enforcement_record",
         },
     }
@@ -185,23 +211,48 @@ def _prune(db: Database, loaded: list[str], records: list[dict]) -> None:
             repos.delete_labor_cases_except(db, brand_id, keep)
 
 
+def _targets(only: Optional[Iterable[str]]) -> list[tuple[str, DolMatch]]:
+    mapped = {b: s.dol for b, s in brand_sources.all_sources().items() if s.dol}
+    if only is None:
+        return list(mapped.items())
+    wanted = list(only)
+    unknown = sorted(set(wanted) - set(mapped))
+    if unknown:
+        raise DolError(f"no DOL mapping in brand_sources.json for: {', '.join(unknown)}")
+    return [(b, mapped[b]) for b in wanted]
+
+
 def load(db: Database, client: httpx.Client, *, api_key: str,
          now: Callable[[], datetime] = repos.utcnow,
-         sleep: Callable[[float], None] = time.sleep) -> pipeline.LoadReport:
-    if not api_key:
+         sleep: Callable[[float], None] = time.sleep,
+         only: Optional[Iterable[str]] = None,
+         pause: float = 0.0,
+         progress: Optional[Callable[[str, str], None]] = None,
+         rows_for: Optional[Callable[[DolMatch], list[dict]]] = None) -> pipeline.LoadReport:
+    """Fetch every mapped brand, or just `only`. `rows_for(match)` reads rows from a downloaded
+    database instead of the API (no key, no rate limit). `pause` seconds between API brands eases
+    DOL's rate limit; `progress(brand, message)` is called as each brand finishes."""
+    if rows_for is None and not api_key:
         raise DolError("DOL_API_KEY is not set (free key: https://dataportal.dol.gov/api-keys)")
+    targets = _targets(only)
     retrieved_at = now()
     records, errors, loaded = [], [], []
-    for brand_id, source in brand_sources.all_sources().items():
-        if not source.dol:
-            continue
+    for i, (brand_id, match) in enumerate(targets):
+        if i and pause > 0 and rows_for is None:
+            sleep(pause)
         try:
-            rows = fetch_rows(client, api_key, source.dol, sleep=sleep)
+            rows = rows_for(match) if rows_for else fetch_rows(client, api_key, match, sleep=sleep)
         except DolError as exc:
             errors.append(f"{brand_id}: {exc}")
+            if progress:
+                progress(brand_id, f"failed ({exc})")
             continue
-        records.extend(to_case(r, brand_id, retrieved_at) for r in rows if _in_industry(r, source.dol))
+        method = "download" if rows_for else "api"
+        cases = [to_case(r, brand_id, retrieved_at, method) for r in rows if _in_industry(r, match)]
+        records.extend(cases)
         loaded.append(brand_id)
+        if progress:
+            progress(brand_id, f"{len(cases)} case{'' if len(cases) == 1 else 's'}")
     report = pipeline.load(
         db, source=SOURCE, collection=repos.LABOR_CASES, records=records, model=LaborCase,
         doc_id=doc_id, prior_errors=errors, extra={"loaded_brands": loaded}, now=now,
@@ -210,13 +261,18 @@ def load(db: Database, client: httpx.Client, *, api_key: str,
     return report
 
 
-def summarize(db: Database, brand_id: str) -> LaborSummary:
-    """Totals computed in MongoDB, so a brand with thousands of cases stays one small read."""
+def summarize(db: Database, brand_id: str, since: Optional[date] = None) -> LaborSummary:
+    """Wages, safety and organizing for the last two years (or since `since`), computed in MongoDB."""
+    since = since or labordata.window_start()
+    cutoff = datetime.combine(since, datetime.min.time())
     loaded = db[pipeline.PIPELINE_RUNS].find_one({"source": SOURCE, "loaded_brands": brand_id},
                                                  {"_id": 1}) is not None
-    totals = repos.labor_totals(db, brand_id)
+    totals = repos.labor_totals(db, brand_id, since=cutoff)
     return LaborSummary(
         merchant_id=brand_id,
+        window_start=since.isoformat(),
+        safety=osha.summarize(db, brand_id, since),
+        organizing=nlrb.summarize(db, brand_id, since),
         loaded=loaded,
         case_count=totals["cases"],
         violations=totals["violations"],
