@@ -408,6 +408,13 @@ body.on-field { background: var(--field); }
 .fact-list dd { margin: 0; color: var(--on-field); font-variant-numeric: tabular-nums; white-space: nowrap; }
 .fact-aside { width: 100%; display: grid; gap: 6px; margin-top: 8px; padding-top: 14px; border-top: 1px dashed var(--glass-line); }
 
+/* Labor record: one wide card, three columns (organize, safety, wages) that stack on narrow screens. */
+@media (min-width: 900px) { .fact.is-wide { grid-column: 1 / -1; } }
+.labor-parts { width: 100%; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr)); gap: 12px 32px; margin-top: 6px; }
+.labor-parts section { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; padding-top: 14px; border-top: 1px solid var(--glass-line); }
+.labor-parts h4 { margin: 0; font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--route); }
+.labor-headline { margin: 0; font-size: 22px; font-weight: 400; letter-spacing: -0.02em; line-height: 1.2; color: var(--on-field); font-variant-numeric: tabular-nums; }
+
 .co-alts { list-style: none; padding: 0; margin: 0; }
 .co-alts li { display: grid; grid-template-columns: minmax(180px, 1fr) 2fr auto; gap: 6px 24px; align-items: baseline; padding: 16px 0; border-top: 1px solid rgba(255, 255, 255, 0.08); }
 .co-alts li:last-child { border-bottom: 1px solid rgba(255, 255, 255, 0.08); }

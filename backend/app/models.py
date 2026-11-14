@@ -73,7 +73,7 @@ class SpendingSummary(BaseModel):
 MIN_DATA_YEAR = 1990
 MAX_DATA_YEAR = 2100
 
-SourceName = Literal["company_report", "climate_trace", "dol_whd", "epa_useeio", "manual"]
+SourceName = Literal["company_report", "climate_trace", "dol_whd", "epa_useeio", "manual", "osha", "nlrb"]
 
 
 class Provenance(BaseModel):
@@ -167,11 +167,83 @@ class LaborCase(BaseModel):
     provenance: Provenance
 
 
+class OshaInspection(BaseModel):
+    activity_nr: str = Field(min_length=1, max_length=20)
+    brand_id: str
+    establishment: str = ""
+    city: Optional[str] = None
+    state: Optional[str] = Field(None, max_length=2)
+    naics: Optional[str] = None
+    opened: date
+    closed: Optional[date] = None
+    inspection_type: str = ""  # OSHA code: A accident, M fatality/catastrophe, B complaint, H planned, ...
+    after_accident: bool = False  # opened because of an accident, fatality or catastrophe
+    serious: int = Field(0, ge=0)
+    willful: int = Field(0, ge=0)
+    repeat: int = Field(0, ge=0)
+    other: int = Field(0, ge=0)
+    initial_penalty_cents: int = Field(0, ge=0)
+    current_penalty_cents: int = Field(0, ge=0)  # after settlement or contest
+    provenance: Provenance
+
+
+class NlrbCase(BaseModel):
+    case_number: str = Field(min_length=1, max_length=20)
+    brand_id: str
+    name: str = ""
+    case_type: Literal["CA", "RC", "RM", "RD"]  # CA = charge against employer; R* = election petitions
+    city: Optional[str] = None
+    state: Optional[str] = Field(None, max_length=2)
+    filed: date
+    closed: Optional[date] = None
+    status: str = ""
+    outcome: Literal["open", "remedied", "dismissed_or_withdrawn", "other"] = "open"
+    reason_closed: Optional[str] = None
+    allegations: list[str] = Field(default_factory=list, max_length=10)
+    certified_union: Optional[str] = None
+    url: Optional[str] = None
+    provenance: Provenance
+
+
+class SafetySummary(BaseModel):
+    """OSHA inspections opened in the window, with what they found."""
+
+    loaded: bool
+    inspections: int = 0
+    after_accident: int = 0
+    serious: int = 0
+    willful: int = 0
+    repeat: int = 0
+    penalties: float = 0.0  # current (after settlement) penalties, dollars
+    source_name: str = "U.S. Occupational Safety and Health Administration enforcement data"
+    source_url: str = "https://www.osha.gov/ords/imis/establishment.html"
+
+
+class OrganizingSummary(BaseModel):
+    """NLRB unfair labor practice charges against the employer and union election petitions."""
+
+    loaded: bool
+    charges: int = 0  # CA cases: allegations, not findings
+    charges_open: int = 0
+    charges_remedied: int = 0  # settled or withdrawn after the employer remedied it
+    charges_dismissed: int = 0  # dismissed or withdrawn without a remedy
+    top_allegations: list[str] = Field(default_factory=list)
+    petitions: int = 0  # RC/RM: workers or employer asked for a union election
+    unions_certified: int = 0  # election won, union certified
+    elections_union_lost: int = 0  # election held, no union majority
+    decertification_petitions: int = 0  # RD
+    source_name: str = "U.S. National Labor Relations Board case data"
+    source_url: str = "https://www.nlrb.gov/search/case"
+
+
 class LaborSummary(BaseModel):
-    """Facts only: counts and dollar totals of concluded DOL Wage and Hour cases."""
+    """Facts only, last two years: wage cases, workplace safety, and the right to organize."""
 
     merchant_id: str
-    loaded: bool  # False = never fetched for this brand (different from zero cases)
+    window_start: Optional[str] = None  # ISO date; everything below is from on or after it
+    safety: Optional[SafetySummary] = None
+    organizing: Optional[OrganizingSummary] = None
+    loaded: bool  # wages: False = never fetched for this brand (different from zero cases)
     case_count: int = 0
     violations: int = 0
     employees_affected: int = 0

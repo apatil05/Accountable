@@ -1,4 +1,14 @@
 {
+  "acehardware": {
+    "dol": {
+      "name_patterns": [
+        "ACE HARDWARE"
+      ],
+      "naics_prefixes": [
+        "444"
+      ]
+    }
+  },
   "amazon": {
     "dol": {
       "name_patterns": [
@@ -26,6 +36,17 @@
       ]
     }
   },
+  "bluebottle": {
+    "dol": {
+      "name_patterns": [
+        "BLUE BOTTLE"
+      ],
+      "naics_prefixes": [
+        "7225",
+        "7222"
+      ]
+    }
+  },
   "chipotle": {
     "carbon_factor": "limited_service_restaurant",
     "dol": {
@@ -35,6 +56,38 @@
       "naics_prefixes": [
         "7225",
         "7222"
+      ]
+    }
+  },
+  "foodlion": {
+    "dol": {
+      "name_patterns": [
+        "FOOD LION"
+      ],
+      "naics_prefixes": [
+        "445"
+      ]
+    }
+  },
+  "harristeeter": {
+    "dol": {
+      "name_patterns": [
+        "HARRIS TEETER"
+      ],
+      "naics_prefixes": [
+        "445"
+      ]
+    }
+  },
+  "heb": {
+    "dol": {
+      "name_patterns": [
+        "H-E-B",
+        "H E B GROCERY",
+        "HEB GROCERY"
+      ],
+      "naics_prefixes": [
+        "445"
       ]
     }
   },
@@ -60,6 +113,27 @@
         "448",
         "458",
         "316"
+      ]
+    }
+  },
+  "patelbrothers": {
+    "dol": {
+      "name_patterns": [
+        "PATEL BROTHERS",
+        "PATEL BROS"
+      ],
+      "naics_prefixes": [
+        "445"
+      ]
+    }
+  },
+  "planetfitness": {
+    "dol": {
+      "name_patterns": [
+        "PLANET FITNESS"
+      ],
+      "naics_prefixes": [
+        "7139"
       ]
     }
   },
@@ -91,11 +165,24 @@
     "dol": {
       "name_patterns": [
         "TARGET STORE",
-        "TARGET CORP"
+        "TARGET STORES",
+        "TARGET CORP",
+        "TARGET CORPORATION"
       ],
       "naics_prefixes": [
         "452",
         "455"
+      ]
+    }
+  },
+  "torchys": {
+    "dol": {
+      "name_patterns": [
+        "TORCHY"
+      ],
+      "naics_prefixes": [
+        "7225",
+        "7222"
       ]
     }
   },
@@ -118,6 +205,27 @@
       "naics_prefixes": [
         "452",
         "455"
+      ]
+    }
+  },
+  "wegmans": {
+    "dol": {
+      "name_patterns": [
+        "WEGMANS"
+      ],
+      "naics_prefixes": [
+        "445"
+      ]
+    }
+  },
+  "whataburger": {
+    "dol": {
+      "name_patterns": [
+        "WHATABURGER"
+      ],
+      "naics_prefixes": [
+        "7225",
+        "7222"
       ]
     }
   }

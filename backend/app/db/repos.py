@@ -180,10 +180,13 @@ EMPTY_LABOR_TOTALS = {"cases": 0, "violations": 0, "employees": 0, "back_wages_c
                       "penalties_cents": 0, "child_labor_cases": 0, "earliest": None, "latest": None}
 
 
-def labor_totals(db: Database, brand_id: str) -> dict:
-    """Sums over a brand's cases, computed by MongoDB (one small document back)."""
+def labor_totals(db: Database, brand_id: str, since: datetime | None = None) -> dict:
+    """Sums over a brand's cases (concluded on or after `since`), computed by MongoDB."""
+    match: dict[str, Any] = {"brand_id": brand_id}
+    if since is not None:
+        match["findings_end"] = {"$gte": since}
     pipeline = [
-        {"$match": {"brand_id": brand_id}},
+        {"$match": match},
         {"$group": {
             "_id": None,
             "cases": {"$sum": 1},

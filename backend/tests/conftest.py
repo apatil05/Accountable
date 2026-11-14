@@ -18,6 +18,14 @@ def mock_mode(monkeypatch):
     monkeypatch.setattr(config, "USE_MOCK_DATA", True)
 
 
+@pytest.fixture(autouse=True)
+def isolated_labordata_cache(tmp_path, monkeypatch):
+    """Loaders delete the cache after a run; tests must never touch the real multi-GB downloads."""
+    from app.services import labordata
+
+    monkeypatch.setattr(labordata, "CACHE_DIR", tmp_path / "labordata-cache")
+
+
 @pytest.fixture
 def db():
     if not config.MONGODB_URI:
