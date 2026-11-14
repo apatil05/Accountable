@@ -28,6 +28,7 @@ from app import config
 SEED_RECORD = config.DATA_DIR / "nessie_seed.local.json"
 TIMEOUT_SECONDS = 15
 PURCHASE_STATUS = "completed"
+NESSIE_PURCHASE_STATUSES = ("pending", "completed", "cancelled")
 DEFAULT_ADDRESS = {"street_number": "1", "street_name": "Main St", "city": "Amherst", "state": "MA", "zip": "01002"}
 
 
@@ -35,6 +36,12 @@ def complete_address(address: Mapping[str, Any] | None) -> dict[str, str]:
     """Nessie rejects blank address parts; fill any missing ones from the demo address."""
     given = address or {}
     return {key: str(given.get(key) or default) for key, default in DEFAULT_ADDRESS.items()}
+
+
+def purchase_status(purchase: Mapping[str, Any]) -> str:
+    """Keep a status Nessie accepts; anything else (missing, our old "executed") becomes completed."""
+    status = purchase.get("status")
+    return status if status in NESSIE_PURCHASE_STATUSES else PURCHASE_STATUS
 
 
 def post(client: httpx.Client, path: str, body: dict) -> dict:
@@ -84,7 +91,7 @@ def seed(client: httpx.Client, data: dict, record: dict, save: Callable[[dict], 
             "purchase_date": p["purchase_date"], "amount": p["amount"],
             "description": p["description"] or "purchase",
             # Without a status, Nessie's own GET /accounts/{id}/purchases fails with HTTP 400.
-            "status": PURCHASE_STATUS,
+            "status": purchase_status(p),
         })
         record["purchase_ids"].append(created["_id"])
         save(record)

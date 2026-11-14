@@ -32,17 +32,22 @@ def test_health_reports_database_and_last_sync(client):
     assert body["last_sync"] is not None
 
 
-def test_spending_summary(client):
+def test_spending_summary(client, mock_data):
     body = client.get("/api/spending/summary").json()
-    assert body["total_spent"] == 2067.62
-    assert body["merchants"][0]["merchant_id"] == "amazon"
+    assert body["total_spent"] == mock_data.total()
+    top = body["merchants"][0]
+    assert top["total_spent"] == max(m["total_spent"] for m in body["merchants"])
+    assert top["total_spent"] == mock_data.total(f"m_{top['merchant_id']}")
 
 
-def test_transactions_expose_brand_ids_in_dollars(client):
+def test_transactions_expose_brand_ids_in_dollars(client, mock_data):
     rows = client.get("/api/spending/transactions").json()
-    assert len(rows) == 60
-    starbucks = next(r for r in rows if r["id"] == "p_015")
-    assert (starbucks["merchant_id"], starbucks["amount"], starbucks["purchase_date"]) == ("starbucks", 6.78, "2026-11-08")
+    assert len(rows) == len(mock_data.purchases)
+    expected = mock_data.first("m_starbucks")
+    starbucks = next(r for r in rows if r["id"] == expected["_id"])
+    assert (starbucks["merchant_id"], starbucks["amount"], starbucks["purchase_date"], starbucks["description"]) == (
+        "starbucks", expected["amount"], expected["purchase_date"], expected["description"],
+    )
 
 
 def test_profile_round_trip(client):
@@ -71,11 +76,11 @@ def test_supply_chains_cover_every_demo_brand(client):
     assert len(client.get("/api/supply-chains").json()) == 10
 
 
-def test_sync_endpoint_is_idempotent(client, db):
+def test_sync_endpoint_is_idempotent(client, db, mock_data):
     first = client.post("/api/sync", headers=AUTH).json()
     before = db.purchases.count_documents({})
     second = client.post("/api/sync", headers=AUTH).json()
-    assert (first["purchases"], second["purchases"]) == (60, 60)
+    assert first["purchases"] == second["purchases"] == len(mock_data.purchases)
     assert db.purchases.count_documents({}) == before
 
 

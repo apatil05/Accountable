@@ -200,604 +200,2384 @@
  ],
  "purchases": [
   {
-   "_id": "p_015",
+   "_id": "p_0001",
    "merchant_id": "m_starbucks",
    "payer_id": "acct_demo",
-   "purchase_date": "2026-11-08",
-   "amount": 6.78,
-   "status": "executed",
+   "purchase_date": "2026-05-15",
+   "amount": 6.9,
+   "status": "completed",
    "medium": "balance",
-   "description": ""
+   "description": "STARBUCKS STORE 08812 HADLEY MA"
   },
   {
-   "_id": "p_014",
-   "merchant_id": "m_starbucks",
-   "payer_id": "acct_demo",
-   "purchase_date": "2026-11-07",
-   "amount": 8.88,
-   "status": "executed",
-   "medium": "balance",
-   "description": ""
-  },
-  {
-   "_id": "p_005",
-   "merchant_id": "m_starbucks",
-   "payer_id": "acct_demo",
-   "purchase_date": "2026-11-06",
-   "amount": 8.55,
-   "status": "executed",
-   "medium": "balance",
-   "description": ""
-  },
-  {
-   "_id": "p_053",
-   "merchant_id": "m_shell",
-   "payer_id": "acct_demo",
-   "purchase_date": "2026-11-06",
-   "amount": 39.36,
-   "status": "executed",
-   "medium": "balance",
-   "description": ""
-  },
-  {
-   "_id": "p_043",
+   "_id": "p_0002",
    "merchant_id": "m_chipotle",
    "payer_id": "acct_demo",
-   "purchase_date": "2026-11-05",
-   "amount": 15.2,
-   "status": "executed",
+   "purchase_date": "2026-05-16",
+   "amount": 13.11,
+   "status": "completed",
    "medium": "balance",
-   "description": ""
+   "description": "CHIPOTLE 2741 HADLEY MA"
   },
   {
-   "_id": "p_003",
+   "_id": "p_0003",
+   "merchant_id": "m_traderjoes",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-05-16",
+   "amount": 37.4,
+   "status": "completed",
+   "medium": "balance",
+   "description": "TRADER JOE S #509 HADLEY MA"
+  },
+  {
+   "_id": "p_0004",
    "merchant_id": "m_starbucks",
    "payer_id": "acct_demo",
-   "purchase_date": "2026-11-04",
-   "amount": 8.11,
-   "status": "executed",
+   "purchase_date": "2026-05-17",
+   "amount": 3.69,
+   "status": "completed",
    "medium": "balance",
-   "description": ""
+   "description": "STARBUCKS STORE 11423 AMHERST MA"
   },
   {
-   "_id": "p_034",
-   "merchant_id": "m_target",
-   "payer_id": "acct_demo",
-   "purchase_date": "2026-11-04",
-   "amount": 21.49,
-   "status": "executed",
-   "medium": "balance",
-   "description": ""
-  },
-  {
-   "_id": "p_030",
+   "_id": "p_0005",
    "merchant_id": "m_walmart",
    "payer_id": "acct_demo",
-   "purchase_date": "2026-11-03",
-   "amount": 54.47,
-   "status": "executed",
+   "purchase_date": "2026-05-17",
+   "amount": 26.63,
+   "status": "completed",
    "medium": "balance",
-   "description": ""
+   "description": "WAL-MART #2183 HADLEY MA"
   },
   {
-   "_id": "p_004",
+   "_id": "p_0006",
    "merchant_id": "m_starbucks",
    "payer_id": "acct_demo",
-   "purchase_date": "2026-11-01",
-   "amount": 5.83,
-   "status": "executed",
+   "purchase_date": "2026-05-18",
+   "amount": 8.99,
+   "status": "completed",
    "medium": "balance",
-   "description": ""
+   "description": "STARBUCKS STORE 08812 HADLEY MA"
   },
   {
-   "_id": "p_016",
+   "_id": "p_0007",
    "merchant_id": "m_starbucks",
    "payer_id": "acct_demo",
-   "purchase_date": "2026-10-27",
-   "amount": 5.45,
-   "status": "executed",
+   "purchase_date": "2026-05-19",
+   "amount": 9.63,
+   "status": "completed",
    "medium": "balance",
-   "description": ""
+   "description": "STARBUCKS STORE 11423 AMHERST MA"
   },
   {
-   "_id": "p_017",
-   "merchant_id": "m_starbucks",
+   "_id": "p_0008",
+   "merchant_id": "m_apple",
    "payer_id": "acct_demo",
-   "purchase_date": "2026-10-26",
-   "amount": 6.7,
-   "status": "executed",
+   "purchase_date": "2026-05-21",
+   "amount": 10.99,
+   "status": "completed",
    "medium": "balance",
-   "description": ""
+   "description": "APPLE.COM/BILL CUPERTINO CA"
   },
   {
-   "_id": "p_021",
-   "merchant_id": "m_amazon",
-   "payer_id": "acct_demo",
-   "purchase_date": "2026-10-20",
-   "amount": 41.05,
-   "status": "executed",
-   "medium": "balance",
-   "description": ""
-  },
-  {
-   "_id": "p_024",
-   "merchant_id": "m_amazon",
-   "payer_id": "acct_demo",
-   "purchase_date": "2026-10-18",
-   "amount": 50.72,
-   "status": "executed",
-   "medium": "balance",
-   "description": ""
-  },
-  {
-   "_id": "p_006",
-   "merchant_id": "m_starbucks",
-   "payer_id": "acct_demo",
-   "purchase_date": "2026-10-17",
-   "amount": 4.19,
-   "status": "executed",
-   "medium": "balance",
-   "description": ""
-  },
-  {
-   "_id": "p_011",
-   "merchant_id": "m_starbucks",
-   "payer_id": "acct_demo",
-   "purchase_date": "2026-10-16",
-   "amount": 7.15,
-   "status": "executed",
-   "medium": "balance",
-   "description": ""
-  },
-  {
-   "_id": "p_008",
-   "merchant_id": "m_starbucks",
-   "payer_id": "acct_demo",
-   "purchase_date": "2026-10-14",
-   "amount": 4.45,
-   "status": "executed",
-   "medium": "balance",
-   "description": ""
-  },
-  {
-   "_id": "p_028",
-   "merchant_id": "m_walmart",
-   "payer_id": "acct_demo",
-   "purchase_date": "2026-10-13",
-   "amount": 67.66,
-   "status": "executed",
-   "medium": "balance",
-   "description": ""
-  },
-  {
-   "_id": "p_055",
-   "merchant_id": "m_shell",
-   "payer_id": "acct_demo",
-   "purchase_date": "2026-10-13",
-   "amount": 42.96,
-   "status": "executed",
-   "medium": "balance",
-   "description": ""
-  },
-  {
-   "_id": "p_044",
+   "_id": "p_0009",
    "merchant_id": "m_chipotle",
    "payer_id": "acct_demo",
-   "purchase_date": "2026-10-10",
-   "amount": 13.37,
-   "status": "executed",
+   "purchase_date": "2026-05-21",
+   "amount": 19.31,
+   "status": "completed",
    "medium": "balance",
-   "description": ""
+   "description": "CHIPOTLE 2741 HADLEY MA"
   },
   {
-   "_id": "p_058",
+   "_id": "p_0010",
+   "merchant_id": "m_starbucks",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-05-21",
+   "amount": 4.98,
+   "status": "completed",
+   "medium": "balance",
+   "description": "STARBUCKS STORE 11423 AMHERST MA"
+  },
+  {
+   "_id": "p_0011",
    "merchant_id": "m_shell",
    "payer_id": "acct_demo",
-   "purchase_date": "2026-10-09",
-   "amount": 52.67,
-   "status": "executed",
+   "purchase_date": "2026-05-22",
+   "amount": 34.23,
+   "status": "completed",
    "medium": "balance",
-   "description": ""
+   "description": "SHELL OIL 57543921005 AMHERST MA"
   },
   {
-   "_id": "p_060",
+   "_id": "p_0012",
+   "merchant_id": "m_starbucks",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-05-22",
+   "amount": 11.13,
+   "status": "completed",
+   "medium": "balance",
+   "description": "STARBUCKS STORE 11423 AMHERST MA"
+  },
+  {
+   "_id": "p_0013",
+   "merchant_id": "m_traderjoes",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-05-22",
+   "amount": 25.69,
+   "status": "completed",
+   "medium": "balance",
+   "description": "TRADER JOE S #509 HADLEY MA"
+  },
+  {
+   "_id": "p_0014",
+   "merchant_id": "m_amazon",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-05-25",
+   "amount": 27.33,
+   "status": "completed",
+   "medium": "balance",
+   "description": "AMAZON MKTPL*JDQ6W52M3 Amzn.com/bill WA"
+  },
+  {
+   "_id": "p_0015",
+   "merchant_id": "m_starbucks",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-05-26",
+   "amount": 4.98,
+   "status": "completed",
+   "medium": "balance",
+   "description": "STARBUCKS STORE 08812 HADLEY MA"
+  },
+  {
+   "_id": "p_0016",
+   "merchant_id": "m_traderjoes",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-05-28",
+   "amount": 65.97,
+   "status": "completed",
+   "medium": "balance",
+   "description": "TRADER JOE S #509 HADLEY MA"
+  },
+  {
+   "_id": "p_0017",
+   "merchant_id": "m_chipotle",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-05-29",
+   "amount": 14.02,
+   "status": "completed",
+   "medium": "balance",
+   "description": "CHIPOTLE 2741 HADLEY MA"
+  },
+  {
+   "_id": "p_0018",
+   "merchant_id": "m_walmart",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-05-29",
+   "amount": 32.8,
+   "status": "completed",
+   "medium": "balance",
+   "description": "WAL-MART #2183 HADLEY MA"
+  },
+  {
+   "_id": "p_0019",
+   "merchant_id": "m_starbucks",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-05-31",
+   "amount": 5.62,
+   "status": "completed",
+   "medium": "balance",
+   "description": "STARBUCKS STORE 08812 HADLEY MA"
+  },
+  {
+   "_id": "p_0020",
+   "merchant_id": "m_shell",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-06-01",
+   "amount": 44.52,
+   "status": "completed",
+   "medium": "balance",
+   "description": "SHELL OIL 57543921005 AMHERST MA"
+  },
+  {
+   "_id": "p_0021",
+   "merchant_id": "m_chipotle",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-06-02",
+   "amount": 15.03,
+   "status": "completed",
+   "medium": "balance",
+   "description": "CHIPOTLE 2741 HADLEY MA"
+  },
+  {
+   "_id": "p_0022",
    "merchant_id": "m_hm",
    "payer_id": "acct_demo",
-   "purchase_date": "2026-10-09",
-   "amount": 49.72,
-   "status": "executed",
+   "purchase_date": "2026-06-02",
+   "amount": 40.73,
+   "status": "completed",
    "medium": "balance",
-   "description": ""
+   "description": "H&M 0518 HOLYOKE MA"
   },
   {
-   "_id": "p_033",
+   "_id": "p_0023",
    "merchant_id": "m_target",
    "payer_id": "acct_demo",
-   "purchase_date": "2026-10-08",
-   "amount": 48.49,
-   "status": "executed",
+   "purchase_date": "2026-06-02",
+   "amount": 29.25,
+   "status": "completed",
    "medium": "balance",
-   "description": ""
+   "description": "TARGET 00018275 HADLEY MA"
   },
   {
-   "_id": "p_054",
-   "merchant_id": "m_shell",
-   "payer_id": "acct_demo",
-   "purchase_date": "2026-10-08",
-   "amount": 37.59,
-   "status": "executed",
-   "medium": "balance",
-   "description": ""
-  },
-  {
-   "_id": "p_026",
+   "_id": "p_0024",
    "merchant_id": "m_amazon",
    "payer_id": "acct_demo",
-   "purchase_date": "2026-10-04",
-   "amount": 48.32,
-   "status": "executed",
+   "purchase_date": "2026-06-03",
+   "amount": 37.01,
+   "status": "completed",
    "medium": "balance",
-   "description": ""
+   "description": "AMAZON MKTPL*4PKXMNUTW Amzn.com/bill WA"
   },
   {
-   "_id": "p_040",
-   "merchant_id": "m_chipotle",
+   "_id": "p_0025",
+   "merchant_id": "m_apple",
    "payer_id": "acct_demo",
-   "purchase_date": "2026-10-04",
-   "amount": 12.7,
-   "status": "executed",
+   "purchase_date": "2026-06-03",
+   "amount": 2.99,
+   "status": "completed",
    "medium": "balance",
-   "description": ""
+   "description": "APPLE.COM/BILL CUPERTINO CA"
   },
   {
-   "_id": "p_001",
+   "_id": "p_0026",
    "merchant_id": "m_starbucks",
    "payer_id": "acct_demo",
-   "purchase_date": "2026-10-03",
-   "amount": 8.74,
-   "status": "executed",
+   "purchase_date": "2026-06-04",
+   "amount": 9.74,
+   "status": "completed",
    "medium": "balance",
-   "description": ""
+   "description": "STARBUCKS STORE 08812 HADLEY MA"
   },
   {
-   "_id": "p_032",
+   "_id": "p_0027",
+   "merchant_id": "m_traderjoes",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-06-04",
+   "amount": 58.25,
+   "status": "completed",
+   "medium": "balance",
+   "description": "TRADER JOE S #509 HADLEY MA"
+  },
+  {
+   "_id": "p_0028",
+   "merchant_id": "m_starbucks",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-06-06",
+   "amount": 7.7,
+   "status": "completed",
+   "medium": "balance",
+   "description": "STARBUCKS STORE 08812 HADLEY MA"
+  },
+  {
+   "_id": "p_0029",
+   "merchant_id": "m_shell",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-06-08",
+   "amount": 38.61,
+   "status": "completed",
+   "medium": "balance",
+   "description": "SHELL OIL 57543921005 AMHERST MA"
+  },
+  {
+   "_id": "p_0030",
    "merchant_id": "m_walmart",
    "payer_id": "acct_demo",
-   "purchase_date": "2026-10-01",
-   "amount": 63.77,
-   "status": "executed",
+   "purchase_date": "2026-06-08",
+   "amount": 54.83,
+   "status": "completed",
    "medium": "balance",
-   "description": ""
+   "description": "WAL-MART #2183 HADLEY MA"
   },
   {
-   "_id": "p_036",
-   "merchant_id": "m_target",
+   "_id": "p_0031",
+   "merchant_id": "m_amazon",
    "payer_id": "acct_demo",
-   "purchase_date": "2026-10-01",
-   "amount": 23.36,
-   "status": "executed",
+   "purchase_date": "2026-06-09",
+   "amount": 14.99,
+   "status": "completed",
    "medium": "balance",
-   "description": ""
+   "description": "Amazon Prime*RQJ1ER3WI Amzn.com/bill WA"
   },
   {
-   "_id": "p_041",
-   "merchant_id": "m_chipotle",
-   "payer_id": "acct_demo",
-   "purchase_date": "2026-09-30",
-   "amount": 13.97,
-   "status": "executed",
-   "medium": "balance",
-   "description": ""
-  },
-  {
-   "_id": "p_050",
-   "merchant_id": "m_traderjoes",
-   "payer_id": "acct_demo",
-   "purchase_date": "2026-09-30",
-   "amount": 31.02,
-   "status": "executed",
-   "medium": "balance",
-   "description": ""
-  },
-  {
-   "_id": "p_049",
-   "merchant_id": "m_traderjoes",
-   "payer_id": "acct_demo",
-   "purchase_date": "2026-09-25",
-   "amount": 69.92,
-   "status": "executed",
-   "medium": "balance",
-   "description": ""
-  },
-  {
-   "_id": "p_002",
+   "_id": "p_0032",
    "merchant_id": "m_starbucks",
    "payer_id": "acct_demo",
-   "purchase_date": "2026-09-24",
-   "amount": 7.25,
-   "status": "executed",
+   "purchase_date": "2026-06-10",
+   "amount": 5.62,
+   "status": "completed",
    "medium": "balance",
-   "description": ""
+   "description": "STARBUCKS STORE 08812 HADLEY MA"
   },
   {
-   "_id": "p_035",
+   "_id": "p_0033",
+   "merchant_id": "m_chipotle",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-06-11",
+   "amount": 17.01,
+   "status": "completed",
+   "medium": "balance",
+   "description": "CHIPOTLE 2741 HADLEY MA"
+  },
+  {
+   "_id": "p_0034",
+   "merchant_id": "m_traderjoes",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-06-11",
+   "amount": 97.29,
+   "status": "completed",
+   "medium": "balance",
+   "description": "TRADER JOE S #509 HADLEY MA"
+  },
+  {
+   "_id": "p_0035",
+   "merchant_id": "m_nike",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-06-14",
+   "amount": 34.99,
+   "status": "completed",
+   "medium": "balance",
+   "description": "NIKE.COM BEAVERTON OR"
+  },
+  {
+   "_id": "p_0036",
+   "merchant_id": "m_starbucks",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-06-15",
+   "amount": 6.37,
+   "status": "completed",
+   "medium": "balance",
+   "description": "STARBUCKS STORE 08812 HADLEY MA"
+  },
+  {
+   "_id": "p_0037",
+   "merchant_id": "m_target",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-06-15",
+   "amount": 80.08,
+   "status": "completed",
+   "medium": "balance",
+   "description": "TARGET 00018275 HADLEY MA"
+  },
+  {
+   "_id": "p_0038",
+   "merchant_id": "m_shell",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-06-16",
+   "amount": 39.98,
+   "status": "completed",
+   "medium": "balance",
+   "description": "SHELL OIL 57543921005 AMHERST MA"
+  },
+  {
+   "_id": "p_0039",
+   "merchant_id": "m_starbucks",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-06-16",
+   "amount": 6.37,
+   "status": "completed",
+   "medium": "balance",
+   "description": "STARBUCKS STORE 08812 HADLEY MA"
+  },
+  {
+   "_id": "p_0040",
+   "merchant_id": "m_walmart",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-06-16",
+   "amount": 36.55,
+   "status": "completed",
+   "medium": "balance",
+   "description": "WAL-MART #2183 HADLEY MA"
+  },
+  {
+   "_id": "p_0041",
+   "merchant_id": "m_amazon",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-06-17",
+   "amount": 70.56,
+   "status": "completed",
+   "medium": "balance",
+   "description": "AMAZON MKTPL*1GN7EFSZ7 Amzn.com/bill WA"
+  },
+  {
+   "_id": "p_0042",
+   "merchant_id": "m_starbucks",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-06-17",
+   "amount": 6.9,
+   "status": "completed",
+   "medium": "balance",
+   "description": "STARBUCKS STORE 11423 AMHERST MA"
+  },
+  {
+   "_id": "p_0043",
+   "merchant_id": "m_traderjoes",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-06-18",
+   "amount": 60.37,
+   "status": "completed",
+   "medium": "balance",
+   "description": "TRADER JOE S #509 HADLEY MA"
+  },
+  {
+   "_id": "p_0044",
+   "merchant_id": "m_apple",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-06-21",
+   "amount": 10.99,
+   "status": "completed",
+   "medium": "balance",
+   "description": "APPLE.COM/BILL CUPERTINO CA"
+  },
+  {
+   "_id": "p_0045",
+   "merchant_id": "m_starbucks",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-06-22",
+   "amount": 6.37,
+   "status": "completed",
+   "medium": "balance",
+   "description": "STARBUCKS STORE 08812 HADLEY MA"
+  },
+  {
+   "_id": "p_0046",
+   "merchant_id": "m_starbucks",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-06-23",
+   "amount": 10.91,
+   "status": "completed",
+   "medium": "balance",
+   "description": "STARBUCKS STORE 08812 HADLEY MA"
+  },
+  {
+   "_id": "p_0047",
+   "merchant_id": "m_shell",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-06-24",
+   "amount": 34.5,
+   "status": "completed",
+   "medium": "balance",
+   "description": "SHELL OIL 57543921005 AMHERST MA"
+  },
+  {
+   "_id": "p_0048",
+   "merchant_id": "m_starbucks",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-06-24",
+   "amount": 6.85,
+   "status": "completed",
+   "medium": "balance",
+   "description": "STARBUCKS STORE 08812 HADLEY MA"
+  },
+  {
+   "_id": "p_0049",
+   "merchant_id": "m_traderjoes",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-06-24",
+   "amount": 47.31,
+   "status": "completed",
+   "medium": "balance",
+   "description": "TRADER JOE S #509 HADLEY MA"
+  },
+  {
+   "_id": "p_0050",
+   "merchant_id": "m_starbucks",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-06-25",
+   "amount": 3.69,
+   "status": "completed",
+   "medium": "balance",
+   "description": "STARBUCKS STORE 08812 HADLEY MA"
+  },
+  {
+   "_id": "p_0051",
+   "merchant_id": "m_walmart",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-06-25",
+   "amount": 25.53,
+   "status": "completed",
+   "medium": "balance",
+   "description": "WAL-MART #2183 HADLEY MA"
+  },
+  {
+   "_id": "p_0052",
+   "merchant_id": "m_amazon",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-06-29",
+   "amount": 37.47,
+   "status": "completed",
+   "medium": "balance",
+   "description": "AMAZON MKTPL*CGL1VNBNS Amzn.com/bill WA"
+  },
+  {
+   "_id": "p_0053",
+   "merchant_id": "m_starbucks",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-06-29",
+   "amount": 5.62,
+   "status": "completed",
+   "medium": "balance",
+   "description": "STARBUCKS STORE 08812 HADLEY MA"
+  },
+  {
+   "_id": "p_0054",
+   "merchant_id": "m_starbucks",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-06-30",
+   "amount": 3.69,
+   "status": "completed",
+   "medium": "balance",
+   "description": "STARBUCKS STORE 11423 AMHERST MA"
+  },
+  {
+   "_id": "p_0055",
+   "merchant_id": "m_starbucks",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-07-01",
+   "amount": 9.63,
+   "status": "completed",
+   "medium": "balance",
+   "description": "STARBUCKS STORE 11423 AMHERST MA"
+  },
+  {
+   "_id": "p_0056",
+   "merchant_id": "m_target",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-07-01",
+   "amount": 46.17,
+   "status": "completed",
+   "medium": "balance",
+   "description": "TARGET 00018275 HADLEY MA"
+  },
+  {
+   "_id": "p_0057",
+   "merchant_id": "m_traderjoes",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-07-01",
+   "amount": 54.79,
+   "status": "completed",
+   "medium": "balance",
+   "description": "TRADER JOE S #509 HADLEY MA"
+  },
+  {
+   "_id": "p_0058",
+   "merchant_id": "m_starbucks",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-07-02",
+   "amount": 4.98,
+   "status": "completed",
+   "medium": "balance",
+   "description": "STARBUCKS STORE 08812 HADLEY MA"
+  },
+  {
+   "_id": "p_0059",
+   "merchant_id": "m_apple",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-07-03",
+   "amount": 2.99,
+   "status": "completed",
+   "medium": "balance",
+   "description": "APPLE.COM/BILL CUPERTINO CA"
+  },
+  {
+   "_id": "p_0060",
+   "merchant_id": "m_starbucks",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-07-03",
+   "amount": 3.69,
+   "status": "completed",
+   "medium": "balance",
+   "description": "STARBUCKS STORE 08812 HADLEY MA"
+  },
+  {
+   "_id": "p_0061",
+   "merchant_id": "m_walmart",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-07-03",
+   "amount": 51.89,
+   "status": "completed",
+   "medium": "balance",
+   "description": "WAL-MART #2183 HADLEY MA"
+  },
+  {
+   "_id": "p_0062",
+   "merchant_id": "m_shell",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-07-04",
+   "amount": 36.54,
+   "status": "completed",
+   "medium": "balance",
+   "description": "SHELL OIL 57543921005 AMHERST MA"
+  },
+  {
+   "_id": "p_0063",
+   "merchant_id": "m_starbucks",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-07-06",
+   "amount": 10.06,
+   "status": "completed",
+   "medium": "balance",
+   "description": "STARBUCKS STORE 08812 HADLEY MA"
+  },
+  {
+   "_id": "p_0064",
+   "merchant_id": "m_starbucks",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-07-07",
+   "amount": 5.62,
+   "status": "completed",
+   "medium": "balance",
+   "description": "STARBUCKS STORE 08812 HADLEY MA"
+  },
+  {
+   "_id": "p_0065",
+   "merchant_id": "m_traderjoes",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-07-08",
+   "amount": 67.73,
+   "status": "completed",
+   "medium": "balance",
+   "description": "TRADER JOE S #509 HADLEY MA"
+  },
+  {
+   "_id": "p_0066",
+   "merchant_id": "m_amazon",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-07-09",
+   "amount": 14.99,
+   "status": "completed",
+   "medium": "balance",
+   "description": "Amazon Prime*W0IKMYK0J Amzn.com/bill WA"
+  },
+  {
+   "_id": "p_0067",
+   "merchant_id": "m_amazon",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-07-09",
+   "amount": 54.14,
+   "status": "completed",
+   "medium": "balance",
+   "description": "AMAZON MKTPL*PB1ONF8TQ Amzn.com/bill WA"
+  },
+  {
+   "_id": "p_0068",
+   "merchant_id": "m_chipotle",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-07-09",
+   "amount": 13.11,
+   "status": "completed",
+   "medium": "balance",
+   "description": "CHIPOTLE 2741 HADLEY MA"
+  },
+  {
+   "_id": "p_0069",
+   "merchant_id": "m_hm",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-07-10",
+   "amount": 98.36,
+   "status": "completed",
+   "medium": "balance",
+   "description": "H&M 0518 HOLYOKE MA"
+  },
+  {
+   "_id": "p_0070",
+   "merchant_id": "m_starbucks",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-07-10",
+   "amount": 6.9,
+   "status": "completed",
+   "medium": "balance",
+   "description": "STARBUCKS STORE 08812 HADLEY MA"
+  },
+  {
+   "_id": "p_0071",
+   "merchant_id": "m_chipotle",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-07-11",
+   "amount": 13.11,
+   "status": "completed",
+   "medium": "balance",
+   "description": "CHIPOTLE 2741 HADLEY MA"
+  },
+  {
+   "_id": "p_0072",
+   "merchant_id": "m_shell",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-07-11",
+   "amount": 31.07,
+   "status": "completed",
+   "medium": "balance",
+   "description": "SHELL OIL 57543921005 AMHERST MA"
+  },
+  {
+   "_id": "p_0073",
+   "merchant_id": "m_starbucks",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-07-11",
+   "amount": 8.13,
+   "status": "completed",
+   "medium": "balance",
+   "description": "STARBUCKS STORE 08812 HADLEY MA"
+  },
+  {
+   "_id": "p_0074",
+   "merchant_id": "m_walmart",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-07-11",
+   "amount": 31.76,
+   "status": "completed",
+   "medium": "balance",
+   "description": "WAL-MART #2183 HADLEY MA"
+  },
+  {
+   "_id": "p_0075",
+   "merchant_id": "m_starbucks",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-07-13",
+   "amount": 9.52,
+   "status": "completed",
+   "medium": "balance",
+   "description": "STARBUCKS STORE 08812 HADLEY MA"
+  },
+  {
+   "_id": "p_0076",
+   "merchant_id": "m_starbucks",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-07-14",
+   "amount": 7.7,
+   "status": "completed",
+   "medium": "balance",
+   "description": "STARBUCKS STORE 11423 AMHERST MA"
+  },
+  {
+   "_id": "p_0077",
+   "merchant_id": "m_traderjoes",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-07-16",
+   "amount": 34.1,
+   "status": "completed",
+   "medium": "balance",
+   "description": "TRADER JOE S #509 HADLEY MA"
+  },
+  {
+   "_id": "p_0078",
+   "merchant_id": "m_amazon",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-07-17",
+   "amount": 18.21,
+   "status": "completed",
+   "medium": "balance",
+   "description": "AMAZON MKTPL*9FM2QCJX6 Amzn.com/bill WA"
+  },
+  {
+   "_id": "p_0079",
+   "merchant_id": "m_chipotle",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-07-17",
+   "amount": 11.72,
+   "status": "completed",
+   "medium": "balance",
+   "description": "CHIPOTLE 2741 HADLEY MA"
+  },
+  {
+   "_id": "p_0080",
+   "merchant_id": "m_starbucks",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-07-17",
+   "amount": 5.62,
+   "status": "completed",
+   "medium": "balance",
+   "description": "STARBUCKS STORE 08812 HADLEY MA"
+  },
+  {
+   "_id": "p_0081",
+   "merchant_id": "m_walmart",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-07-19",
+   "amount": 70.41,
+   "status": "completed",
+   "medium": "balance",
+   "description": "WAL-MART #2183 HADLEY MA"
+  },
+  {
+   "_id": "p_0082",
+   "merchant_id": "m_chipotle",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-07-20",
+   "amount": 12.25,
+   "status": "completed",
+   "medium": "balance",
+   "description": "CHIPOTLE 2741 HADLEY MA"
+  },
+  {
+   "_id": "p_0083",
+   "merchant_id": "m_target",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-07-20",
+   "amount": 18.6,
+   "status": "completed",
+   "medium": "balance",
+   "description": "TARGET 00018275 HADLEY MA"
+  },
+  {
+   "_id": "p_0084",
+   "merchant_id": "m_apple",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-07-21",
+   "amount": 10.99,
+   "status": "completed",
+   "medium": "balance",
+   "description": "APPLE.COM/BILL CUPERTINO CA"
+  },
+  {
+   "_id": "p_0085",
+   "merchant_id": "m_shell",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-07-21",
+   "amount": 30.74,
+   "status": "completed",
+   "medium": "balance",
+   "description": "SHELL OIL 57543921005 AMHERST MA"
+  },
+  {
+   "_id": "p_0086",
+   "merchant_id": "m_starbucks",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-07-21",
+   "amount": 5.62,
+   "status": "completed",
+   "medium": "balance",
+   "description": "STARBUCKS STORE 08812 HADLEY MA"
+  },
+  {
+   "_id": "p_0087",
+   "merchant_id": "m_chipotle",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-07-22",
+   "amount": 12.25,
+   "status": "completed",
+   "medium": "balance",
+   "description": "CHIPOTLE 2741 HADLEY MA"
+  },
+  {
+   "_id": "p_0088",
+   "merchant_id": "m_starbucks",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-07-22",
+   "amount": 6.9,
+   "status": "completed",
+   "medium": "balance",
+   "description": "STARBUCKS STORE 08812 HADLEY MA"
+  },
+  {
+   "_id": "p_0089",
+   "merchant_id": "m_starbucks",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-07-23",
+   "amount": 4.98,
+   "status": "completed",
+   "medium": "balance",
+   "description": "STARBUCKS STORE 08812 HADLEY MA"
+  },
+  {
+   "_id": "p_0090",
+   "merchant_id": "m_traderjoes",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-07-24",
+   "amount": 58.54,
+   "status": "completed",
+   "medium": "balance",
+   "description": "TRADER JOE S #509 HADLEY MA"
+  },
+  {
+   "_id": "p_0091",
+   "merchant_id": "m_starbucks",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-07-25",
+   "amount": 4.98,
+   "status": "completed",
+   "medium": "balance",
+   "description": "STARBUCKS STORE 11423 AMHERST MA"
+  },
+  {
+   "_id": "p_0092",
+   "merchant_id": "m_amazon",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-07-29",
+   "amount": 15.53,
+   "status": "completed",
+   "medium": "balance",
+   "description": "AMAZON MKTPL*6RZZX8KK6 Amzn.com/bill WA"
+  },
+  {
+   "_id": "p_0093",
+   "merchant_id": "m_walmart",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-07-29",
+   "amount": 31.88,
+   "status": "completed",
+   "medium": "balance",
+   "description": "WAL-MART #2183 HADLEY MA"
+  },
+  {
+   "_id": "p_0094",
+   "merchant_id": "m_shell",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-07-30",
+   "amount": 28.86,
+   "status": "completed",
+   "medium": "balance",
+   "description": "SHELL OIL 57543921005 AMHERST MA"
+  },
+  {
+   "_id": "p_0095",
+   "merchant_id": "m_starbucks",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-07-30",
+   "amount": 11.13,
+   "status": "completed",
+   "medium": "balance",
+   "description": "STARBUCKS STORE 08812 HADLEY MA"
+  },
+  {
+   "_id": "p_0096",
+   "merchant_id": "m_chipotle",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-07-31",
+   "amount": 22.63,
+   "status": "completed",
+   "medium": "balance",
+   "description": "CHIPOTLE 2741 HADLEY MA"
+  },
+  {
+   "_id": "p_0097",
+   "merchant_id": "m_starbucks",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-07-31",
+   "amount": 3.69,
+   "status": "completed",
+   "medium": "balance",
+   "description": "STARBUCKS STORE 11423 AMHERST MA"
+  },
+  {
+   "_id": "p_0098",
+   "merchant_id": "m_traderjoes",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-07-31",
+   "amount": 52.57,
+   "status": "completed",
+   "medium": "balance",
+   "description": "TRADER JOE S #509 HADLEY MA"
+  },
+  {
+   "_id": "p_0099",
+   "merchant_id": "m_apple",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-08-03",
+   "amount": 2.99,
+   "status": "completed",
+   "medium": "balance",
+   "description": "APPLE.COM/BILL CUPERTINO CA"
+  },
+  {
+   "_id": "p_0100",
+   "merchant_id": "m_starbucks",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-08-03",
+   "amount": 5.62,
+   "status": "completed",
+   "medium": "balance",
+   "description": "STARBUCKS STORE 08812 HADLEY MA"
+  },
+  {
+   "_id": "p_0101",
+   "merchant_id": "m_starbucks",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-08-04",
+   "amount": 10.38,
+   "status": "completed",
+   "medium": "balance",
+   "description": "STARBUCKS STORE 08812 HADLEY MA"
+  },
+  {
+   "_id": "p_0102",
+   "merchant_id": "m_target",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-08-04",
+   "amount": 17.64,
+   "status": "completed",
+   "medium": "balance",
+   "description": "TARGET 00018275 HADLEY MA"
+  },
+  {
+   "_id": "p_0103",
+   "merchant_id": "m_starbucks",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-08-05",
+   "amount": 6.37,
+   "status": "completed",
+   "medium": "balance",
+   "description": "STARBUCKS STORE 08812 HADLEY MA"
+  },
+  {
+   "_id": "p_0104",
+   "merchant_id": "m_chipotle",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-08-06",
+   "amount": 14.02,
+   "status": "completed",
+   "medium": "balance",
+   "description": "CHIPOTLE 2741 HADLEY MA"
+  },
+  {
+   "_id": "p_0105",
+   "merchant_id": "m_shell",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-08-06",
+   "amount": 30.21,
+   "status": "completed",
+   "medium": "balance",
+   "description": "SHELL OIL 57543921005 AMHERST MA"
+  },
+  {
+   "_id": "p_0106",
+   "merchant_id": "m_starbucks",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-08-06",
+   "amount": 3.69,
+   "status": "completed",
+   "medium": "balance",
+   "description": "STARBUCKS STORE 08812 HADLEY MA"
+  },
+  {
+   "_id": "p_0107",
+   "merchant_id": "m_chipotle",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-08-07",
+   "amount": 14.02,
+   "status": "completed",
+   "medium": "balance",
+   "description": "CHIPOTLE 2741 HADLEY MA"
+  },
+  {
+   "_id": "p_0108",
+   "merchant_id": "m_traderjoes",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-08-07",
+   "amount": 44.81,
+   "status": "completed",
+   "medium": "balance",
+   "description": "TRADER JOE S #509 HADLEY MA"
+  },
+  {
+   "_id": "p_0109",
+   "merchant_id": "m_amazon",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-08-09",
+   "amount": 14.99,
+   "status": "completed",
+   "medium": "balance",
+   "description": "Amazon Prime*1AH240ZXV Amzn.com/bill WA"
+  },
+  {
+   "_id": "p_0110",
+   "merchant_id": "m_starbucks",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-08-10",
+   "amount": 6.9,
+   "status": "completed",
+   "medium": "balance",
+   "description": "STARBUCKS STORE 11423 AMHERST MA"
+  },
+  {
+   "_id": "p_0111",
+   "merchant_id": "m_amazon",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-08-11",
+   "amount": 69.14,
+   "status": "completed",
+   "medium": "balance",
+   "description": "AMAZON MKTPL*SIF3V0WKJ Amzn.com/bill WA"
+  },
+  {
+   "_id": "p_0112",
+   "merchant_id": "m_starbucks",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-08-11",
+   "amount": 8.13,
+   "status": "completed",
+   "medium": "balance",
+   "description": "STARBUCKS STORE 08812 HADLEY MA"
+  },
+  {
+   "_id": "p_0113",
+   "merchant_id": "m_walmart",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-08-11",
+   "amount": 53.4,
+   "status": "completed",
+   "medium": "balance",
+   "description": "WAL-MART #2183 HADLEY MA"
+  },
+  {
+   "_id": "p_0114",
+   "merchant_id": "m_starbucks",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-08-13",
+   "amount": 6.37,
+   "status": "completed",
+   "medium": "balance",
+   "description": "STARBUCKS STORE 11423 AMHERST MA"
+  },
+  {
+   "_id": "p_0115",
+   "merchant_id": "m_shell",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-08-14",
+   "amount": 37.81,
+   "status": "completed",
+   "medium": "balance",
+   "description": "SHELL OIL 57543921005 AMHERST MA"
+  },
+  {
+   "_id": "p_0116",
+   "merchant_id": "m_starbucks",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-08-14",
+   "amount": 10.38,
+   "status": "completed",
+   "medium": "balance",
+   "description": "STARBUCKS STORE 08812 HADLEY MA"
+  },
+  {
+   "_id": "p_0117",
+   "merchant_id": "m_traderjoes",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-08-14",
+   "amount": 75.76,
+   "status": "completed",
+   "medium": "balance",
+   "description": "TRADER JOE S #509 HADLEY MA"
+  },
+  {
+   "_id": "p_0118",
+   "merchant_id": "m_starbucks",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-08-17",
+   "amount": 7.7,
+   "status": "completed",
+   "medium": "balance",
+   "description": "STARBUCKS STORE 11423 AMHERST MA"
+  },
+  {
+   "_id": "p_0119",
+   "merchant_id": "m_starbucks",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-08-18",
+   "amount": 3.69,
+   "status": "completed",
+   "medium": "balance",
+   "description": "STARBUCKS STORE 08812 HADLEY MA"
+  },
+  {
+   "_id": "p_0120",
+   "merchant_id": "m_starbucks",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-08-19",
+   "amount": 6.37,
+   "status": "completed",
+   "medium": "balance",
+   "description": "STARBUCKS STORE 08812 HADLEY MA"
+  },
+  {
+   "_id": "p_0121",
+   "merchant_id": "m_target",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-08-19",
+   "amount": 79.28,
+   "status": "completed",
+   "medium": "balance",
+   "description": "TARGET 00018275 HADLEY MA"
+  },
+  {
+   "_id": "p_0122",
+   "merchant_id": "m_amazon",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-08-20",
+   "amount": 21.18,
+   "status": "completed",
+   "medium": "balance",
+   "description": "AMAZON MKTPL*T7CF77TS6 Amzn.com/bill WA"
+  },
+  {
+   "_id": "p_0123",
+   "merchant_id": "m_apple",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-08-21",
+   "amount": 10.99,
+   "status": "completed",
+   "medium": "balance",
+   "description": "APPLE.COM/BILL CUPERTINO CA"
+  },
+  {
+   "_id": "p_0124",
+   "merchant_id": "m_chipotle",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-08-21",
+   "amount": 15.03,
+   "status": "completed",
+   "medium": "balance",
+   "description": "CHIPOTLE 2741 HADLEY MA"
+  },
+  {
+   "_id": "p_0125",
+   "merchant_id": "m_shell",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-08-22",
+   "amount": 32.79,
+   "status": "completed",
+   "medium": "balance",
+   "description": "SHELL OIL 57543921005 AMHERST MA"
+  },
+  {
+   "_id": "p_0126",
+   "merchant_id": "m_starbucks",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-08-22",
+   "amount": 11.13,
+   "status": "completed",
+   "medium": "balance",
+   "description": "STARBUCKS STORE 08812 HADLEY MA"
+  },
+  {
+   "_id": "p_0127",
+   "merchant_id": "m_traderjoes",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-08-22",
+   "amount": 53.5,
+   "status": "completed",
+   "medium": "balance",
+   "description": "TRADER JOE S #509 HADLEY MA"
+  },
+  {
+   "_id": "p_0128",
+   "merchant_id": "m_nike",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-08-23",
+   "amount": 109.97,
+   "status": "completed",
+   "medium": "balance",
+   "description": "NIKE.COM BEAVERTON OR"
+  },
+  {
+   "_id": "p_0129",
+   "merchant_id": "m_walmart",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-08-24",
+   "amount": 32.3,
+   "status": "completed",
+   "medium": "balance",
+   "description": "WAL-MART #2183 HADLEY MA"
+  },
+  {
+   "_id": "p_0130",
+   "merchant_id": "m_starbucks",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-08-25",
+   "amount": 6.9,
+   "status": "completed",
+   "medium": "balance",
+   "description": "STARBUCKS STORE 08812 HADLEY MA"
+  },
+  {
+   "_id": "p_0131",
+   "merchant_id": "m_traderjoes",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-08-28",
+   "amount": 39.48,
+   "status": "completed",
+   "medium": "balance",
+   "description": "TRADER JOE S #509 HADLEY MA"
+  },
+  {
+   "_id": "p_0132",
+   "merchant_id": "m_hm",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-08-30",
+   "amount": 52.93,
+   "status": "completed",
+   "medium": "balance",
+   "description": "H&M 0518 HOLYOKE MA"
+  },
+  {
+   "_id": "p_0133",
+   "merchant_id": "m_shell",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-08-31",
+   "amount": 43.62,
+   "status": "completed",
+   "medium": "balance",
+   "description": "SHELL OIL 57543921005 AMHERST MA"
+  },
+  {
+   "_id": "p_0134",
+   "merchant_id": "m_starbucks",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-08-31",
+   "amount": 6.9,
+   "status": "completed",
+   "medium": "balance",
+   "description": "STARBUCKS STORE 08812 HADLEY MA"
+  },
+  {
+   "_id": "p_0135",
+   "merchant_id": "m_starbucks",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-09-01",
+   "amount": 6.37,
+   "status": "completed",
+   "medium": "balance",
+   "description": "STARBUCKS STORE 11423 AMHERST MA"
+  },
+  {
+   "_id": "p_0136",
+   "merchant_id": "m_target",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-09-01",
+   "amount": 23.33,
+   "status": "completed",
+   "medium": "balance",
+   "description": "TARGET 00018275 HADLEY MA"
+  },
+  {
+   "_id": "p_0137",
+   "merchant_id": "m_walmart",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-09-01",
+   "amount": 63.83,
+   "status": "completed",
+   "medium": "balance",
+   "description": "WAL-MART #2183 HADLEY MA"
+  },
+  {
+   "_id": "p_0138",
+   "merchant_id": "m_amazon",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-09-02",
+   "amount": 47.23,
+   "status": "completed",
+   "medium": "balance",
+   "description": "AMAZON MKTPL*SNZ9K5VMC Amzn.com/bill WA"
+  },
+  {
+   "_id": "p_0139",
+   "merchant_id": "m_chipotle",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-09-02",
+   "amount": 11.72,
+   "status": "completed",
+   "medium": "balance",
+   "description": "CHIPOTLE 2741 HADLEY MA"
+  },
+  {
+   "_id": "p_0140",
+   "merchant_id": "m_starbucks",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-09-02",
+   "amount": 8.99,
+   "status": "completed",
+   "medium": "balance",
+   "description": "STARBUCKS STORE 08812 HADLEY MA"
+  },
+  {
+   "_id": "p_0141",
+   "merchant_id": "m_apple",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-09-03",
+   "amount": 2.99,
+   "status": "completed",
+   "medium": "balance",
+   "description": "APPLE.COM/BILL CUPERTINO CA"
+  },
+  {
+   "_id": "p_0142",
+   "merchant_id": "m_starbucks",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-09-03",
+   "amount": 10.06,
+   "status": "completed",
+   "medium": "balance",
+   "description": "STARBUCKS STORE 08812 HADLEY MA"
+  },
+  {
+   "_id": "p_0143",
+   "merchant_id": "m_traderjoes",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-09-03",
+   "amount": 34.15,
+   "status": "completed",
+   "medium": "balance",
+   "description": "TRADER JOE S #509 HADLEY MA"
+  },
+  {
+   "_id": "p_0144",
+   "merchant_id": "m_starbucks",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-09-04",
+   "amount": 8.45,
+   "status": "completed",
+   "medium": "balance",
+   "description": "STARBUCKS STORE 08812 HADLEY MA"
+  },
+  {
+   "_id": "p_0145",
+   "merchant_id": "m_chipotle",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-09-07",
+   "amount": 17.55,
+   "status": "completed",
+   "medium": "balance",
+   "description": "CHIPOTLE 2741 HADLEY MA"
+  },
+  {
+   "_id": "p_0146",
+   "merchant_id": "m_shell",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-09-07",
+   "amount": 39.58,
+   "status": "completed",
+   "medium": "balance",
+   "description": "SHELL OIL 57543921005 AMHERST MA"
+  },
+  {
+   "_id": "p_0147",
+   "merchant_id": "m_starbucks",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-09-07",
+   "amount": 3.69,
+   "status": "completed",
+   "medium": "balance",
+   "description": "STARBUCKS STORE 11423 AMHERST MA"
+  },
+  {
+   "_id": "p_0148",
+   "merchant_id": "m_starbucks",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-09-08",
+   "amount": 6.9,
+   "status": "completed",
+   "medium": "balance",
+   "description": "STARBUCKS STORE 08812 HADLEY MA"
+  },
+  {
+   "_id": "p_0149",
+   "merchant_id": "m_amazon",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-09-09",
+   "amount": 14.99,
+   "status": "completed",
+   "medium": "balance",
+   "description": "Amazon Prime*47YIFAWSW Amzn.com/bill WA"
+  },
+  {
+   "_id": "p_0150",
+   "merchant_id": "m_starbucks",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-09-10",
+   "amount": 3.69,
+   "status": "completed",
+   "medium": "balance",
+   "description": "STARBUCKS STORE 11423 AMHERST MA"
+  },
+  {
+   "_id": "p_0151",
+   "merchant_id": "m_chipotle",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-09-11",
+   "amount": 14.02,
+   "status": "completed",
+   "medium": "balance",
+   "description": "CHIPOTLE 2741 HADLEY MA"
+  },
+  {
+   "_id": "p_0152",
+   "merchant_id": "m_traderjoes",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-09-11",
+   "amount": 48.94,
+   "status": "completed",
+   "medium": "balance",
+   "description": "TRADER JOE S #509 HADLEY MA"
+  },
+  {
+   "_id": "p_0153",
+   "merchant_id": "m_starbucks",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-09-12",
+   "amount": 11.13,
+   "status": "completed",
+   "medium": "balance",
+   "description": "STARBUCKS STORE 08812 HADLEY MA"
+  },
+  {
+   "_id": "p_0154",
+   "merchant_id": "m_walmart",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-09-12",
+   "amount": 28.19,
+   "status": "completed",
+   "medium": "balance",
+   "description": "WAL-MART #2183 HADLEY MA"
+  },
+  {
+   "_id": "p_0155",
+   "merchant_id": "m_starbucks",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-09-13",
+   "amount": 9.74,
+   "status": "completed",
+   "medium": "balance",
+   "description": "STARBUCKS STORE 08812 HADLEY MA"
+  },
+  {
+   "_id": "p_0156",
+   "merchant_id": "m_amazon",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-09-15",
+   "amount": 21.09,
+   "status": "completed",
+   "medium": "balance",
+   "description": "AMAZON MKTPL*61YB5JV98 Amzn.com/bill WA"
+  },
+  {
+   "_id": "p_0157",
+   "merchant_id": "m_starbucks",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-09-15",
+   "amount": 4.98,
+   "status": "completed",
+   "medium": "balance",
+   "description": "STARBUCKS STORE 08812 HADLEY MA"
+  },
+  {
+   "_id": "p_0158",
+   "merchant_id": "m_shell",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-09-16",
+   "amount": 42.12,
+   "status": "completed",
+   "medium": "balance",
+   "description": "SHELL OIL 57543921005 AMHERST MA"
+  },
+  {
+   "_id": "p_0159",
+   "merchant_id": "m_starbucks",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-09-16",
+   "amount": 5.62,
+   "status": "completed",
+   "medium": "balance",
+   "description": "STARBUCKS STORE 08812 HADLEY MA"
+  },
+  {
+   "_id": "p_0160",
+   "merchant_id": "m_starbucks",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-09-17",
+   "amount": 5.62,
+   "status": "completed",
+   "medium": "balance",
+   "description": "STARBUCKS STORE 08812 HADLEY MA"
+  },
+  {
+   "_id": "p_0161",
+   "merchant_id": "m_traderjoes",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-09-17",
+   "amount": 52.13,
+   "status": "completed",
+   "medium": "balance",
+   "description": "TRADER JOE S #509 HADLEY MA"
+  },
+  {
+   "_id": "p_0162",
+   "merchant_id": "m_apple",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-09-20",
+   "amount": 264.56,
+   "status": "completed",
+   "medium": "balance",
+   "description": "APPLE STORE R154 BOSTON MA"
+  },
+  {
+   "_id": "p_0163",
+   "merchant_id": "m_chipotle",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-09-20",
+   "amount": 14.02,
+   "status": "completed",
+   "medium": "balance",
+   "description": "CHIPOTLE 2741 HADLEY MA"
+  },
+  {
+   "_id": "p_0164",
+   "merchant_id": "m_amazon",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-09-21",
+   "amount": 61.04,
+   "status": "completed",
+   "medium": "balance",
+   "description": "AMAZON MKTPL*ZFDWEIXTA Amzn.com/bill WA"
+  },
+  {
+   "_id": "p_0165",
+   "merchant_id": "m_apple",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-09-21",
+   "amount": 10.99,
+   "status": "completed",
+   "medium": "balance",
+   "description": "APPLE.COM/BILL CUPERTINO CA"
+  },
+  {
+   "_id": "p_0166",
+   "merchant_id": "m_starbucks",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-09-21",
+   "amount": 4.98,
+   "status": "completed",
+   "medium": "balance",
+   "description": "STARBUCKS STORE 08812 HADLEY MA"
+  },
+  {
+   "_id": "p_0167",
    "merchant_id": "m_target",
    "payer_id": "acct_demo",
    "purchase_date": "2026-09-21",
-   "amount": 24.07,
-   "status": "executed",
+   "amount": 45.0,
+   "status": "completed",
    "medium": "balance",
-   "description": ""
+   "description": "TARGET 00018275 HADLEY MA"
   },
   {
-   "_id": "p_009",
+   "_id": "p_0168",
    "merchant_id": "m_starbucks",
    "payer_id": "acct_demo",
-   "purchase_date": "2026-09-20",
-   "amount": 4.3,
-   "status": "executed",
+   "purchase_date": "2026-09-22",
+   "amount": 10.38,
+   "status": "completed",
    "medium": "balance",
-   "description": ""
+   "description": "STARBUCKS STORE 11423 AMHERST MA"
   },
   {
-   "_id": "p_007",
-   "merchant_id": "m_starbucks",
-   "payer_id": "acct_demo",
-   "purchase_date": "2026-09-19",
-   "amount": 6.09,
-   "status": "executed",
-   "medium": "balance",
-   "description": ""
-  },
-  {
-   "_id": "p_059",
-   "merchant_id": "m_hm",
-   "payer_id": "acct_demo",
-   "purchase_date": "2026-09-19",
-   "amount": 55.24,
-   "status": "executed",
-   "medium": "balance",
-   "description": ""
-  },
-  {
-   "_id": "p_048",
-   "merchant_id": "m_traderjoes",
-   "payer_id": "acct_demo",
-   "purchase_date": "2026-09-17",
-   "amount": 42.81,
-   "status": "executed",
-   "medium": "balance",
-   "description": ""
-  },
-  {
-   "_id": "p_057",
-   "merchant_id": "m_shell",
-   "payer_id": "acct_demo",
-   "purchase_date": "2026-09-17",
-   "amount": 43.03,
-   "status": "executed",
-   "medium": "balance",
-   "description": ""
-  },
-  {
-   "_id": "p_027",
-   "merchant_id": "m_amazon",
-   "payer_id": "acct_demo",
-   "purchase_date": "2026-09-16",
-   "amount": 40.2,
-   "status": "executed",
-   "medium": "balance",
-   "description": ""
-  },
-  {
-   "_id": "p_051",
-   "merchant_id": "m_traderjoes",
-   "payer_id": "acct_demo",
-   "purchase_date": "2026-09-15",
-   "amount": 46.0,
-   "status": "executed",
-   "medium": "balance",
-   "description": ""
-  },
-  {
-   "_id": "p_037",
-   "merchant_id": "m_nike",
-   "payer_id": "acct_demo",
-   "purchase_date": "2026-09-12",
-   "amount": 111.08,
-   "status": "executed",
-   "medium": "balance",
-   "description": ""
-  },
-  {
-   "_id": "p_056",
-   "merchant_id": "m_shell",
-   "payer_id": "acct_demo",
-   "purchase_date": "2026-09-11",
-   "amount": 36.61,
-   "status": "executed",
-   "medium": "balance",
-   "description": ""
-  },
-  {
-   "_id": "p_031",
+   "_id": "p_0169",
    "merchant_id": "m_walmart",
    "payer_id": "acct_demo",
-   "purchase_date": "2026-09-07",
-   "amount": 49.71,
-   "status": "executed",
+   "purchase_date": "2026-09-22",
+   "amount": 24.64,
+   "status": "completed",
    "medium": "balance",
-   "description": ""
+   "description": "WAL-MART #2183 HADLEY MA"
   },
   {
-   "_id": "p_025",
-   "merchant_id": "m_amazon",
-   "payer_id": "acct_demo",
-   "purchase_date": "2026-09-06",
-   "amount": 45.35,
-   "status": "executed",
-   "medium": "balance",
-   "description": ""
-  },
-  {
-   "_id": "p_022",
-   "merchant_id": "m_amazon",
-   "payer_id": "acct_demo",
-   "purchase_date": "2026-09-04",
-   "amount": 67.54,
-   "status": "executed",
-   "medium": "balance",
-   "description": ""
-  },
-  {
-   "_id": "p_039",
-   "merchant_id": "m_chipotle",
-   "payer_id": "acct_demo",
-   "purchase_date": "2026-09-03",
-   "amount": 13.87,
-   "status": "executed",
-   "medium": "balance",
-   "description": ""
-  },
-  {
-   "_id": "p_010",
+   "_id": "p_0170",
    "merchant_id": "m_starbucks",
    "payer_id": "acct_demo",
-   "purchase_date": "2026-09-02",
-   "amount": 4.62,
-   "status": "executed",
+   "purchase_date": "2026-09-23",
+   "amount": 6.85,
+   "status": "completed",
    "medium": "balance",
-   "description": ""
+   "description": "STARBUCKS STORE 08812 HADLEY MA"
   },
   {
-   "_id": "p_023",
-   "merchant_id": "m_amazon",
+   "_id": "p_0171",
+   "merchant_id": "m_shell",
    "payer_id": "acct_demo",
-   "purchase_date": "2026-09-02",
-   "amount": 16.65,
-   "status": "executed",
+   "purchase_date": "2026-09-25",
+   "amount": 32.31,
+   "status": "completed",
    "medium": "balance",
-   "description": ""
+   "description": "SHELL OIL 57543921005 AMHERST MA"
   },
   {
-   "_id": "p_013",
+   "_id": "p_0172",
    "merchant_id": "m_starbucks",
    "payer_id": "acct_demo",
-   "purchase_date": "2026-09-01",
-   "amount": 6.93,
-   "status": "executed",
+   "purchase_date": "2026-09-25",
+   "amount": 4.98,
+   "status": "completed",
    "medium": "balance",
-   "description": ""
+   "description": "STARBUCKS STORE 08812 HADLEY MA"
   },
   {
-   "_id": "p_018",
-   "merchant_id": "m_starbucks",
-   "payer_id": "acct_demo",
-   "purchase_date": "2026-09-01",
-   "amount": 5.54,
-   "status": "executed",
-   "medium": "balance",
-   "description": ""
-  },
-  {
-   "_id": "p_047",
+   "_id": "p_0173",
    "merchant_id": "m_traderjoes",
    "payer_id": "acct_demo",
-   "purchase_date": "2026-09-01",
-   "amount": 74.69,
-   "status": "executed",
+   "purchase_date": "2026-09-25",
+   "amount": 108.57,
+   "status": "completed",
    "medium": "balance",
-   "description": ""
+   "description": "TRADER JOE S #509 HADLEY MA"
   },
   {
-   "_id": "p_012",
+   "_id": "p_0174",
    "merchant_id": "m_starbucks",
    "payer_id": "acct_demo",
-   "purchase_date": "2026-08-31",
-   "amount": 8.74,
-   "status": "executed",
+   "purchase_date": "2026-09-28",
+   "amount": 3.69,
+   "status": "completed",
    "medium": "balance",
-   "description": ""
+   "description": "STARBUCKS STORE 11423 AMHERST MA"
   },
   {
-   "_id": "p_020",
+   "_id": "p_0175",
+   "merchant_id": "m_starbucks",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-09-29",
+   "amount": 9.52,
+   "status": "completed",
+   "medium": "balance",
+   "description": "STARBUCKS STORE 11423 AMHERST MA"
+  },
+  {
+   "_id": "p_0176",
    "merchant_id": "m_amazon",
    "payer_id": "acct_demo",
-   "purchase_date": "2026-08-31",
-   "amount": 56.55,
-   "status": "executed",
+   "purchase_date": "2026-10-02",
+   "amount": 82.34,
+   "status": "completed",
    "medium": "balance",
-   "description": ""
+   "description": "AMAZON MKTPL*BVDCBLN0O Amzn.com/bill WA"
   },
   {
-   "_id": "p_042",
+   "_id": "p_0177",
    "merchant_id": "m_chipotle",
    "payer_id": "acct_demo",
-   "purchase_date": "2026-08-31",
-   "amount": 14.98,
-   "status": "executed",
+   "purchase_date": "2026-10-02",
+   "amount": 20.87,
+   "status": "completed",
    "medium": "balance",
-   "description": ""
+   "description": "CHIPOTLE 2741 HADLEY MA"
   },
   {
-   "_id": "p_052",
+   "_id": "p_0178",
    "merchant_id": "m_traderjoes",
    "payer_id": "acct_demo",
-   "purchase_date": "2026-08-27",
-   "amount": 35.27,
-   "status": "executed",
+   "purchase_date": "2026-10-02",
+   "amount": 53.13,
+   "status": "completed",
    "medium": "balance",
-   "description": ""
+   "description": "TRADER JOE S #509 HADLEY MA"
   },
   {
-   "_id": "p_038",
+   "_id": "p_0179",
+   "merchant_id": "m_walmart",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-10-02",
+   "amount": 24.72,
+   "status": "completed",
+   "medium": "balance",
+   "description": "WAL-MART #2183 HADLEY MA"
+  },
+  {
+   "_id": "p_0180",
    "merchant_id": "m_apple",
    "payer_id": "acct_demo",
-   "purchase_date": "2026-08-20",
-   "amount": 261.1,
-   "status": "executed",
+   "purchase_date": "2026-10-03",
+   "amount": 2.99,
+   "status": "completed",
    "medium": "balance",
-   "description": ""
+   "description": "APPLE.COM/BILL CUPERTINO CA"
   },
   {
-   "_id": "p_045",
+   "_id": "p_0181",
    "merchant_id": "m_chipotle",
    "payer_id": "acct_demo",
-   "purchase_date": "2026-08-20",
-   "amount": 11.32,
-   "status": "executed",
+   "purchase_date": "2026-10-03",
+   "amount": 21.72,
+   "status": "completed",
    "medium": "balance",
-   "description": ""
+   "description": "CHIPOTLE 2741 HADLEY MA"
   },
   {
-   "_id": "p_019",
+   "_id": "p_0182",
+   "merchant_id": "m_shell",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-10-03",
+   "amount": 30.3,
+   "status": "completed",
+   "medium": "balance",
+   "description": "SHELL OIL 57543921005 AMHERST MA"
+  },
+  {
+   "_id": "p_0183",
+   "merchant_id": "m_starbucks",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-10-04",
+   "amount": 6.9,
+   "status": "completed",
+   "medium": "balance",
+   "description": "STARBUCKS STORE 08812 HADLEY MA"
+  },
+  {
+   "_id": "p_0184",
+   "merchant_id": "m_starbucks",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-10-05",
+   "amount": 5.62,
+   "status": "completed",
+   "medium": "balance",
+   "description": "STARBUCKS STORE 11423 AMHERST MA"
+  },
+  {
+   "_id": "p_0185",
+   "merchant_id": "m_starbucks",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-10-06",
+   "amount": 8.45,
+   "status": "completed",
+   "medium": "balance",
+   "description": "STARBUCKS STORE 08812 HADLEY MA"
+  },
+  {
+   "_id": "p_0186",
+   "merchant_id": "m_starbucks",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-10-07",
+   "amount": 3.69,
+   "status": "completed",
+   "medium": "balance",
+   "description": "STARBUCKS STORE 08812 HADLEY MA"
+  },
+  {
+   "_id": "p_0187",
+   "merchant_id": "m_traderjoes",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-10-08",
+   "amount": 54.0,
+   "status": "completed",
+   "medium": "balance",
+   "description": "TRADER JOE S #509 HADLEY MA"
+  },
+  {
+   "_id": "p_0188",
    "merchant_id": "m_amazon",
    "payer_id": "acct_demo",
-   "purchase_date": "2026-08-18",
-   "amount": 26.1,
-   "status": "executed",
+   "purchase_date": "2026-10-09",
+   "amount": 14.99,
+   "status": "completed",
    "medium": "balance",
-   "description": ""
+   "description": "Amazon Prime*PF8O349NF Amzn.com/bill WA"
   },
   {
-   "_id": "p_029",
+   "_id": "p_0189",
+   "merchant_id": "m_target",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-10-09",
+   "amount": 35.45,
+   "status": "completed",
+   "medium": "balance",
+   "description": "TARGET 00018275 HADLEY MA"
+  },
+  {
+   "_id": "p_0190",
    "merchant_id": "m_walmart",
    "payer_id": "acct_demo",
-   "purchase_date": "2026-08-16",
-   "amount": 66.79,
-   "status": "executed",
+   "purchase_date": "2026-10-10",
+   "amount": 67.13,
+   "status": "completed",
    "medium": "balance",
-   "description": ""
+   "description": "WAL-MART #2183 HADLEY MA"
   },
   {
-   "_id": "p_046",
+   "_id": "p_0191",
+   "merchant_id": "m_amazon",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-10-12",
+   "amount": 31.15,
+   "status": "cancelled",
+   "medium": "balance",
+   "description": "AMAZON MKTPL*OROSMYMIZ Amzn.com/bill WA"
+  },
+  {
+   "_id": "p_0192",
+   "merchant_id": "m_amazon",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-10-12",
+   "amount": 31.15,
+   "status": "completed",
+   "medium": "balance",
+   "description": "AMAZON MKTPL*OROSMYMIZ Amzn.com/bill WA"
+  },
+  {
+   "_id": "p_0193",
+   "merchant_id": "m_starbucks",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-10-12",
+   "amount": 4.98,
+   "status": "completed",
+   "medium": "balance",
+   "description": "STARBUCKS STORE 08812 HADLEY MA"
+  },
+  {
+   "_id": "p_0194",
+   "merchant_id": "m_shell",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-10-13",
+   "amount": 39.7,
+   "status": "completed",
+   "medium": "balance",
+   "description": "SHELL OIL 57543921005 AMHERST MA"
+  },
+  {
+   "_id": "p_0195",
+   "merchant_id": "m_starbucks",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-10-13",
+   "amount": 5.62,
+   "status": "completed",
+   "medium": "balance",
+   "description": "STARBUCKS STORE 08812 HADLEY MA"
+  },
+  {
+   "_id": "p_0196",
+   "merchant_id": "m_starbucks",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-10-15",
+   "amount": 6.9,
+   "status": "completed",
+   "medium": "balance",
+   "description": "STARBUCKS STORE 08812 HADLEY MA"
+  },
+  {
+   "_id": "p_0197",
+   "merchant_id": "m_traderjoes",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-10-15",
+   "amount": 37.33,
+   "status": "completed",
+   "medium": "balance",
+   "description": "TRADER JOE S #509 HADLEY MA"
+  },
+  {
+   "_id": "p_0198",
+   "merchant_id": "m_hm",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-10-16",
+   "amount": 27.68,
+   "status": "completed",
+   "medium": "balance",
+   "description": "H&M 0518 HOLYOKE MA"
+  },
+  {
+   "_id": "p_0199",
+   "merchant_id": "m_starbucks",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-10-16",
+   "amount": 7.7,
+   "status": "completed",
+   "medium": "balance",
+   "description": "STARBUCKS STORE 08812 HADLEY MA"
+  },
+  {
+   "_id": "p_0200",
    "merchant_id": "m_chipotle",
    "payer_id": "acct_demo",
-   "purchase_date": "2026-08-16",
-   "amount": 12.55,
-   "status": "executed",
+   "purchase_date": "2026-10-17",
+   "amount": 12.25,
+   "status": "completed",
    "medium": "balance",
-   "description": ""
+   "description": "CHIPOTLE 2741 HADLEY MA"
+  },
+  {
+   "_id": "p_0201",
+   "merchant_id": "m_starbucks",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-10-19",
+   "amount": 3.69,
+   "status": "completed",
+   "medium": "balance",
+   "description": "STARBUCKS STORE 08812 HADLEY MA"
+  },
+  {
+   "_id": "p_0202",
+   "merchant_id": "m_amazon",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-10-20",
+   "amount": 15.21,
+   "status": "completed",
+   "medium": "balance",
+   "description": "AMAZON MKTPL*HF51X26LQ Amzn.com/bill WA"
+  },
+  {
+   "_id": "p_0203",
+   "merchant_id": "m_shell",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-10-20",
+   "amount": 37.04,
+   "status": "completed",
+   "medium": "balance",
+   "description": "SHELL OIL 57543921005 AMHERST MA"
+  },
+  {
+   "_id": "p_0204",
+   "merchant_id": "m_starbucks",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-10-20",
+   "amount": 6.9,
+   "status": "completed",
+   "medium": "balance",
+   "description": "STARBUCKS STORE 08812 HADLEY MA"
+  },
+  {
+   "_id": "p_0205",
+   "merchant_id": "m_apple",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-10-21",
+   "amount": 10.99,
+   "status": "completed",
+   "medium": "balance",
+   "description": "APPLE.COM/BILL CUPERTINO CA"
+  },
+  {
+   "_id": "p_0206",
+   "merchant_id": "m_traderjoes",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-10-21",
+   "amount": 87.59,
+   "status": "completed",
+   "medium": "balance",
+   "description": "TRADER JOE S #509 HADLEY MA"
+  },
+  {
+   "_id": "p_0207",
+   "merchant_id": "m_chipotle",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-10-22",
+   "amount": 12.25,
+   "status": "completed",
+   "medium": "balance",
+   "description": "CHIPOTLE 2741 HADLEY MA"
+  },
+  {
+   "_id": "p_0208",
+   "merchant_id": "m_target",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-10-22",
+   "amount": 41.61,
+   "status": "completed",
+   "medium": "balance",
+   "description": "TARGET 00018275 HADLEY MA"
+  },
+  {
+   "_id": "p_0209",
+   "merchant_id": "m_chipotle",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-10-23",
+   "amount": 13.11,
+   "status": "completed",
+   "medium": "balance",
+   "description": "CHIPOTLE 2741 HADLEY MA"
+  },
+  {
+   "_id": "p_0210",
+   "merchant_id": "m_walmart",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-10-23",
+   "amount": 18.6,
+   "status": "completed",
+   "medium": "balance",
+   "description": "WAL-MART #2183 HADLEY MA"
+  },
+  {
+   "_id": "p_0211",
+   "merchant_id": "m_starbucks",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-10-25",
+   "amount": 6.37,
+   "status": "completed",
+   "medium": "balance",
+   "description": "STARBUCKS STORE 11423 AMHERST MA"
+  },
+  {
+   "_id": "p_0212",
+   "merchant_id": "m_chipotle",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-10-27",
+   "amount": 17.01,
+   "status": "completed",
+   "medium": "balance",
+   "description": "CHIPOTLE 2741 HADLEY MA"
+  },
+  {
+   "_id": "p_0213",
+   "merchant_id": "m_starbucks",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-10-27",
+   "amount": 6.37,
+   "status": "completed",
+   "medium": "balance",
+   "description": "STARBUCKS STORE 11423 AMHERST MA"
+  },
+  {
+   "_id": "p_0214",
+   "merchant_id": "m_chipotle",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-10-28",
+   "amount": 17.01,
+   "status": "completed",
+   "medium": "balance",
+   "description": "CHIPOTLE 2741 HADLEY MA"
+  },
+  {
+   "_id": "p_0215",
+   "merchant_id": "m_starbucks",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-10-28",
+   "amount": 10.91,
+   "status": "completed",
+   "medium": "balance",
+   "description": "STARBUCKS STORE 08812 HADLEY MA"
+  },
+  {
+   "_id": "p_0216",
+   "merchant_id": "m_traderjoes",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-10-28",
+   "amount": 58.36,
+   "status": "completed",
+   "medium": "balance",
+   "description": "TRADER JOE S #509 HADLEY MA"
+  },
+  {
+   "_id": "p_0217",
+   "merchant_id": "m_chipotle",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-10-29",
+   "amount": 11.72,
+   "status": "completed",
+   "medium": "balance",
+   "description": "CHIPOTLE 2741 HADLEY MA"
+  },
+  {
+   "_id": "p_0218",
+   "merchant_id": "m_starbucks",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-10-29",
+   "amount": 5.62,
+   "status": "completed",
+   "medium": "balance",
+   "description": "STARBUCKS STORE 08812 HADLEY MA"
+  },
+  {
+   "_id": "p_0219",
+   "merchant_id": "m_chipotle",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-10-30",
+   "amount": 19.31,
+   "status": "completed",
+   "medium": "balance",
+   "description": "CHIPOTLE 2741 HADLEY MA"
+  },
+  {
+   "_id": "p_0220",
+   "merchant_id": "m_shell",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-10-30",
+   "amount": 40.4,
+   "status": "completed",
+   "medium": "balance",
+   "description": "SHELL OIL 57543921005 AMHERST MA"
+  },
+  {
+   "_id": "p_0221",
+   "merchant_id": "m_starbucks",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-10-30",
+   "amount": 5.62,
+   "status": "completed",
+   "medium": "balance",
+   "description": "STARBUCKS STORE 08812 HADLEY MA"
+  },
+  {
+   "_id": "p_0222",
+   "merchant_id": "m_amazon",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-11-02",
+   "amount": 8.05,
+   "status": "completed",
+   "medium": "balance",
+   "description": "AMAZON MKTPL*FIM7QMTNZ Amzn.com/bill WA"
+  },
+  {
+   "_id": "p_0223",
+   "merchant_id": "m_starbucks",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-11-02",
+   "amount": 3.69,
+   "status": "completed",
+   "medium": "balance",
+   "description": "STARBUCKS STORE 11423 AMHERST MA"
+  },
+  {
+   "_id": "p_0224",
+   "merchant_id": "m_walmart",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-11-02",
+   "amount": 18.44,
+   "status": "completed",
+   "medium": "balance",
+   "description": "WAL-MART #2183 HADLEY MA"
+  },
+  {
+   "_id": "p_0225",
+   "merchant_id": "m_apple",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-11-03",
+   "amount": 2.99,
+   "status": "completed",
+   "medium": "balance",
+   "description": "APPLE.COM/BILL CUPERTINO CA"
+  },
+  {
+   "_id": "p_0226",
+   "merchant_id": "m_chipotle",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-11-03",
+   "amount": 12.25,
+   "status": "completed",
+   "medium": "balance",
+   "description": "CHIPOTLE 2741 HADLEY MA"
+  },
+  {
+   "_id": "p_0227",
+   "merchant_id": "m_starbucks",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-11-03",
+   "amount": 6.9,
+   "status": "completed",
+   "medium": "balance",
+   "description": "STARBUCKS STORE 08812 HADLEY MA"
+  },
+  {
+   "_id": "p_0228",
+   "merchant_id": "m_starbucks",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-11-04",
+   "amount": 4.98,
+   "status": "completed",
+   "medium": "balance",
+   "description": "STARBUCKS STORE 08812 HADLEY MA"
+  },
+  {
+   "_id": "p_0229",
+   "merchant_id": "m_traderjoes",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-11-04",
+   "amount": 33.9,
+   "status": "completed",
+   "medium": "balance",
+   "description": "TRADER JOE S #509 HADLEY MA"
+  },
+  {
+   "_id": "p_0230",
+   "merchant_id": "m_starbucks",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-11-06",
+   "amount": 3.69,
+   "status": "completed",
+   "medium": "balance",
+   "description": "STARBUCKS STORE 08812 HADLEY MA"
+  },
+  {
+   "_id": "p_0231",
+   "merchant_id": "m_nike",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-11-07",
+   "amount": 64.97,
+   "status": "completed",
+   "medium": "balance",
+   "description": "NIKE.COM BEAVERTON OR"
+  },
+  {
+   "_id": "p_0232",
+   "merchant_id": "m_shell",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-11-08",
+   "amount": 27.2,
+   "status": "completed",
+   "medium": "balance",
+   "description": "SHELL OIL 57543921005 AMHERST MA"
+  },
+  {
+   "_id": "p_0233",
+   "merchant_id": "m_amazon",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-11-09",
+   "amount": 14.99,
+   "status": "completed",
+   "medium": "balance",
+   "description": "Amazon Prime*HF8BKJI3S Amzn.com/bill WA"
+  },
+  {
+   "_id": "p_0234",
+   "merchant_id": "m_target",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-11-10",
+   "amount": 70.15,
+   "status": "completed",
+   "medium": "balance",
+   "description": "TARGET 00018275 HADLEY MA"
+  },
+  {
+   "_id": "p_0235",
+   "merchant_id": "m_amazon",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-11-11",
+   "amount": 121.43,
+   "status": "completed",
+   "medium": "balance",
+   "description": "AMAZON MKTPL*Q3DRVSBB5 Amzn.com/bill WA"
+  },
+  {
+   "_id": "p_0236",
+   "merchant_id": "m_traderjoes",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-11-12",
+   "amount": 39.92,
+   "status": "pending",
+   "medium": "balance",
+   "description": "TRADER JOE S #509 HADLEY MA"
+  },
+  {
+   "_id": "p_0237",
+   "merchant_id": "m_walmart",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-11-12",
+   "amount": 48.06,
+   "status": "pending",
+   "medium": "balance",
+   "description": "WAL-MART #2183 HADLEY MA"
+  },
+  {
+   "_id": "p_0238",
+   "merchant_id": "m_starbucks",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-11-13",
+   "amount": 10.38,
+   "status": "pending",
+   "medium": "balance",
+   "description": "STARBUCKS STORE 11423 AMHERST MA"
   }
  ]
 }

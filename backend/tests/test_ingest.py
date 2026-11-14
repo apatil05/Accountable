@@ -13,14 +13,15 @@ def _counts(db) -> dict[str, int]:
     return {name: db[name].count_documents({}) for name in COLLECTIONS}
 
 
-def test_mock_sync_loads_everything(db):
+def test_mock_sync_loads_everything(db, mock_data):
     result = ingest.sync_customer(db, "cust_demo")
-    assert (result["merchants"], result["purchases"], result["brands_created"]) == (10, 60, 0)
+    purchase_count = len(mock_data.purchases)
+    assert (result["merchants"], result["purchases"], result["brands_created"]) == (10, purchase_count, 0)
     assert result["errors"] == []
     assert _counts(db) == {
         "customers": 1,
         "merchants": 10,
-        "purchases": 60,
+        "purchases": purchase_count,
         "brands": len(ingest.curated_brands()),
     }
 
@@ -39,10 +40,11 @@ def test_merchants_resolve_to_curated_brands(db):
     assert {m["match"]["method"] for m in db.merchants.find()} == {"alias"}
 
 
-def test_purchase_documents_use_cents_and_dates(db):
+def test_purchase_documents_use_cents_and_dates(db, mock_data):
     ingest.sync_customer(db, "cust_demo")
-    purchase = db.purchases.find_one({"_id": "p_015"})
-    assert purchase["amount_cents"] == 678
+    expected = mock_data.first("m_starbucks")
+    purchase = db.purchases.find_one({"_id": expected["_id"]})
+    assert purchase["amount_cents"] == round(expected["amount"] * 100)
     assert purchase["brand_id"] == "starbucks"
     assert purchase["purchase_date"].year == 2026
 
