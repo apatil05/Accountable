@@ -29,7 +29,6 @@ export default function Values() {
 
   return (
     <div className="values">
-      <p className="eyebrow">Your values</p>
       <h1>What matters to you?</h1>
       <p className="muted lead">We weigh each merchant's record by what you care about. Nothing here is shared.</p>
 
