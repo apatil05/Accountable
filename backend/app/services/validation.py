@@ -306,7 +306,6 @@ Answer with ONLY a JSON object, no other text, of this form:
 _CATEGORY_HINTS = {
     "labor": "wages, unions, working conditions, safety, supply-chain labor",
     "environment": "emissions, climate targets, pollution, packaging, waste, water",
-    "political": "lobbying, political donations, trade associations, political controversy",
     "animal_welfare": "animal testing, sourcing of animal products, welfare commitments",
     "community": "local businesses and communities, taxes paid, philanthropy",
     "privacy": "customer data collection or sale, breaches, privacy fines and lawsuits",

@@ -106,14 +106,6 @@
     "label": "not_supported"
   },
   {
-    "id": "sbux-14",
-    "merchant": "Starbucks",
-    "category": "political",
-    "claim": "Because of these disclosure policies, Starbucks consistently receives high transparency ratings on the nonpartisan CPA-Zicklin Index of Corporate Political Disclosure and Accountability",
-    "url": "https://www.politicalaccountability.net/cpa-zicklin-index/",
-    "label": "not_supported"
-  },
-  {
     "id": "sbux-15",
     "merchant": "Starbucks",
     "category": "labor",
@@ -174,14 +166,5 @@
     "url": "https://www.packagingdive.com/news/starbucks-esg-report-sustainability-targets-waste-emissions/708403/",
     "label": "supported",
     "note": "Source says FY19 baseline; claim says 2019. Counted as supported."
-  },
-  {
-    "id": "sbux-27",
-    "merchant": "Starbucks",
-    "category": "political",
-    "claim": "The Center for Political Accountability (CPA) rates Starbucks on the CPA-Zicklin Index for voluntary corporate political transparency and board oversight; in recent years, the company has scored between 72.9% and 78.6% out of 100.",
-    "url": "https://www.politicalaccountability.net/wp-content/uploads/2025/11/2025-CPA-Zicklin-Index.pdf",
-    "label": "partial",
-    "note": "Partial: 2025 index PDF shows Starbucks at 72.9; 78.6 is not in the source."
   }
 ]

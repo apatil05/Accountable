@@ -58,8 +58,6 @@ _locks_guard = threading.Lock()
 _AREAS = {
     "labor": "wages, unionization, working conditions, safety, and labor practices in its supply chain",
     "environment": "emissions, climate commitments and progress, pollution, packaging and waste",
-    "political": "lobbying and political donations (report recipients and amounts factually); "
-    "rate transparency and legal/ethical controversy, NOT which side it supports",
     "animal_welfare": "animal testing, sourcing of animal products, and welfare commitments",
     "community": "effect on local businesses and communities, taxes paid, philanthropy",
     "privacy": "customer data collection and sale, breaches, and privacy fines",

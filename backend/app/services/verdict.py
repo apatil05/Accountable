@@ -23,7 +23,6 @@ log = logging.getLogger(__name__)
 CATEGORY_LABELS = {
     "labor": "Labor & workers",
     "environment": "Environment",
-    "political": "Political spending",
     "animal_welfare": "Animal welfare",
     "community": "Local community",
     "privacy": "Data & privacy",

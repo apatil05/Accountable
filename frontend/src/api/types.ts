@@ -3,7 +3,6 @@
 export const CATEGORIES = [
   "labor",
   "environment",
-  "political",
   "animal_welfare",
   "community",
   "privacy",
@@ -13,7 +12,6 @@ export type EthicsCategory = (typeof CATEGORIES)[number];
 export const CATEGORY_LABELS: Record<EthicsCategory, string> = {
   labor: "Labor & workers",
   environment: "Environment",
-  political: "Political spending",
   animal_welfare: "Animal welfare",
   community: "Local community",
   privacy: "Data & privacy",

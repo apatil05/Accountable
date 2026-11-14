@@ -9,7 +9,6 @@ from pydantic import BaseModel, Field, PrivateAttr
 EthicsCategory = Literal[
     "labor",
     "environment",
-    "political",
     "animal_welfare",
     "community",
     "privacy",
