@@ -58,8 +58,8 @@ Four tracks, each with one owner and clear files. Names TBD; claim one in the gr
 ### Person A: Data & Backend (Nessie, storage, deploy)
 **Owns:** `services/nessie.py`, `services/aggregation.py`, `store.py`, `scripts/seed_nessie.py`, `main.py`, deployment.
 1. Get a Nessie API key, run `python -m scripts.seed_nessie` to load our mock merchants + purchases into the sandbox, set `USE_MOCK_DATA=false`. Fix whatever the real responses break.
-2. Merchant name normalization (Nessie names can be messy; map "AMZN Mktp" → "Amazon"), since research quality depends on it.
-3. Pick DB and swap `store.py`: profiles + cached `EthicsReport`s + supply chains. Recommendation: **Postgres with JSONB columns** (covers the "Mongo-style document" need, and Supabase gives us a hosted one in 2 minutes).
+2. Merchant name normalization (Nessie names can be messy; map "AMZN Mktp" → "Amazon"), since research quality depends on it. **Done:** `services/normalize.py` + `data/brands.json`. Every Nessie merchant resolves to a brand; **`merchant_id` in the API is now the brand slug** (e.g. `amazon`, `traderjoes`), so B and D key their data by brand slug. To teach it a new brand, add an entry with aliases to `data/brands.json`.
+3. **DB: MongoDB Atlas (decided).** One free M0 cluster, one shared database `accountable`. Collections: `brands`, `merchants`, `customers`, `purchases`, `profiles`, `sync_runs`, and `ethics_reports` / `supply_chains` (keyed by brand slug) for B and D to cache into. `store.py` now reads/writes `profiles`. Data flows Nessie → `ingest.py` (normalize + upsert) → Atlas; routes read from Atlas.
 4. Spending insights for the dashboard: per-month trend, "top category", spend by score band.
 5. Deploy: backend (Render / Railway / Cloud Run), frontend (Vercel / Netlify), point the GoDaddy domain at it.
 
@@ -103,11 +103,11 @@ Sync every few hours: 5 minutes, each person says what's done, what's blocked, a
 - **Branches:** `a/nessie-live`, `b/gemini-research`, etc. PR into `main`; anyone can review; keep `main` runnable.
 - **Secrets** only in `backend/.env` (gitignored). Never commit keys. Share them in DMs.
 - **Contract changes** = `models.py` + `types.ts` in the same PR.
-- **Mock stays working.** `USE_MOCK_DATA=true` must always run with zero keys, which is our demo fallback.
+- **Mock stays working.** `USE_MOCK_DATA=true` runs with no Nessie or Gemini keys (mock customer is loaded into Atlas on first start). It does need `MONGODB_URI`. Tests use a throwaway `accountable_test_*` database and never touch `accountable`.
 - Ethics output about real companies must show sources and the Verified/Unverified badge. No unsourced claims in the UI.
 
 ## 6. Open questions
-- Postgres or Mongo? (recommendation above: Postgres + JSONB)
+- ~~Postgres or Mongo?~~ Decided: MongoDB Atlas (see Person A, item 3).
 - How do we present political spending without the app itself taking a side? (Suggest: report facts like donation totals by recipient, let the user's own stated stances do the judging.)
 - Which product do we map for big-box stores (Walmart, Amazon) that sell everything? Top purchase category, or let the user pick?
 - Demo persona: whose values do we show live?

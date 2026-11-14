@@ -1,23 +1,22 @@
-"""Tiny persistence layer. JSON file for now so the shell runs with zero setup.
+"""User-profile persistence, backed by the `profiles` collection in MongoDB Atlas.
 
-Owner: Person A. Swap for Postgres (or Mongo; profiles are already JSON docs)
-once the schema settles. Keep the function signatures the same.
+Owner: Person A. One document per customer (`_id` = customer id); the profile's
+nested weights and lists live inside that single document.
 """
 
-import json
+from pymongo.database import Database
 
-from . import config
+from .db import repos
 from .models import UserProfile
 
-_PROFILE_FILE = config.DATA_DIR / "profile.local.json"  # gitignored
+
+def load_profile(db: Database, customer_id: str) -> UserProfile:
+    doc = repos.get_profile(db, customer_id)
+    if not doc:
+        return UserProfile()
+    return UserProfile(**{k: v for k, v in doc.items() if k in UserProfile.model_fields})
 
 
-def load_profile() -> UserProfile:
-    if _PROFILE_FILE.exists():
-        return UserProfile(**json.loads(_PROFILE_FILE.read_text()))
-    return UserProfile()
-
-
-def save_profile(profile: UserProfile) -> UserProfile:
-    _PROFILE_FILE.write_text(profile.model_dump_json(indent=2))
+def save_profile(db: Database, customer_id: str, profile: UserProfile) -> UserProfile:
+    repos.save_profile(db, customer_id, profile.model_dump())
     return profile

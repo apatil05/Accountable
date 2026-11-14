@@ -1,5 +1,5 @@
 {
- "m_starbucks": {
+ "starbucks": {
   "product": "Latte",
   "stages": [
    {
@@ -44,7 +44,7 @@
    }
   ]
  },
- "m_amazon": {
+ "amazon": {
   "product": "Smart speaker",
   "stages": [
    {
@@ -89,7 +89,7 @@
    }
   ]
  },
- "m_walmart": {
+ "walmart": {
   "product": "Cotton T-shirt",
   "stages": [
    {
@@ -134,7 +134,7 @@
    }
   ]
  },
- "m_target": {
+ "target": {
   "product": "Ceramic mug",
   "stages": [
    {
@@ -171,7 +171,7 @@
    }
   ]
  },
- "m_nike": {
+ "nike": {
   "product": "Running shoes",
   "stages": [
    {
@@ -224,7 +224,7 @@
    }
   ]
  },
- "m_apple": {
+ "apple": {
   "product": "Smartphone",
   "stages": [
    {
@@ -269,7 +269,7 @@
    }
   ]
  },
- "m_chipotle": {
+ "chipotle": {
   "product": "Burrito bowl",
   "stages": [
    {
@@ -314,7 +314,7 @@
    }
   ]
  },
- "m_traderjoes": {
+ "traderjoes": {
   "product": "Bananas",
   "stages": [
    {
@@ -351,7 +351,7 @@
    }
   ]
  },
- "m_shell": {
+ "shell": {
   "product": "Gasoline",
   "stages": [
    {
@@ -396,7 +396,7 @@
    }
   ]
  },
- "m_hm": {
+ "hm": {
   "product": "Jeans",
   "stages": [
    {
