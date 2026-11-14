@@ -59,12 +59,23 @@ export interface CategoryScore {
   claims: Claim[];
 }
 
+export type VerdictLabel = "aligns" | "mixed" | "against";
+
+export interface ValuesVerdict {
+  label: VerdictLabel;
+  headline: string;
+  blurb: string;
+  deal_breakers: string[];
+  source: "gemini" | "template";
+}
+
 export interface EthicsReport {
   merchant_id: string;
   merchant_name: string;
   overall_score: number;
   personalized_score: number;
   categories: CategoryScore[];
+  verdict: ValuesVerdict;
   data_source: "mock" | "gemini";
   researched_at: string | null;
 }

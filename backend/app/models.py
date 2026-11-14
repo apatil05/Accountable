@@ -83,12 +83,27 @@ class CategoryScore(BaseModel):
     claims: list[Claim] = []
 
 
+VerdictLabel = Literal["aligns", "mixed", "against"]
+
+
+class ValuesVerdict(BaseModel):
+    """Bottom line for the user. The label is computed by services/scoring.py,
+    never by the LLM; Gemini may only write the blurb that explains it."""
+
+    label: VerdictLabel
+    headline: str  # fixed per label, e.g. "We think Starbucks aligns with your values"
+    blurb: str  # 2-3 sentences
+    deal_breakers: list[str] = []  # weight-5 categories that forced "against"
+    source: Literal["gemini", "template"] = "template"
+
+
 class EthicsReport(BaseModel):
     merchant_id: str
     merchant_name: str
     overall_score: float
     personalized_score: float
     categories: list[CategoryScore]
+    verdict: ValuesVerdict
     data_source: Literal["mock", "gemini"] = "mock"
     researched_at: Optional[str] = None
 
