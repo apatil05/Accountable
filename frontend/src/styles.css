@@ -16,6 +16,8 @@ body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.5 var(-
 a { color: var(--accent); }
 button { font: inherit; cursor: pointer; }
 .muted { color: var(--muted); font-size: 13px; }
+::selection { background: #cfe5da; color: var(--ink); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 6px; }
 
 .topbar {
   display: flex; align-items: center; justify-content: space-between;
@@ -48,30 +50,78 @@ h3 { font: 600 15px var(--sans); margin: 0 0 14px; }
 .grid-2 .card { margin-bottom: 0; }
 .grid-2 + .card { margin-top: 18px; }
 @media (max-width: 800px) { .grid-2 { grid-template-columns: 1fr; } main, .topbar { padding-left: 18px; padding-right: 18px; } }
+@media (max-width: 520px) {
+  .topbar { flex-wrap: wrap; gap: 10px; padding-top: 12px; padding-bottom: 12px; }
+  .topbar nav { width: 100%; }
+  .topbar nav a { padding: 6px 12px; }
+  h1 { font-size: 32px; }
+  .summary-line { font-size: 17px; }
+}
+
+/* Dashboard: summary */
+.summary { margin: 8px 0 28px; }
+.summary h1 { margin-bottom: 10px; }
+.summary-line { margin: 0; max-width: 62ch; font: 400 19px/1.45 var(--serif); color: var(--muted); }
+.summary-line strong { color: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; }
+h2 { font: 500 22px/1.2 var(--serif); margin: 0 0 4px; text-wrap: balance; }
 
 /* Dashboard: map tile */
-.tile-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; flex-wrap: wrap; margin-bottom: 8px; }
-.tile-head h3 { margin-bottom: 2px; }
-.tile-head p { margin: 0; }
-.tile-link { font-size: 14px; font-weight: 600; text-decoration: none; white-space: nowrap; }
-.map-tile { margin-bottom: 32px; }
+.tile-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px 24px; flex-wrap: wrap; margin-bottom: 12px; }
+.tile-head p { margin: 0; max-width: 62ch; }
+.tile-link { font-size: 14px; font-weight: 600; text-decoration: none; white-space: nowrap; text-underline-offset: 3px; }
+.tile-link:hover { text-decoration: underline; }
+.map-tile { margin-bottom: 40px; overflow-x: clip; }
+.map-frame { aspect-ratio: 960 / 500; }
+.map-placeholder { height: 100%; display: grid; place-items: center; background: #f3f6f7; border-radius: 10px; color: var(--muted); font-size: 13px; }
+.map-tile .map-tip { white-space: normal; width: max-content; max-width: min(240px, 70vw); }
+.route-legend {
+  list-style: none; padding: 14px 0 0; margin: 14px 0 0; border-top: 1px solid var(--line);
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(min(300px, 100%), 1fr)); gap: 2px 20px;
+}
+.route-item {
+  display: grid; grid-template-columns: 10px auto 1fr; align-items: baseline; gap: 4px 10px;
+  padding: 6px 8px; margin: 0 -8px; border-radius: 8px; color: inherit; text-decoration: none; font-size: 13px;
+}
+.route-item:hover, .route-item.is-active { background: #f7f5f0; }
+.route-item .route-dot { align-self: center; }
+.route-name { font-weight: 600; }
+.route-path { color: var(--muted); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 /* Dashboard: merchant tiles */
-.section-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
-.section-head h3 { margin: 0; }
+.section-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; margin-bottom: 14px; }
 .merchant-grid { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(240px, 100%), 1fr)); gap: 14px; }
 .merchant-tile {
   display: flex; flex-direction: column; gap: 4px; height: 100%;
   background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 16px 18px;
-  color: inherit; text-decoration: none; transition: border-color .15s, transform .15s, box-shadow .15s;
+  color: inherit; text-decoration: none; transition: border-color .2s cubic-bezier(.16, 1, .3, 1), transform .2s cubic-bezier(.16, 1, .3, 1), box-shadow .2s cubic-bezier(.16, 1, .3, 1);
 }
-.merchant-tile:hover { border-color: var(--ink); transform: translateY(-2px); box-shadow: 0 6px 18px rgba(27, 31, 29, .06); }
-.mt-top { display: flex; flex-direction: column; margin-bottom: 6px; }
-.mt-name { display: flex; align-items: center; gap: 8px; font-size: 16px; }
+.merchant-tile:hover, .merchant-tile:focus-visible { border-color: var(--ink); transform: translateY(-2px); box-shadow: 0 6px 18px rgba(27, 31, 29, .06); }
+.mt-name { display: flex; align-items: center; gap: 8px; font: 600 16px var(--sans); margin: 0; }
 .route-dot { width: 10px; height: 10px; border-radius: 50%; flex: none; }
-.mt-spend { font: 500 24px var(--serif); }
-.mt-facts { display: flex; flex-wrap: wrap; gap: 6px; margin-top: auto; padding-top: 10px; }
-.fact-chip { font-size: 12px; background: #f7f5f0; border: 1px solid var(--line); border-radius: 999px; padding: 2px 10px; }
+.mt-spend { font: 500 24px var(--serif); font-variant-numeric: tabular-nums; margin-top: 8px; }
+.mt-share { height: 4px; background: #efece5; border-radius: 2px; overflow: hidden; margin: 2px 0 4px; }
+.mt-share > div { height: 100%; background: var(--ink); border-radius: 2px; }
+.mt-example { margin: auto 0 0; padding-top: 12px; font-size: 13px; line-height: 1.4; }
+.empty p { margin: 0 0 4px; }
+
+/* Dashboard: closing hand-off to values */
+.values-cta { margin-top: 48px; padding-top: 28px; border-top: 1px solid var(--line); max-width: 62ch; }
+.values-cta p { margin: 4px 0 12px; }
+
+/* Error / retry panel */
+.state-panel { max-width: 52ch; margin: 60px auto; text-align: center; }
+.state-panel h1 { font-size: 28px; margin-bottom: 8px; }
+.state-panel p { color: var(--muted); margin: 0 0 20px; }
+.state-panel details { margin-top: 24px; font-size: 13px; color: var(--muted); text-align: left; }
+.state-panel summary { cursor: pointer; text-align: center; }
+.state-panel code { display: block; margin-top: 8px; padding: 10px 12px; background: #efece5; border-radius: 8px; white-space: pre-wrap; word-break: break-word; }
+
+/* Motion: respect the OS "reduce motion" setting on the dashboard */
+@media (prefers-reduced-motion: reduce) {
+  .map-tile .map-route { animation: none; }
+  .merchant-tile { transition: none; }
+  .merchant-tile:hover, .merchant-tile:focus-visible { transform: none; }
+}
 
 .score { display: inline-grid; place-items: center; min-width: 40px; height: 28px; border-radius: 8px; font-weight: 600; font-size: 14px; }
 .score-lg { min-width: 56px; height: 40px; font: 500 22px var(--serif); border-radius: 10px; }
