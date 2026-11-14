@@ -3,7 +3,7 @@
 google-genai is imported lazily so mock mode runs without the package or a key.
 """
 
-from functools import lru_cache
+import threading
 
 from .. import config
 
@@ -13,8 +13,18 @@ def enabled() -> bool:
     return bool(config.GEMINI_API_KEY) and not config.USE_MOCK_DATA
 
 
-@lru_cache
-def client():
-    from google import genai
+_client = None
+_client_lock = threading.Lock()
 
-    return genai.Client(api_key=config.GEMINI_API_KEY)
+
+def client():
+    """One shared client, created under a lock. (An unlocked lru_cache let concurrent first
+    calls build duplicate Clients; the uncached ones were garbage-collected mid-request, and
+    genai.Client.__del__ closes the HTTP client: "client has been closed".)"""
+    global _client
+    with _client_lock:
+        if _client is None:
+            from google import genai
+
+            _client = genai.Client(api_key=config.GEMINI_API_KEY)
+        return _client

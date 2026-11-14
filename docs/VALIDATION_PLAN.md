@@ -18,7 +18,7 @@ A live run on Starbucks (2026-11-14) produced 18 claims and all 18 came back `va
 | 6. Scoring / verdict skip null categories | Done |
 | 7. Research prompt: 4-6 claims per area, source steering | Done |
 | 8. Caching: don't cache incomplete reports; profile-independent validated cache | Done (in memory; persistence still TODO) |
-| 9. Evaluation set + script | Not started |
+| 9. Evaluation set + script | Done: 22 Starbucks claims, `python -m scripts.eval_validation` |
 | 10. Pre-warm script for demo merchants | Not started |
 | Frontend null score + hide empty claim list | Done, not type-checked (no Node on the dev machine; run `npm run build`) |
 
@@ -103,8 +103,22 @@ Profile-independent results (research, then validated + rescored categories) are
 
 Research itself takes 80-100s per merchant and is the other half of the latency. Pre-warming hides both for the demo.
 
+## Evaluation
+
+`backend/scripts/eval_claims.json`: 22 real Starbucks claims from the research runs above, labeled by reading each source page: 15 `supported`, 3 `partial`, 4 `not_supported`. A `partial` claim counts as correct if it is rejected or validated with its text rewritten. Claims whose pages block every automated reader (about.starbucks.com, fastcompany.com, theindependent.sg, Scribd) were dropped, so the `url_context` path is barely covered.
+
+`python -m scripts.eval_validation` (from `backend/`) runs validation 3 times, prints false positives/negatives and unstable claims, and exits 1 if mean precision is below 90%. Recall is reported, not gated.
+
+First result (2026-11-14): **precision mean 93%, worst 93%; recall mean 88%, worst 81%. PASS.**
+
+- Only false positive: `sbux-02` (NakedPact, an auto-generated privacy rating site whose page also lists data brokers as a concern). Kept as an eval case, not blocked.
+- `sbux-18` is a consistent false negative by design: the page supports it, but the judge says an ADA lawsuit over the non-dairy surcharge fits none of the six categories, so it is dropped.
+- `sbux-04`, `sbux-16`, `sbux-24` flip between runs (judge quotes don't always match multi-fragment HTML exactly; partial rewrites vary).
+
+Building the eval surfaced a race in `gemini.client()`: an unlocked `lru_cache` let concurrent first calls build duplicate clients, and the garbage-collected duplicates closed the HTTP connection mid-request ("client has been closed"). Fixed with a lock; this also affected `warm_cache` on a cold server.
+
 ## Next
 
-1. Evaluation set (step 9): labeled claims + planted fakes (real URL + false claim, wrong merchant, dead URL, blocked domain). Measure precision overall and on the `url_context` path.
-2. Pre-warm script (step 10) for the demo merchants, with Gemini rate limits in mind (4 merchants at a time x 8 judge calls).
-3. Persist the research and validated caches (shared with Person A's DB work).
+1. Pre-warm script (step 10) for the demo merchants, with Gemini rate limits in mind (4 merchants at a time x 8 judge calls).
+2. Persist the research and validated caches (shared with Person A's DB work).
+3. Grow the eval with Amazon and Shell claims, and label the blocked-site claims by hand so the `url_context` path is measured.

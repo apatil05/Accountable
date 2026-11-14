@@ -1,0 +1,187 @@
+[
+  {
+    "id": "sbux-01",
+    "merchant": "Starbucks",
+    "category": "privacy",
+    "claim": "Pollock Cohen LLP reports that a class-action lawsuit was filed against Starbucks in 2023, alleging the company violated New York City's Biometric Identifier Information Law. According to the firm, the suit claims Starbucks failed to properly notify customers that two Manhattan stores using Amazon's 'Just Walk Out' technology were collecting biometric data and palm images.",
+    "url": "https://www.pollockcohen.com/media/news-releases/2023-05-04-class-action-lawsuit-filed-against-starbucks-for-unlawful-biometric-data-collection",
+    "label": "supported"
+  },
+  {
+    "id": "sbux-02",
+    "merchant": "Starbucks",
+    "category": "privacy",
+    "claim": "According to NakedPact, Starbucks allows users to request account deletion under privacy regulations like the CCPA and GDPR, refrains from selling personal data to commercial data brokers, and prohibits using private communications for AI model training.",
+    "url": "https://nakedpact.com/privacy/starbucks-coffee-company",
+    "label": "not_supported",
+    "note": "Page lists data brokers as a yellow flag; contradicts 'refrains from selling to data brokers'. Auto-generated rating site."
+  },
+  {
+    "id": "sbux-03",
+    "merchant": "Starbucks",
+    "category": "privacy",
+    "claim": "Shieldworkz reports that in September 2022, Starbucks Singapore confirmed a third-party vendor breach resulting in the theft of personal data—specifically names, phone numbers, email addresses, and dates of birth—of approximately 219,000 customers, which was subsequently advertised for sale on a cybercrime forum.",
+    "url": "https://shieldworkz.com/blogs/inside-the-starbucks-breach-trilogy",
+    "label": "supported"
+  },
+  {
+    "id": "sbux-04",
+    "merchant": "Starbucks",
+    "category": "animal_welfare",
+    "claim": "According to World Animal Protection, Starbucks recently eliminated the extra charge for non-dairy milk options in response to demand for accessible, ethical, and sustainable choices.",
+    "url": "https://www.worldanimalprotection.us/latest/blogs/plant-based-milk-surcharge/",
+    "label": "supported"
+  },
+  {
+    "id": "sbux-05",
+    "merchant": "Starbucks",
+    "category": "environment",
+    "claim": "A CBS News investigation found that 32 of 36 tracked cups placed into Starbucks recycling bins were traced to landfills, incinerators, or waste transfer stations.",
+    "url": "https://www.cbsnews.com/news/starbucks-plastic-cups-recycling-trash/",
+    "label": "supported"
+  },
+  {
+    "id": "sbux-06",
+    "merchant": "Starbucks",
+    "category": "labor",
+    "claim": "According to a legal brief cited by the American Federation of School Administrators, administrative law judges have found Starbucks committed more than 400 violations of federal labor law, including firing 59 union leaders and supporters.",
+    "url": "https://www.theschoolleader.org/news/supreme-court-starbucks-works-weaken-labor-rights",
+    "label": "supported"
+  },
+  {
+    "id": "sbux-07",
+    "merchant": "Starbucks",
+    "category": "privacy",
+    "claim": "eSecurity Planet reports that breach notification filings revealed attackers compromised 889 Starbucks Partner Central accounts through phishing, exposing sensitive personal and financial information.",
+    "url": "https://www.esecurityplanet.com/threats/starbucks-hr-portal-breach-exposes-employee-information/",
+    "label": "supported"
+  },
+  {
+    "id": "sbux-08",
+    "merchant": "Starbucks",
+    "category": "animal_welfare",
+    "claim": "According to New Roots Institute, Starbucks is requiring its suppliers to move away from gestation crates for pregnant pigs and toward group housing by 2024.",
+    "url": "https://www.newrootsinstitute.org/articles/starbucks-relationship-with-factory-farming",
+    "label": "supported",
+    "note": "Accurate to this source, but the source is dated."
+  },
+  {
+    "id": "sbux-09",
+    "merchant": "Starbucks",
+    "category": "labor",
+    "claim": "An NLRB administrative law judge ruled that Starbucks unlawfully spied on employees and discharged two workers in retaliation for their unionizing efforts.",
+    "url": "https://www.nlrb.gov/news-outreach/nlrb-administrative-law-judge-finds-starbucks-illegally-retaliated-against-two",
+    "label": "supported"
+  },
+  {
+    "id": "sbux-10",
+    "merchant": "Starbucks",
+    "category": "labor",
+    "claim": "An investigation documented children under 13 working 40-hour weeks in gruelling conditions on coffee farms in Guatemala that supply Starbucks.",
+    "url": "https://www.theguardian.com/business/2020/mar/01/children-work-for-pittance-to-pick-coffee-beans-used-by-starbucks-and-nespresso",
+    "label": "supported"
+  },
+  {
+    "id": "sbux-11",
+    "merchant": "Starbucks",
+    "category": "privacy",
+    "claim": "The Korea Times reported that South Korea's communications regulator fined Starbucks Coffee Korea Co. after personal information of 537 customers was disclosed due to a technical glitch in an upgraded version of its mobile app.",
+    "url": "https://www.koreatimes.co.kr/business/companies/20180711/starbucks-coffee-korea-fined-for-personal-data-breaches",
+    "label": "supported"
+  },
+  {
+    "id": "sbux-12",
+    "merchant": "Starbucks",
+    "category": "community",
+    "claim": "In the year to October 2023, Starbucks' UK business paid £7.2 million in UK corporation tax on a gross profit of £149 million, drawing criticism from tax transparency campaigners over high royalty and licensing payments to parent entities.",
+    "url": "https://www.theguardian.com/business/2024/apr/05/starbucks-paid-7-point-2m-in-uk-corporation-tax-despite-gross-profit-of-149m",
+    "label": "supported"
+  },
+  {
+    "id": "sbux-13",
+    "merchant": "Starbucks",
+    "category": "privacy",
+    "claim": "The Starbucks Rewards app collects precise geolocation, in-store browsing, mobile purchase frequency, and payment configurations.",
+    "url": "https://www.legal500.com/intelligence/united-states/privacy/ftc-staff-report-shines-a-light-on-the-treacherous-road-ahead-for-mobile-payments",
+    "label": "not_supported"
+  },
+  {
+    "id": "sbux-14",
+    "merchant": "Starbucks",
+    "category": "political",
+    "claim": "Because of these disclosure policies, Starbucks consistently receives high transparency ratings on the nonpartisan CPA-Zicklin Index of Corporate Political Disclosure and Accountability",
+    "url": "https://www.politicalaccountability.net/cpa-zicklin-index/",
+    "label": "not_supported"
+  },
+  {
+    "id": "sbux-15",
+    "merchant": "Starbucks",
+    "category": "labor",
+    "claim": "The company developed its Coffee and Farmer Equity (C.A.F.E.) Practices with Conservation International.",
+    "url": "https://nclnet.org/national-consumers-league-sues-starbucks-alleging-coffee-giant-deceives-customers-with-claims-of-100-ethical-coffee-tea/",
+    "label": "partial",
+    "note": "Partial: page says Starbucks developed C.A.F.E. Practices but not 'with Conservation International'."
+  },
+  {
+    "id": "sbux-16",
+    "merchant": "Starbucks",
+    "category": "community",
+    "claim": "Although the EU General Court ultimately annulled that decision in 2019 (finding the Commission had not legally proven selective advantage), public investigations revealed that Starbucks used royalty and intellectual-property transfer payments to report little to no taxable income in several European jurisdictions (such as the UK) despite high revenues.",
+    "url": "https://www.theguardian.com/business/2015/oct/21/starbucks-and-fiat-tax-deals-with-eu-nations-ruled-unlawful",
+    "label": "partial",
+    "note": "Partial: page (2015) supports the royalty/intra-group tax structure, not the 2019 annulment."
+  },
+  {
+    "id": "sbux-17",
+    "merchant": "Starbucks",
+    "category": "labor",
+    "claim": "Administrative law judges and the NLRB have issued dozens of formal decisions finding Starbucks liable for hundreds of federal labor law violations.",
+    "url": "https://nlrbresearch.com/circuit/CL-11435058.html",
+    "label": "not_supported",
+    "note": "Single case opinion; does not support 'dozens of decisions'."
+  },
+  {
+    "id": "sbux-18",
+    "merchant": "Starbucks",
+    "category": "animal_welfare",
+    "claim": "A $5 million class-action lawsuit was filed against Starbucks alleging that upcharges for plant-based milk violate the Americans with Disabilities Act.",
+    "url": "https://www.theguardian.com/business/2024/mar/21/starbucks-non-dairy-lactose-intolerant-discrimination-lawsuit",
+    "label": "supported",
+    "note": "Page states the m ADA class action plainly."
+  },
+  {
+    "id": "sbux-23",
+    "merchant": "Starbucks",
+    "category": "labor",
+    "claim": "Starbucks Workers United reports that National Labor Relations Board administrative law judges have determined that Starbucks committed more than 400 violations of labor law.",
+    "url": "https://sbworkersunited.org/union-baristas-are-on-strike-over-starbucks-record-breaking-labor-law-violations/",
+    "label": "supported"
+  },
+  {
+    "id": "sbux-24",
+    "merchant": "Starbucks",
+    "category": "labor",
+    "claim": "A lawsuit alleges that in Brazil, labor prosecutors cited Starbucks suppliers—including the Cooxupé cooperative and the family farm of its president—for illegal wage deductions and subjecting workers to conditions analogous to slavery.",
+    "url": "https://www.courthousenews.com/wp-content/uploads/2024/01/starbucks-labor-rights-violations-suit.pdf",
+    "label": "supported",
+    "note": "Complaint PDF: prosecutor complaint vs Cooxupe 'analogous to slavery'; president's family farm cited for 'theft of 30% of its workers' wages'."
+  },
+  {
+    "id": "sbux-25",
+    "merchant": "Starbucks",
+    "category": "environment",
+    "claim": "According to FY2023 sustainability data, Starbucks recorded an 8% increase in greenhouse gas emissions and a 13% increase in operational waste sent to landfills compared to 2019.",
+    "url": "https://www.packagingdive.com/news/starbucks-esg-report-sustainability-targets-waste-emissions/708403/",
+    "label": "supported",
+    "note": "Source says FY19 baseline; claim says 2019. Counted as supported."
+  },
+  {
+    "id": "sbux-27",
+    "merchant": "Starbucks",
+    "category": "political",
+    "claim": "The Center for Political Accountability (CPA) rates Starbucks on the CPA-Zicklin Index for voluntary corporate political transparency and board oversight; in recent years, the company has scored between 72.9% and 78.6% out of 100.",
+    "url": "https://www.politicalaccountability.net/wp-content/uploads/2025/11/2025-CPA-Zicklin-Index.pdf",
+    "label": "partial",
+    "note": "Partial: 2025 index PDF shows Starbucks at 72.9; 78.6 is not in the source."
+  }
+]
