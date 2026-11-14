@@ -292,7 +292,7 @@ For each numbered claim, decide from the SOURCE TEXT ONLY (not your own knowledg
   either way (e.g. how many countries it sources from, a description of a program with no
   outcome or commitment). A mixed fact gets the direction of its main point.
 - severity: how much the fact should matter to an ethics-minded shopper:
-  "major": a court ruling, regulator action or fine, a systemic or repeated pattern, or a large
+  "major": a court ruling, regulator action or fine, a systemic or repeated pattern, child labor, forced labor or other serious human rights abuse, or a large
     measured impact (positive or negative);
   "notable": a documented incident, a lawsuit filed, or concrete measured progress or regression;
   "minor": a pledge, target, or announcement, a small program, or an isolated or unproven allegation.

@@ -136,7 +136,7 @@ A Gemini call is given the merchant, the page, and the claims that cite it. It s
 - **event year:** when the event happened (used only in step 4, never shown).
 - **category:** which of the five categories the claim is really evidence about, or `none` if it says nothing about the merchant's conduct.
 - **direction:** `positive` or `negative` for the merchant's conduct, or `neutral` for context with no ethical weight either way (used in step 4, never shown).
-- **severity:** `major` (court ruling, regulator action or fine, systemic pattern, large measured impact), `notable` (documented incident, lawsuit filed, measured progress or regression) or `minor` (pledge, target, small program, isolated or unproven allegation). Used in step 4, never shown.
+- **severity:** `major` (court ruling, regulator action or fine, systemic pattern, child or forced labor and other serious human rights abuse, large measured impact), `notable` (documented incident, lawsuit filed, measured progress or regression) or `minor` (pledge, target, small program, isolated or unproven allegation). Used in step 4, never shown.
 
 Each call has a 30 second cap, and at most 8 run at once across the server.
 
