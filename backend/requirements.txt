@@ -3,5 +3,8 @@ uvicorn[standard]>=0.30
 httpx>=0.27
 pydantic>=2.7
 python-dotenv>=1.0
+pymongo>=4.10
+certifi>=2024.0
+rapidfuzz>=3.0
 # Added later by the research-engine owner:
 # google-genai>=1.0

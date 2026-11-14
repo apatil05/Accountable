@@ -1,5 +1,5 @@
 {
- "m_starbucks": {
+ "starbucks": {
   "categories": [
    {
     "category": "labor",
@@ -87,7 +87,7 @@
    }
   ]
  },
- "m_amazon": {
+ "amazon": {
   "categories": [
    {
     "category": "labor",
@@ -175,7 +175,7 @@
    }
   ]
  },
- "m_walmart": {
+ "walmart": {
   "categories": [
    {
     "category": "labor",
@@ -263,7 +263,7 @@
    }
   ]
  },
- "m_target": {
+ "target": {
   "categories": [
    {
     "category": "labor",
@@ -351,7 +351,7 @@
    }
   ]
  },
- "m_nike": {
+ "nike": {
   "categories": [
    {
     "category": "labor",
@@ -439,7 +439,7 @@
    }
   ]
  },
- "m_apple": {
+ "apple": {
   "categories": [
    {
     "category": "labor",
@@ -527,7 +527,7 @@
    }
   ]
  },
- "m_chipotle": {
+ "chipotle": {
   "categories": [
    {
     "category": "labor",
@@ -615,7 +615,7 @@
    }
   ]
  },
- "m_traderjoes": {
+ "traderjoes": {
   "categories": [
    {
     "category": "labor",
@@ -703,7 +703,7 @@
    }
   ]
  },
- "m_shell": {
+ "shell": {
   "categories": [
    {
     "category": "labor",
@@ -791,7 +791,7 @@
    }
   ]
  },
- "m_hm": {
+ "hm": {
   "categories": [
    {
     "category": "labor",
