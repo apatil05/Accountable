@@ -39,6 +39,24 @@ FRONTEND_ORIGINS = tuple(
     o.strip() for o in os.getenv("FRONTEND_ORIGIN", "http://localhost:5173").split(",") if o.strip()
 )
 
+# Anything other than an explicit development value counts as production (strict CORS, no
+# /docs), so a typo like "prod" fails safe.
+APP_ENV = os.getenv("APP_ENV", "development").strip().lower()
+DEVELOPMENT_ENVS = frozenset({"development", "dev", "local", "test"})
+
+# Shared secret for POST /api/sync (sent as the X-Admin-Token header). Empty = HTTP sync disabled;
+# `python -m scripts.sync` always works because it runs with direct database access.
+ADMIN_TOKEN = os.getenv("ADMIN_TOKEN", "")
+MIN_ADMIN_TOKEN_LENGTH = 16
+
+# Lets API callers pick a customer with ?customer_id=. Off by default so a public deploy
+# only ever shows the configured customer.
+ALLOW_CUSTOMER_OVERRIDE = _bool("ALLOW_CUSTOMER_OVERRIDE", False)
+
+
+def is_production() -> bool:
+    return APP_ENV not in DEVELOPMENT_ENVS
+
 
 def validate() -> None:
     """Fail fast at startup with one clear message instead of a stack trace later."""
@@ -50,5 +68,10 @@ def validate() -> None:
             problems.append("NESSIE_API_KEY is not set (required when USE_MOCK_DATA=false)")
         if not NESSIE_CUSTOMER_ID:
             problems.append("NESSIE_CUSTOMER_ID is not set (required when USE_MOCK_DATA=false)")
+    if ADMIN_TOKEN and len(ADMIN_TOKEN) < MIN_ADMIN_TOKEN_LENGTH:
+        problems.append(
+            f"ADMIN_TOKEN must be at least {MIN_ADMIN_TOKEN_LENGTH} characters "
+            "(generate one: python -c 'import secrets; print(secrets.token_urlsafe(32))')"
+        )
     if problems:
         raise ConfigError("; ".join(problems))

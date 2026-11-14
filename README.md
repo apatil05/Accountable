@@ -30,7 +30,11 @@ cp .env.example .env        # then set MONGODB_URI in .env
 uvicorn app.main:app --reload --port 8000
 ```
 On first start the backend loads the mock customer into Atlas. Re-sync any time with
-`python -m scripts.sync` or `POST /api/sync`.
+`python -m scripts.sync`. Over HTTP, `POST /api/sync` needs the `X-Admin-Token` header matching
+`ADMIN_TOKEN` (and is limited to one run per 30 seconds); it's disabled when `ADMIN_TOKEN` is empty.
+
+The API only serves the configured customer. Set `ALLOW_CUSTOMER_OVERRIDE=true` locally if you
+need `?customer_id=` or `/api/customers`; keep it `false` on any public deploy.
 API docs at http://localhost:8000/docs
 
 **Tests** (from `backend/`): `pytest`. Tests that need a database run against a throwaway
