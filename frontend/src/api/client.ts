@@ -2,8 +2,10 @@ import type {
   Alternative,
   CompanyEmissions,
   EthicsReport,
+  NearbyPlace,
   LaborSummary,
   SpendingSummary,
+  SupplierReport,
   SupplyChain,
   UserProfile,
 } from "./types";
@@ -26,6 +28,9 @@ export const api = {
   supplyChain: (id: string) => req<SupplyChain>(`/merchants/${id}/supply-chain`),
   alternatives: (id: string) => req<Alternative[]>(`/merchants/${id}/alternatives`),
   allSupplyChains: () => req<SupplyChain[]>("/supply-chains"),
+  suppliers: (id: string) => req<SupplierReport>(`/merchants/${id}/suppliers`),
+  allSuppliers: () => req<SupplierReport[]>("/suppliers"),
+  nearbyPlace: (lat: number, lng: number) => req<NearbyPlace | null>(`/places/nearby?lat=${lat}&lng=${lng}`),
   emissions: (id: string) => req<CompanyEmissions[]>(`/merchants/${id}/emissions`),
   labor: (id: string) => req<LaborSummary>(`/merchants/${id}/labor`),
 };

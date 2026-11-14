@@ -4,7 +4,7 @@
 // when saving, so the backend contract is unchanged. Political topics are not offered.
 import { useEffect, useMemo, useState } from "react";
 import { api } from "../api/client";
-import { CATEGORIES, CATEGORY_LABELS, type SpendingSummary, type SupplyChain, type UserProfile } from "../api/types";
+import { CATEGORIES, CATEGORY_LABELS, type SpendingSummary, type UserProfile } from "../api/types";
 
 const LEVELS = ["Not at all", "A little", "Somewhat", "Matters", "A lot", "Most of all"];
 const TOPIC_HINTS: Record<string, string> = {
@@ -24,7 +24,6 @@ const shortDate = (iso: string) => {
 export default function Values() {
   const [p, setP] = useState<UserProfile | null>(null);
   const [summary, setSummary] = useState<SpendingSummary | null>(null);
-  const [chains, setChains] = useState<SupplyChain[]>([]);
   const [mock, setMock] = useState<boolean | null>(null);
   const [status, setStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
   const [err, setErr] = useState<string | null>(null);
@@ -32,7 +31,6 @@ export default function Values() {
   useEffect(() => {
     api.profile().then(setP).catch((e) => setErr(String(e)));
     api.summary().then(setSummary).catch(() => setSummary(null));
-    api.allSupplyChains().then(setChains).catch(() => setChains([]));
     api.health().then((h) => setMock(h.mock_data)).catch(() => setMock(null));
   }, []);
 
@@ -47,7 +45,6 @@ export default function Values() {
     const topCategory = [...byCat.entries()].sort((a, b) => b[1] - a[1])[0]?.[0];
     return { purchases, latest, frequent, topCategory };
   }, [summary]);
-  const home = chains[0]?.stages[chains[0].stages.length - 1]?.place;
 
   if (err) {
     return (
@@ -81,7 +78,7 @@ export default function Values() {
             <span className="vp-avatar" aria-hidden="true">{initials}</span>
             <div>
               <h1 id="profile-title">{p.name}</h1>
-              <p>{home ? `Shopping around ${home}` : "Your profile"}</p>
+              <p>Your profile</p>
             </div>
           </div>
 

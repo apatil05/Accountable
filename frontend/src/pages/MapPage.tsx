@@ -1,142 +1,225 @@
-// "Where your money goes": every supply route on a zoomable night globe. Owner: Person C (rebuilt from
-// Person D's original page with the owner's heads-up; D's flat WorldMap stays on the merchant page).
-// Point at a company to preview its route; click it to open its page. Click a stop on the globe for details.
+// "Where your money goes": every company's real suppliers on a zoomable globe. Owner: Person C
+// (rebuilt from Person D's original page with the owner's heads-up). All data is real: US import records
+// (ImportYeti) -> each supplier and the company's US importer, geocoded, with a Wikipedia article per place.
+//  - point at a company to light its supplier routes; click it to open its page
+//  - "Suppliers" lists a company's suppliers; click one (or a diamond on the globe) to learn about where it is
 import { useEffect, useMemo, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { api } from "../api/client";
-import type { SpendingSummary, SupplyChain, SupplyChainStage } from "../api/types";
-import Globe, { type StopRef } from "../components/Globe";
-import StopDetail from "../components/StopDetail";
+import type { SpendingSummary, SupplierReport } from "../api/types";
+import Globe from "../components/Globe";
+import SupplierCard, { ImporterCard } from "../components/SupplierCard";
+import { possessive, supplierCountry, reportPoints, sphericalCenter, supplierPointId, toGlobe } from "../lib/suppliers";
 
 const usd = (n: number) => n.toLocaleString("en-US", { style: "currency", currency: "USD" });
-
-// Center of a route on the sphere, so the whole route turns onto the visible face.
-function routeCenter(c: SupplyChain): [number, number] {
-  let x = 0, y = 0, z = 0;
-  for (const s of c.stages) {
-    const l = (s.lng * Math.PI) / 180, p = (s.lat * Math.PI) / 180;
-    x += Math.cos(p) * Math.cos(l);
-    y += Math.cos(p) * Math.sin(l);
-    z += Math.sin(p);
-  }
-  return [(Math.atan2(y, x) * 180) / Math.PI, (Math.atan2(z, Math.hypot(x, y)) * 180) / Math.PI];
-}
+const num = (n: number) => n.toLocaleString("en-US");
 
 export default function MapPage() {
-  const navigate = useNavigate();
-  const [chains, setChains] = useState<SupplyChain[] | null>(null);
+  const [reports, setReports] = useState<SupplierReport[] | null>(null);
+  const [failed, setFailed] = useState<string | null>(null);
   const [summary, setSummary] = useState<SpendingSummary | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
-  const [stop, setStop] = useState<StopRef | null>(null);
+  const [pinned, setPinned] = useState<string | null>(null);
+  const [selected, setSelected] = useState<string | null>(null); // point id: "company:index" or "company:importer"
   const [zoom, setZoom] = useState(1);
   const [query, setQuery] = useState("");
   const coarse = typeof window !== "undefined" && window.matchMedia("(pointer: coarse)").matches;
 
   useEffect(() => {
-    api.allSupplyChains().then(setChains).catch(() => setChains([]));
+    api
+      .allSuppliers()
+      .then(setReports)
+      .catch((e) => {
+        setReports([]);
+        setFailed(
+          String(e).includes("503")
+            ? "Supplier data isn't set up on this server yet (it needs an ImportYeti key)."
+            : "We couldn't load supplier data right now.",
+        );
+      });
     api.summary().then(setSummary).catch(() => setSummary(null));
   }, []);
 
   const names = useMemo(() => Object.fromEntries((summary?.merchants ?? []).map((m) => [m.merchant_id, m.name])), [summary]);
-  const spend = useMemo(() => Object.fromEntries((summary?.merchants ?? []).map((m) => [m.merchant_id, m.total_spent])), [summary]);
-  const list = useMemo(() => {
+  const byId = useMemo(() => new Map((reports ?? []).map((r) => [r.merchant_id, r])), [reports]);
+  const globe = useMemo(() => toGlobe(reports ?? [], names), [reports, names]);
+  const companies = useMemo(() => {
     const q = query.trim().toLowerCase();
-    return [...(chains ?? [])]
-      .sort((a, b) => (spend[b.merchant_id] ?? 0) - (spend[a.merchant_id] ?? 0))
-      .filter((c) => !q || `${names[c.merchant_id] ?? ""} ${c.product} ${c.stages.map((s) => s.place).join(" ")}`.toLowerCase().includes(q));
-  }, [chains, names, spend, query]);
+    return (summary?.merchants ?? []).filter((m) => {
+      if (!q) return true;
+      const r = byId.get(m.merchant_id);
+      const hay = [m.name, ...(r?.suppliers ?? []).flatMap((s) => [s.name, s.place?.title ?? "", supplierCountry(s)])];
+      return hay.join(" ").toLowerCase().includes(q);
+    });
+  }, [summary, byId, query]);
 
-  const byId = useMemo(() => new Map((chains ?? []).map((c) => [c.merchant_id, c])), [chains]);
-  const stopChain = stop ? byId.get(stop.merchantId) : undefined;
-  const stopData: SupplyChainStage | undefined = stop ? stopChain?.stages[stop.index] : undefined;
-  const lit = stop?.merchantId ?? preview;
-  const litChain = lit ? byId.get(lit) : undefined;
-  const focus: [number, number] | null = stopData ? [stopData.lng, stopData.lat] : litChain ? routeCenter(litChain) : null;
+  const [selCompany, selPart] = selected ? selected.split(":") : [null, ""];
+  const selReport = selCompany ? byId.get(selCompany) : undefined;
+  const supplier = selPart !== "importer" ? selReport?.suppliers[Number(selPart)] : undefined;
+  const importer = selPart === "importer" ? selReport?.importer ?? undefined : undefined;
+  const lit = pinned ?? preview;
+  const pinnedReport = pinned ? byId.get(pinned) : undefined;
+  const focus: [number, number] | null = supplier
+    ? [supplier.lng, supplier.lat]
+    : importer?.lat != null && importer.lng != null
+      ? [importer.lng, importer.lat]
+      : lit
+      ? sphericalCenter(reportPoints(byId.get(lit)))
+      : null;
 
-  const selectStop = (ref: StopRef) => {
-    setStop(ref);
-    setZoom(3);
+  const pin = (id: string) => {
+    setPinned(id);
+    setSelected(null);
+    setZoom(1.2);
   };
-  const reset = () => {
-    setStop(null);
-    setPreview(null);
+  const unpin = () => {
+    setPinned(null);
+    setSelected(null);
     setZoom(1);
   };
+  const pickSupplier = (id: string) => {
+    setPinned(id.split(":")[0]);
+    setSelected(id);
+    setZoom(3);
+  };
+  const onPointClick = (id: string) => pickSupplier(id); // suppliers and importers both open a card
 
   return (
     <div className="mapx">
-      <aside className="mapx-panel" aria-label="Supply routes">
-        <div className="mapx-head">
-          <h1>Supply routes</h1>
-          <p>One example product per company you pay, traced from where it starts to you. Not yet verified. Point at a company to see its route; click to open it.</p>
-        </div>
-        <label className="mapx-search">
-          <span className="visually-hidden">Filter routes</span>
-          <input type="search" placeholder="Filter by company, product or place" value={query} onChange={(e) => setQuery(e.target.value)} />
-        </label>
-        {chains === null ? (
-          <p className="mapx-note" role="status">Loading routes…</p>
-        ) : list.length === 0 ? (
-          <p className="mapx-note">{chains.length ? "No routes match that filter." : "No routes yet."}</p>
+      <aside className="mapx-panel" aria-label="Companies and their suppliers">
+        {!pinned ? (
+          <>
+            <div className="mapx-head">
+              <h1>Where it comes from</h1>
+              <p>
+                Real suppliers behind the companies you pay, from US import records. Point at a company to see its
+                supplier routes, click it to open its page, or list its suppliers.
+              </p>
+            </div>
+            <label className="mapx-search">
+              <span className="visually-hidden">Filter companies</span>
+              <input type="search" placeholder="Filter by company, supplier, place or country" value={query} onChange={(e) => setQuery(e.target.value)} />
+            </label>
+            {reports === null || !summary ? (
+              <p className="mapx-note" role="status">Loading suppliers…</p>
+            ) : failed ? (
+              <p className="mapx-note" role="alert">{failed}</p>
+            ) : companies.length === 0 ? (
+              <p className="mapx-note">No companies match that filter.</p>
+            ) : (
+              <ul className="mapx-list" onMouseLeave={() => setPreview(null)}>
+                {companies.map((m) => {
+                  const r = byId.get(m.merchant_id);
+                  const n = r?.suppliers.length ?? 0;
+                  const countries = [...new Set((r?.suppliers ?? []).map((s) => supplierCountry(s)).filter(Boolean))];
+                  return (
+                    <li key={m.merchant_id} className="mapx-row">
+                      <Link
+                        to={`/merchant/${m.merchant_id}`}
+                        className={`mapx-item ${lit === m.merchant_id ? "is-active" : ""}`}
+                        onMouseEnter={() => setPreview(m.merchant_id)}
+                        onFocus={() => setPreview(m.merchant_id)}
+                        onClick={(e) => {
+                          // Touch has no hover: the first tap previews the routes, the second opens the page.
+                          if (coarse && lit !== m.merchant_id) {
+                            e.preventDefault();
+                            setPreview(m.merchant_id);
+                          }
+                        }}
+                      >
+                        <span className="mapx-item-top">
+                          <strong>{m.name}</strong>
+                          <span className="num">{usd(m.total_spent)}</span>
+                        </span>
+                        <span className="mapx-item-sub">
+                          {n ? `${n} supplier${n === 1 ? "" : "s"} · ${countries.join(", ")}` : "No US import records found"}
+                        </span>
+                        {coarse && lit === m.merchant_id && <span className="cr-open">Tap again to open</span>}
+                      </Link>
+                      {n > 0 && (
+                        <button type="button" className="mapx-sup-btn" onClick={() => pin(m.merchant_id)} aria-label={`List ${possessive(m.name)} suppliers`}>
+                          <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2l5 6-5 6-5-6z" /></svg>
+                          Suppliers
+                        </button>
+                      )}
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+          </>
         ) : (
-          <ul className="mapx-list" onMouseLeave={() => setPreview(null)}>
-            {list.map((c) => (
-              <li key={c.merchant_id}>
-                <Link
-                  to={`/merchant/${c.merchant_id}`}
-                  className={`mapx-item ${lit === c.merchant_id ? "is-active" : ""}`}
-                  onMouseEnter={() => { setStop(null); setPreview(c.merchant_id); }}
-                  onFocus={() => { setStop(null); setPreview(c.merchant_id); }}
-                  onClick={(e) => {
-                    // Touch has no hover: the first tap previews the route, the second opens the page.
-                    if (coarse && lit !== c.merchant_id) {
-                      e.preventDefault();
-                      setStop(null);
-                      setPreview(c.merchant_id);
-                    }
-                  }}
-                >
-                  <span className="mapx-item-top">
-                    <strong>{names[c.merchant_id] ?? c.merchant_id}</strong>
-                    {spend[c.merchant_id] != null && <span className="num">{usd(spend[c.merchant_id])}</span>}
-                  </span>
-                  <span className="mapx-item-sub">{c.product} · {c.stages[0].place} · {c.stages.length - 1} stops</span>
-                  {coarse && lit === c.merchant_id && <span className="cr-open">Tap again to open</span>}
-                </Link>
-              </li>
-            ))}
-          </ul>
+          <>
+            <button type="button" className="mapx-back" onClick={unpin}>All companies</button>
+            <div className="mapx-head">
+              <h1>{possessive(names[pinned] ?? pinned)} suppliers</h1>
+              <p>
+                Top suppliers in US import records
+                {pinnedReport?.company_name && <> for "{pinnedReport.company_name}"</>}. Locations are approximate, from each
+                supplier's listed address. Click one to learn about where it is.
+              </p>
+            </div>
+            {pinnedReport?.suppliers.length ? (
+              <ul className="mapx-list">
+                {pinnedReport.suppliers.map((s, i) => {
+                  const id = supplierPointId(pinned, i);
+                  return (
+                    <li key={id}>
+                      <button type="button" className={`mapx-item mapx-supplier ${selected === id ? "is-active" : ""}`} onClick={() => pickSupplier(id)} aria-pressed={selected === id}>
+                        <span className="mapx-item-top">
+                          <strong>{s.name}</strong>
+                          {s.country && <span className="tag">{supplierCountry(s)}</span>}
+                        </span>
+                        <span className="mapx-item-sub">
+                          {s.place ? s.place.title : "Location from listed address"}
+                          {s.shipments != null && ` · ${num(s.shipments)} shipments`}
+                        </span>
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
+            ) : (
+              <p className="mapx-note">No suppliers found in US import records for {names[pinned] ?? "this company"}.</p>
+            )}
+            {pinnedReport?.importer && (
+              <button
+                type="button"
+                className={`mapx-item mapx-importer-btn ${selected === `${pinned}:importer` ? "is-active" : ""}`}
+                onClick={() => pickSupplier(`${pinned}:importer`)}
+                disabled={pinnedReport.importer.lat == null}
+              >
+                <span className="mapx-item-top"><strong>Ships to {pinnedReport.importer.name}</strong><span className="tag">US importer</span></span>
+                <span className="mapx-item-sub">
+                  {pinnedReport.importer.place ? pinnedReport.importer.place.title : pinnedReport.importer.address}
+                </span>
+              </button>
+            )}
+            <p className="mapx-credit">Supplier data: ImportYeti (US bill-of-lading records). Places: Wikipedia.</p>
+            <Link to={`/merchant/${pinned}`} className="mapx-report">Open {possessive(names[pinned] ?? "company")} page</Link>
+          </>
         )}
       </aside>
 
       <section className="mapx-stage" aria-label="Globe">
-        {chains && chains.length > 0 && (
+        {globe.routes.length > 0 && (
           <Globe
-            chains={chains}
+            routes={globe.routes}
+            points={globe.points}
             highlight={lit ? [lit] : null}
             focus={focus}
             zoom={zoom}
             onZoomChange={setZoom}
             zoomable
-            labels={names}
-            labelAllStops
-            selectedStop={stop}
-            onStopClick={selectStop}
+            wheel="zoom"
+            selectedPointId={selected}
+            onPointClick={onPointClick}
             tweenMs={900}
-            ariaLabel={`Night globe of ${chains.length} example supply routes. Drag to spin, scroll or use plus and minus to zoom, click a stop for details.`}
+            ariaLabel={`Globe of ${globe.routes.length} real supplier routes from US import records. Drag to spin, scroll or use plus and minus to zoom, click a supplier for details.`}
           />
         )}
-
-        {stop && stopData && stopChain && (
-          <div className="stop-card" role="dialog" aria-label={`${stopData.place} details`}>
-            <button type="button" className="stop-close" onClick={() => { setStop(null); setZoom(1.6); }} aria-label="Close stop details">
-              <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8" /></svg>
-            </button>
-            <p className="stop-of">{names[stopChain.merchant_id] ?? stopChain.merchant_id} · {stopChain.product}</p>
-            <StopDetail stage={stopData} />
-            <Link to={`/merchant/${stopChain.merchant_id}`} className="mapx-report">Open {names[stopChain.merchant_id] ?? "company"}'s page</Link>
-          </div>
-        )}
+        {supplier && <SupplierCard supplier={supplier} company={names[selCompany!]} onClose={() => { setSelected(null); setZoom(1.2); }} />}
+        {importer && <ImporterCard importer={importer} company={names[selCompany!]} onClose={() => { setSelected(null); setZoom(1.2); }} />}
 
         <div className="mapx-controls" role="group" aria-label="Zoom">
           <button type="button" onClick={() => setZoom((z) => Math.min(8, z * 1.4))} aria-label="Zoom in">
@@ -145,10 +228,10 @@ export default function MapPage() {
           <button type="button" onClick={() => setZoom((z) => Math.max(1, z / 1.4))} aria-label="Zoom out">
             <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8h10" /></svg>
           </button>
-          <button type="button" className="mapx-reset" onClick={reset}>Show all</button>
+          <button type="button" className="mapx-reset" onClick={unpin}>Show all</button>
         </div>
         <p className="mapx-caption">
-          {coarse ? "Drag to spin · + and − to zoom · tap a stop for details" : "Drag to spin · scroll to zoom · click a stop for details"}
+          {coarse ? "Drag to spin · pinch to zoom · tap a supplier" : "Drag to spin · scroll, pinch or double-click to zoom · click a supplier"}
         </p>
       </section>
     </div>

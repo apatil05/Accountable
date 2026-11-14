@@ -89,6 +89,8 @@ body.on-field { background: var(--field); }
 .globe canvas { display: block; width: 100%; height: 100%; cursor: grab; touch-action: pan-y; }
 .globe canvas:active { cursor: grabbing; }
 .globe-static canvas { cursor: default; pointer-events: none; }
+/* Zoomable globes take two-finger pinches themselves instead of letting the browser zoom the page. */
+.globe-zoomable canvas { touch-action: none; }
 
 /* ---------- Buttons on the field ---------- */
 .button-light, .button-ghost {
@@ -253,6 +255,19 @@ body.on-field { background: var(--field); }
   border-radius: 12px; cursor: pointer; transition: background-color 0.2s var(--ease-out);
 }
 .mapx-item { color: inherit; text-decoration: none; }
+/* A company row: the row opens the company; the trailing button shows its real suppliers on the globe. */
+.mapx-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; column-gap: 8px; }
+.mapx-row .mapx-item { width: auto; margin-right: 0; }
+.mapx-sup-btn {
+  display: inline-flex; align-items: center; gap: 6px; padding: 6px 10px; border-radius: 10px; cursor: pointer;
+  font: 500 12.5px var(--sans); color: var(--on-field-dim); background: transparent; border: 1px solid var(--glass-line);
+  transition: color 0.2s var(--ease-out), border-color 0.2s var(--ease-out), background-color 0.2s var(--ease-out);
+}
+.mapx-sup-btn:hover, .mapx-sup-btn:focus-visible { color: var(--on-field); border-color: rgba(255, 255, 255, 0.4); background: rgba(255, 255, 255, 0.06); }
+.mapx-sup-btn svg { width: 11px; height: 11px; fill: currentColor; }
+.mapx-supplier .tag { color: var(--on-field-dim); background: rgba(255, 255, 255, 0.08); }
+.mapx-credit { margin: 18px 0 0; font-size: 12px; color: var(--on-field-dim); }
+.place-summary { display: -webkit-box; -webkit-line-clamp: 5; -webkit-box-orient: vertical; overflow: hidden; }
 .mapx-item:hover, .mapx-item:focus-visible, .mapx-item.is-active { background: rgba(255, 255, 255, 0.06); }
 .mapx-item-top { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
 .mapx-item-top strong { font-size: 15px; font-weight: 600; }
@@ -334,6 +349,8 @@ body.on-field { background: var(--field); }
   -webkit-mask-image: radial-gradient(closest-side, #000 80%, transparent 100%);
   mask-image: radial-gradient(closest-side, #000 80%, transparent 100%);
 }
+.co-zoom { right: 8px; bottom: 34px; }
+.co-globe-hint { position: absolute; left: 0; right: 0; bottom: 4px; margin: 0; text-align: center; font-size: 12px; color: var(--on-field-dim); pointer-events: none; }
 .co-globe-empty { height: 100%; display: grid; place-items: center; color: var(--on-field-dim); font-size: 14px; }
 
 .co-section { max-width: 1320px; margin: 72px auto 0; padding: 0 48px; }
@@ -361,6 +378,33 @@ body.on-field { background: var(--field); }
 .co-stop.is-active .co-stop-n { box-shadow: 0 0 0 4px rgba(242, 176, 74, 0.3); }
 .co-stop-stage { font-size: 12.5px; color: var(--on-field-dim); }
 .co-stop-place { font-size: 15.5px; }
+
+/* Suppliers: real import records, each with a photo of the place it's in */
+.co-suppliers { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(300px, 100%), 1fr)); gap: 12px; }
+.co-supplier {
+  all: unset; box-sizing: border-box; width: 100%; display: grid; grid-template-columns: 56px 1fr; gap: 14px; align-items: center;
+  padding: 12px 14px; border-radius: 16px; cursor: pointer; background: rgba(11, 24, 34, 0.6); border: 1px solid var(--glass-line);
+  transition: background-color 0.2s var(--ease-out), border-color 0.2s var(--ease-out);
+}
+.co-supplier:hover, .co-supplier:focus-visible { background: rgba(255, 255, 255, 0.06); }
+.co-supplier.is-active { border-color: rgba(242, 176, 74, 0.6); background: rgba(242, 176, 74, 0.1); }
+.co-supplier img { width: 56px; height: 56px; object-fit: cover; border-radius: 12px; }
+/* Placeholder tile when a place has no photo: the globe's own marker (diamond = supplier, ring = importer). */
+.co-supplier-mark {
+  width: 56px; height: 56px; border-radius: 12px;
+  background: rgba(255, 255, 255, 0.06) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M8 1.5l6.5 6.5L8 14.5 1.5 8z' fill='%23f2b04a'/%3E%3C/svg%3E") center / 16px no-repeat;
+}
+.co-supplier-text { display: grid; gap: 3px; min-width: 0; }
+.co-supplier-name { font-size: 15.5px; font-weight: 600; }
+.co-supplier-where { font-size: 13px; color: var(--on-field-dim); }
+.co-importer, .mapx-importer { margin: 16px 0 0; font-size: 13.5px; color: var(--on-field-dim); }
+.co-importer-btn { margin-top: 14px; max-width: 520px; }
+.co-supplier-mark.is-importer {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ccircle cx='8' cy='8' r='5.5' fill='none' stroke='%23f2b04a' stroke-width='2'/%3E%3C/svg%3E");
+}
+.mapx-importer-btn { margin-top: 14px; border-top: 1px solid rgba(255, 255, 255, 0.07); border-radius: 0 0 12px 12px; }
+.co-supplier:disabled, .mapx-importer-btn:disabled { cursor: default; opacity: 0.7; }
+.co-importer strong, .mapx-importer strong { color: var(--on-field); font-weight: 600; }
 
 /* What we found: topics as quiet columns, never scored */
 .co-topics { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(340px, 100%), 1fr)); gap: 16px; }
@@ -588,7 +632,7 @@ textarea, .inline-input input { width: 100%; font: inherit; padding: 10px 12px; 
   .co-stop { grid-template-columns: 26px 1fr; column-gap: 14px; padding: 10px 12px; }
   .co-stop-n { grid-row: 1 / span 2; margin: 0; }
   .co-alts li { grid-template-columns: 1fr; }
-  .stop-card { left: 10px; top: 10px; width: calc(100% - 20px); max-height: calc(100% - 20px); overflow-y: auto; }
+  .stop-card { left: 10px; top: auto; bottom: 10px; width: calc(100% - 20px); max-height: 58%; overflow-y: auto; }
   .dash-hero { padding: 22px 18px 8px; }
   .dash-hero::before { display: none; }
   .dash-display { font-size: 44px; }
@@ -612,7 +656,7 @@ textarea, .inline-input input { width: 100%; font: inherit; padding: 10px 12px; 
 
 /* ---------- Motion preferences ---------- */
 @media (prefers-reduced-motion: reduce) {
-  .button-light, .button-ghost, .company-row, .glance-figure, .co-stop, .mapx-item, .mapx-stop, .mapx-controls button, .field input, .mapx-search input { transition: none; }
+  .button-light, .button-ghost, .company-row, .glance-figure, .co-stop, .co-supplier, .mapx-sup-btn, .mapx-item, .mapx-stop, .mapx-controls button, .field input, .mapx-search input { transition: none; }
   .button-light:hover { transform: none; }
   .map-route { animation: none; }
 }
