@@ -19,6 +19,41 @@ Gemini researches a merchant and lists claims about it. Because an AI can state 
 6. Blurb         AI     Gemini writes a 2-3 sentence explanation of a verdict that code already decided
 ```
 
+## Flowchart
+
+Blue boxes are AI (a Gemini call), green boxes are code.
+
+```mermaid
+flowchart TD
+    M([Merchant name]) --> R1["1a. Grounded research<br/>Gemini + Google Search"]
+    R1 --> R2["1b. Structure into JSON<br/>scores, summaries, claims with sources"]
+    R2 --> V
+
+    subgraph V ["2. Validation (per source page)"]
+        direction TB
+        D{"Domain blocked?"} -->|yes| F1["Claim fails"]
+        D -->|no| FE["Fetch page<br/>HTML or PDF to text"]
+        FE -->|unreadable| UC["Read via Gemini URL tool<br/>weakest path"]
+        FE -->|readable| J["Judge call<br/>supported / partial / unsupported + quote"]
+        UC --> J
+        J --> CK{"Verdict ok, merchant named,<br/>quote found in page?"}
+        CK -->|no| F1
+        CK -->|yes| P["validated = true<br/>claim reworded, confidence set by code"]
+    end
+
+    V --> C["3. Cleanup<br/>delete claims that failed"]
+    C --> RS["4a. Re-score each category<br/>from surviving claims only"]
+    RS --> T["4b. Temper toward 50<br/>by number of surviving claims"]
+    T --> S["5. Apply user weights<br/>overall + personalized score, verdict label"]
+    S --> B["6. Write 2-3 sentence blurb<br/>label already decided"]
+    B --> O([Report cached and shown in UI])
+
+    classDef ai fill:#dbeafe,stroke:#2563eb,color:#111;
+    classDef code fill:#dcfce7,stroke:#16a34a,color:#111;
+    class R1,R2,UC,J,RS,B ai;
+    class D,FE,CK,P,F1,C,T,S code;
+```
+
 ## Example
 
 Gemini's research includes two claims about Starbucks:
