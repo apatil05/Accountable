@@ -111,7 +111,6 @@ def test_database_outage_becomes_503_without_leaking_details(client, monkeypatch
         {"weights": {"labor": 9}},
         {"weights": {"not_a_category": 3}},
         {"stances": "x" * 2001},
-        {"trusted_sources": ["a.com"] * 21},
     ],
 )
 def test_invalid_profiles_are_rejected(client, change):

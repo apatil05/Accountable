@@ -3,7 +3,6 @@
 export const CATEGORIES = [
   "labor",
   "environment",
-  "political",
   "animal_welfare",
   "community",
   "privacy",
@@ -13,7 +12,6 @@ export type EthicsCategory = (typeof CATEGORIES)[number];
 export const CATEGORY_LABELS: Record<EthicsCategory, string> = {
   labor: "Labor & workers",
   environment: "Environment",
-  political: "Political spending",
   animal_welfare: "Animal welfare",
   community: "Local community",
   privacy: "Data & privacy",
@@ -104,7 +102,6 @@ export interface UserProfile {
   name: string;
   weights: Record<string, number>;
   stances: string;
-  trusted_sources: string[];
   prefer_local: boolean;
 }
 
@@ -118,9 +115,19 @@ export interface Claim {
 
 export interface CategoryScore {
   category: EthicsCategory;
-  score: number;
+  score: number | null; // null = not enough verified evidence
   summary: string;
   claims: Claim[];
+}
+
+export type VerdictLabel = "aligns" | "mixed" | "against";
+
+export interface ValuesVerdict {
+  label: VerdictLabel;
+  headline: string;
+  blurb: string;
+  deal_breakers: string[];
+  source: "gemini" | "template";
 }
 
 export interface EthicsReport {
@@ -129,6 +136,7 @@ export interface EthicsReport {
   overall_score: number;
   personalized_score: number;
   categories: CategoryScore[];
+  verdict: ValuesVerdict;
   data_source: "mock" | "gemini";
   researched_at: string | null;
 }
