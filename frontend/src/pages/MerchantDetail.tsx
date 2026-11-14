@@ -25,10 +25,9 @@ export default function MerchantDetail() {
   return (
     <>
       {report.data_source === "mock" && <MockBanner />}
-      <Link to="/" className="back">← All merchants</Link>
+      <Link to="/dashboard" className="back">Back to spending</Link>
       <section className="hero">
         <div>
-          <p className="eyebrow">Merchant report</p>
           <h1>{report.merchant_name}</h1>
         </div>
         <div className="stats">
