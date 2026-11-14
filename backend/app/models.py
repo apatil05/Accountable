@@ -72,8 +72,11 @@ class Claim(BaseModel):
     source_name: Optional[str] = None
     confidence: float = 0.0  # 0-1, from the LLM
     validated: bool = False  # set by services/validation.py, never by the LLM
-    # Internal only (not serialized): year of the event, from the validation judge. Used in rescoring.
-    _event_year: int = PrivateAttr(default=0)
+    # Internal only (not serialized), set by services/validation.py and used by scoring.category_score:
+    _event_year: int = PrivateAttr(default=0)  # year of the event, 0 = unknown
+    _direction: str = PrivateAttr(default="")  # "positive" / "negative" (neutral claims are dropped)
+    _severity: str = PrivateAttr(default="")  # "minor" / "notable" / "major"
+    _tier: int = PrivateAttr(default=0)  # source tier 1-4 (validation.domain_tier), 0 = unknown
 
 
 class CategoryScore(BaseModel):

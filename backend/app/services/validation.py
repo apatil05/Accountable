@@ -9,12 +9,14 @@ Per claim:
   1. domain check: blocked domains fail; others get a tier (1 = regulator .. 4 = advocacy/unknown)
   2. claims are grouped by source URL; each page is fetched once (HTML or PDF)
   3. one Gemini "judge" call per page returns, per claim: supported / partial /
-     unsupported, a verbatim quote, a rewritten claim, and the event year
+     unsupported, a verbatim quote, a rewritten claim, the event year, the category, and
+     the direction (positive / negative / neutral) and severity used by scoring.category_score
   4. code decides `validated`:
        fetched by us -> verdict supported/partial AND page mentions the merchant
                         AND the quote really appears in the page text
        url_context   -> (we could not fetch it) judge verdict supported/partial
        unreadable    -> not validated
+     and in every case: category "none" or direction "neutral" -> not validated
 Validation details are logged, never returned by the API.
 """
 
@@ -37,8 +39,9 @@ from pydantic import BaseModel
 
 from .. import config
 from ..models import CATEGORIES, CategoryScore, Claim
+from .scoring import DEFAULT_SEVERITY, SEVERITY_W
 
-log = logging.getLogger(__name__)
+log =logging.getLogger(__name__)
 logging.getLogger("pypdf").setLevel(logging.ERROR)  # malformed-PDF warnings are noise
 
 # ---------- 1. domain tiers ----------
@@ -74,7 +77,9 @@ TIER2 = {
     "cdp.net", "violationtracker.goodjobsfirst.org", "opensecrets.org", "sciencebasedtargets.org",
     "knowthechain.org", "corporatebenchmark.org", "ewg.org", "consumerreports.org",
 }
-TIER_LABEL = {1: "government or court", 2: "established news or ratings", 3: "the company itself", 4: "advocacy group, law firm, or other"}
+DIRECTIONS = ("positive", "negative")  # anything else (e.g. "neutral") fails the claim
+SEVERITIES = tuple(SEVERITY_W)
+TIER_LABEL = {1:"government or court", 2: "established news or ratings", 3: "the company itself", 4: "advocacy group, law firm, or other"}
 
 # Extra names a page may use for a merchant (legal name, parent company).
 ALIASES: dict[str, list[str]] = {
@@ -282,6 +287,15 @@ For each numbered claim, decide from the SOURCE TEXT ONLY (not your own knowledg
 - category: the category this claim is actually evidence about (usually the one it was filed
   under), or "none" if it says nothing about {merchant}'s conduct in any category
   (e.g. a business statistic, a product description, or general industry context).
+- direction: does the (rewritten) claim reflect well or badly on {merchant}'s conduct in that
+  category? "positive", "negative", or "neutral" if it is context with no ethical weight
+  either way (e.g. how many countries it sources from, a description of a program with no
+  outcome or commitment). A mixed fact gets the direction of its main point.
+- severity: how much the fact should matter to an ethics-minded shopper:
+  "major": a court ruling, regulator action or fine, a systemic or repeated pattern, or a large
+    measured impact (positive or negative);
+  "notable": a documented incident, a lawsuit filed, or concrete measured progress or regression;
+  "minor": a pledge, target, or announcement, a small program, or an isolated or unproven allegation.
 
 CLAIMS:
 {claims}
@@ -295,7 +309,7 @@ _ATTRIBUTE = (
 _URL_CONTEXT_FORMAT = """
 Read the source at {url} with the URL tool. If you cannot open it, mark every claim "unsupported".
 Answer with ONLY a JSON object, no other text, of this form:
-{{"claims": [{{"index": 1, "verdict": "...", "quote": "...", "rewritten_text": "...", "event_year": 0, "category": "..."}}]}}"""
+{{"claims": [{{"index": 1, "verdict": "...", "quote": "...", "rewritten_text": "...", "event_year": 0, "category": "...", "direction": "...", "severity": "..."}}]}}"""
 
 _CATEGORY_HINTS = {
     "labor": "wages, unions, working conditions, safety, supply-chain labor",
@@ -354,6 +368,8 @@ class _Judged(BaseModel):
     rewritten_text: str = ""
     event_year: int = 0
     category: str = ""
+    direction: str = ""
+    severity: str = ""
 
 
 class _JudgeOut(BaseModel):
@@ -471,7 +487,14 @@ def _validate_source(merchant: str, url: str, items: list[_Item]) -> bool:
                 ok = False  # not evidence about the merchant's conduct in any category
             elif judged_cat in CATEGORIES and judged_cat != it.category:
                 it.move_to = judged_cat
+        direction = j.direction.strip().lower() if j else ""
+        if j is not None and ok and direction not in DIRECTIONS:
+            ok = False  # neutral context (or no answer): carries no ethical weight, so not shown
         if j is not None and ok:
+            severity = j.severity.strip().lower()
+            it.claim._direction = direction
+            it.claim._severity = severity if severity in SEVERITIES else DEFAULT_SEVERITY
+            it.claim._tier = tier
             # Rewritten text carries attribution (low tiers) or is trimmed to what's supported.
             if j.verdict == "partial" or tier >= 3:
                 it.claim.text = j.rewritten_text.strip()
@@ -497,10 +520,11 @@ def _is_timeout(e: BaseException) -> bool:
 
 def _log(merchant, it: _Item, url, tier, method, j: _Judged | None, ok: bool) -> None:
     log.info(
-        "validate merchant=%r category=%s judged_category=%s tier=%s method=%s verdict=%s year=%s "
-        "validated=%s url=%s claim=%r quote=%r",
+        "validate merchant=%r category=%s judged_category=%s tier=%s method=%s verdict=%s "
+        "direction=%s severity=%s year=%s validated=%s url=%s claim=%r quote=%r",
         merchant, it.category, (j.category or None) if j else None, tier, method,
-        j.verdict if j else None, (j.event_year or None) if j else None,
+        j.verdict if j else None, (j.direction or None) if j else None,
+        (j.severity or None) if j else None, (j.event_year or None) if j else None,
         ok, url, it.claim.text[:120], (j.quote[:120] if j else ""),
     )
 

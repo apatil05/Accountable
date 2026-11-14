@@ -14,12 +14,13 @@ A live run on Starbucks (2026-11-14) produced 18 claims and all 18 came back `va
 | 2. Fetcher (HTML + PDF, SSRF guard) | Done |
 | 3. Judge call (per source page, passages only, 30s cap) | Done |
 | 4. Decision logic + per-claim logging | Done |
-| 5. Rescore on validated claims, shrink toward 50, null when none | Done |
+| 5. Rescore on validated claims, shrink toward 50, null when none | Done; replaced by 11 |
 | 6. Scoring / verdict skip null categories | Done |
 | 7. Research prompt: 4-6 claims per area, source steering | Done |
 | 8. Caching: don't cache incomplete reports; profile-independent validated cache | Done (in memory; persistence still TODO) |
 | 9. Evaluation set + script | Done: 22 Starbucks claims, `python -m scripts.eval_validation` |
 | 10. Pre-warm script for demo merchants | Not started |
+| 11. Code-computed category scores (direction x severity x tier x recency) + `eval_scoring`, `eval_stability` | Done |
 | Frontend null score + hide empty claim list | Done, not type-checked (no Node on the dev machine; run `npm run build`) |
 
 ## Decisions
@@ -39,14 +40,15 @@ A live run on Starbucks (2026-11-14) produced 18 claims and all 18 came back `va
 | Judge batching | One judge call per source URL, parallel, global cap of 8 concurrent calls |
 | Judge model | Same `GEMINI_MODEL` |
 | Judge failure (rate limit, outage, not a timeout) | Claims hidden, report NOT cached so the next request retries; research stays cached |
-| Category score | Gemini rescores each category (no search) from its validated claims only, then code shrinks it toward 50 by evidence count: `50 + (s - 50) * n / (n + 2)` |
-| Category summary | Written by the same rescore call from validated claims only, keeping the claims' attribution |
+| Category score | Computed by code (`scoring.category_score`), not Gemini. The judge labels each claim's direction (positive / negative) and severity (minor / notable / major); weight = severity x tier x recency; `score = (50*2 + sum(w*target)) / (2 + sum(w))`, target 100 positive / 0 negative. Tier 3 self-praise weighs 0.4, tier 3 self-admitted harm 1.0. See PIPELINE.md step 4 |
+| Neutral claims | Judge direction `neutral` (context with no ethical weight) fails the claim, like category `none` |
+| Category summary | Written by one Gemini call (`summarize`) from validated claims only, marked (+)/(-), keeping the claims' attribution. It does not score |
 | Category with no validated claims | `score = None`, summary "Not enough verified evidence was found for this category.", skipped by overall/personalized/deal-breakers/verdict |
-| Rescore failure | Show research scores with only validated claims; don't cache, so the next request retries |
-| Recency | The judge extracts the event year (internal `Claim._event_year`, not serialized); the rescore prompt weights the last 5 years more |
-| Validation details (quote, tier, reason, timing) | Never exposed by the API. Logged only |
+| Summary failure | Code scores still apply; show research summaries with only validated claims; don't cache, so the next request retries |
+| Recency | The judge extracts the event year (internal `Claim._event_year`, not serialized); full weight up to 3 years old, then half-life 5 years; unknown year 0.7 |
+| Validation details (quote, tier, direction, severity, reason, timing) | Never exposed by the API. Logged only (private `Claim` attrs) |
 | Domain tiers / blocklist / aliases | Python constants in `validation.py` |
-| Mock mode | No fetch, judge, or rescore. Placeholder claims are unsourced, so they are hidden; mock scores stay so the offline demo still has a dashboard and verdicts |
+| Mock mode | No fetch, judge, scoring from claims, or summary call. Placeholder claims are unsourced, so they are hidden; mock scores stay so the offline demo still has a dashboard and verdicts |
 | Research variability | Results differ between research runs; rely on caching (one stable result per merchant), re-research only on demand |
 | Evaluation | Hand-labeled set of ~30 claims across 3 merchants plus planted fakes; script reports judge precision/recall |
 
@@ -60,20 +62,21 @@ research_with_gemini            (grounded search, 4-6 claims/area, steered sourc
             fetch (httpx 10s, redirects checked, PDF via pypdf)
             -> domain tier on the final URL (blocked -> fail)
             -> judge call (30s cap) on relevant passages, or url_context if fetch failed
-            -> per claim: verdict, quote, rewritten text, event year, category
+            -> per claim: verdict, quote, rewritten text, event year, category, direction, severity
        3. code decides validated:
             fetched by us: supported/partial AND merchant (or alias) in page AND quote in page
             url_context:   supported/partial
             unreadable / timeout / blocked: not validated
-          then: category "none" fails; another category moves the claim;
+          then: category "none" or direction "neutral" fails; another category moves the claim;
                 partial or tier 3-4 -> use the judge's rewritten (attributed) text
   -> drop unvalidated claims
-  -> rescore (Gemini, no search, validated claims only) -> score shrunk toward 50, summary
+  -> scoring.category_score (code): severity x tier x recency weights, pulled toward 50
      (no claims -> score None)
+  -> summarize (Gemini, no search, validated claims only) -> summary text
   -> scoring.overall / personalized / verdict (skip None)
 ```
 
-Profile-independent results (research, then validated + rescored categories) are cached per merchant, so changing weights in `PUT /api/profile` only recomputes scores and the verdict.
+Profile-independent results (research, then validated + scored categories) are cached per merchant, so changing weights in `PUT /api/profile` only recomputes scores and the verdict.
 
 ## Domain tiers
 

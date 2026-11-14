@@ -6,9 +6,10 @@ Pipeline:
   1. research (profile-independent, cached in _research_cache):
      mock JSON, or Gemini with Google Search grounding when gemini.enabled().
   2. validation.validate_claims() checks each claim against its source page and sets
-     claim.validated (docs/VALIDATION_PLAN.md). Unvalidated claims are then dropped, and
-     rescore() re-rates each category from its validated claims only (score=None when
-     none survive). Cached profile-independently in _validated_cache.
+     claim.validated (docs/VALIDATION_PLAN.md). Unvalidated claims are then dropped,
+     score_categories() computes each category's score in code from its validated claims
+     (scoring.category_score; score=None when none survive), and summarize() has Gemini
+     rewrite the summaries from those claims. Cached profile-independently in _validated_cache.
   3. scoring: overall + personalized score, then the aligns/mixed/against verdict
      and its blurb (services/verdict.py). These depend on the user's profile,
      so the finished report lives in _cache, which PUT /api/profile clears
@@ -46,7 +47,7 @@ def _mock() -> dict:
 _cache: dict[str, EthicsReport] = {}
 # Profile-independent research: key -> (categories, data_source, researched_at).
 _research_cache: dict[str, tuple[list[CategoryScore], str, str]] = {}
-# Profile-independent validated + rescored categories (same key), so a weights change in
+# Profile-independent validated + scored categories (same key), so a weights change in
 # PUT /api/profile only recomputes scores and the verdict, not ~80s of validation.
 _validated_cache: dict[str, list[CategoryScore]] = {}
 _research_locks: dict[str, threading.Lock] = {}
@@ -212,75 +213,90 @@ def research_with_gemini(merchant_name: str, profile: UserProfile) -> list[Categ
     return [categories[k] for k in CATEGORIES if k in categories]
 
 
-# ---------- rescoring on validated evidence ----------
+# ---------- scoring and summaries on validated evidence ----------
 
 NO_EVIDENCE_SUMMARY = "Not enough verified evidence was found for this category."
 
-_RESCORE_PROMPT = """Rate the company "{merchant}" in each area below using ONLY the verified facts listed.
-Do not use outside knowledge.
+_SUMMARY_PROMPT = """Summarize what the verified facts below say about the company "{merchant}" in each area.
+Use ONLY the listed facts. Do not use outside knowledge, and do not rate or score the company.
 
-Scale: 100 = exemplary, 50 = typical for its industry, 0 = egregious.
-Weight events from the last 5 years more than older ones (the year is in brackets when known).
-summary: 2 neutral, factual sentences that only use the listed facts. When a fact is attributed
-("According to X...", "A lawsuit alleges...", "{merchant} says..."), keep that attribution in the
-summary; never restate an attributed claim as established fact.
+Each fact is marked (+) if it reflects well on the company and (-) if it reflects badly, with the
+year in brackets when known. Give each area's summary in 2 neutral, factual sentences that cover
+the most important facts. When a fact is attributed ("According to X...", "A lawsuit alleges...",
+"{merchant} says..."), keep that attribution; never restate an attributed claim as established fact.
 
 {areas}
 """
 
 
-class _RescoredCategory(BaseModel):
+class _SummarizedCategory(BaseModel):
     category: str
-    score: float
     summary: str
 
 
-class _RescoreOut(BaseModel):
-    categories: list[_RescoredCategory]
+class _SummaryOut(BaseModel):
+    categories: list[_SummarizedCategory]
 
 
-def rescore(merchant_name: str, categories: list[CategoryScore]) -> None:
-    """Replace each category's research score and summary with ones based only on its
-    validated claims (in place). Categories with no claims get score=None."""
+def score_categories(merchant_name: str, categories: list[CategoryScore]) -> None:
+    """Set each category's score from its validated claims in code (scoring.category_score),
+    in place. Categories with no weighted evidence get score=None and the no-evidence summary."""
+    year = datetime.now(timezone.utc).year
+    for c in categories:
+        c.score = scoring.category_score(c.claims, year)
+        if c.score is None:
+            c.summary = NO_EVIDENCE_SUMMARY
+            continue
+        # One line per category so a score can be explained from the logs.
+        log.info(
+            "score merchant=%r category=%s score=%s claims=[%s]",
+            merchant_name, c.category, c.score,
+            "; ".join(
+                f"{cl._direction}/{cl._severity}/tier{cl._tier}/{cl._event_year or '?'} "
+                f"w={scoring.claim_weight(cl, year):.2f}"
+                for cl in c.claims
+            ),
+        )
+
+
+def summarize(merchant_name: str, categories: list[CategoryScore]) -> None:
+    """Replace each scored category's research summary with one written from its validated
+    claims only (in place). Raises if Gemini fails or skips a category."""
     from google.genai import types
 
-    with_claims = [c for c in categories if c.claims]
-    for c in categories:
-        if not c.claims:
-            c.score, c.summary = None, NO_EVIDENCE_SUMMARY
-    if not with_claims:
+    scored = [c for c in categories if c.score is not None and c.claims]
+    if not scored:
         return
+    sign = {"positive": "(+) ", "negative": "(-) "}
     areas = "\n\n".join(
         f"{c.category}:\n"
-        + "\n".join(f"- {f'[{cl._event_year}] ' if cl._event_year else ''}{cl.text}" for cl in c.claims)
-        for c in with_claims
+        + "\n".join(
+            f"- {sign.get(cl._direction, '')}{f'[{cl._event_year}] ' if cl._event_year else ''}{cl.text}"
+            for cl in c.claims
+        )
+        for c in scored
     )
     resp = gemini.client().models.generate_content(
         model=config.GEMINI_MODEL,
-        contents=_RESCORE_PROMPT.format(merchant=merchant_name, areas=areas),
+        contents=_SUMMARY_PROMPT.format(merchant=merchant_name, areas=areas),
         config=types.GenerateContentConfig(
-            response_mime_type="application/json", response_schema=_RescoreOut, temperature=0.1
+            response_mime_type="application/json", response_schema=_SummaryOut, temperature=0.1
         ),
     )
-    out = resp.parsed if isinstance(resp.parsed, _RescoreOut) else _RescoreOut.model_validate_json(resp.text)
+    out = resp.parsed if isinstance(resp.parsed, _SummaryOut) else _SummaryOut.model_validate_json(resp.text)
     got = {r.category: r for r in out.categories}
-    missing = [c.category for c in with_claims if c.category not in got]
+    missing = [c.category for c in scored if c.category not in got]
     if missing:
-        raise ValueError(f"rescore skipped categories {missing}")
-    for c in with_claims:
-        r = got[c.category]
-        # Shrink toward 50 by evidence count so 1-2 claims can't push a score to an extreme:
-        # 1 claim moves a third of the way, 4 claims two-thirds.
-        n = len(c.claims)
-        c.score = round(50 + (max(0.0, min(100.0, r.score)) - 50) * n / (n + 2), 1)
-        c.summary = r.summary.strip() or c.summary
+        raise ValueError(f"summary skipped categories {missing}")
+    for c in scored:
+        c.summary = got[c.category].summary.strip() or c.summary
 
 
 def _verified_categories(
     key: str, merchant_name: str, raw: list[CategoryScore], data_source: str, profile: UserProfile
 ) -> tuple[list[CategoryScore], bool]:
-    """Validate, hide unvalidated claims, and rescore. Returns (categories, complete);
-    only complete results are cached."""
+    """Validate, hide unvalidated claims, score in code, and summarize. Returns
+    (categories, complete); only complete results are cached."""
     if key in _validated_cache:
         return [c.model_copy(deep=True) for c in _validated_cache[key]], True
 
@@ -294,13 +310,15 @@ def _verified_categories(
     for c in categories:
         c.claims = [cl for cl in c.claims if cl.validated]
     if data_source == "gemini":
+        # Scores come from code, before the summary call, so they're right even if it fails.
+        score_categories(merchant_name, categories)
         try:
             t0 = time.monotonic()
-            rescore(merchant_name, categories)
-            log.info("rescore merchant=%r took=%.1fs", merchant_name, time.monotonic() - t0)
+            summarize(merchant_name, categories)
+            log.info("summarize merchant=%r took=%.1fs", merchant_name, time.monotonic() - t0)
         except Exception:
-            # Keep the research scores for now; not cached, so the next request retries.
-            log.exception("Rescore failed for %s; showing research scores", merchant_name)
+            # Keep the research summaries for now; not cached, so the next request retries.
+            log.exception("Summary failed for %s; showing research summaries", merchant_name)
             complete = False
     if complete:
         _validated_cache[key] = [c.model_copy(deep=True) for c in categories]
@@ -389,7 +407,7 @@ def get_report(
     if complete:
         _cache[merchant_id] = report
     else:
-        # A judge or rescore call failed: show what we have now, and the next request retries.
+        # A judge or summary call failed: show what we have now, and the next request retries.
         log.warning("Validation incomplete for %s; report not cached", merchant_name)
     return report
 
