@@ -1,7 +1,10 @@
 import logging
+import secrets
+import threading
+import time
 from contextlib import asynccontextmanager
 
-from fastapi import APIRouter, Depends, FastAPI, HTTPException, Request
+from fastapi import APIRouter, Depends, FastAPI, Header, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pymongo.database import Database
@@ -24,15 +27,50 @@ from .services import aggregation, ethics, ingest, nessie, supply_chain
 logger = logging.getLogger(__name__)
 
 DEV_ORIGINS = ("http://localhost:5173", "http://127.0.0.1:5173")
+SYNC_COOLDOWN_SECONDS = 30
 
 router = APIRouter(prefix="/api")
+
+
+class SyncGuard:
+    """One sync at a time, plus a cooldown, so a request loop can't hammer Nessie or Atlas."""
+
+    def __init__(self, cooldown_seconds: float):
+        self._lock = threading.Lock()
+        self._cooldown = cooldown_seconds
+        self._last_finished = float("-inf")
+
+    def try_acquire(self) -> bool:
+        if not self._lock.acquire(blocking=False):
+            return False
+        if time.monotonic() - self._last_finished < self._cooldown:
+            self._lock.release()
+            return False
+        return True
+
+    def release(self) -> None:
+        self._last_finished = time.monotonic()  # failures count too, so retries are rate-limited
+        self._lock.release()
+
+
+sync_guard = SyncGuard(SYNC_COOLDOWN_SECONDS)
 
 
 def get_database() -> Database:
     return get_db()
 
 
+def require_admin(x_admin_token: str | None = Header(default=None)) -> None:
+    if not config.ADMIN_TOKEN:
+        raise HTTPException(403, "Sync over HTTP is disabled on this server; use `python -m scripts.sync`")
+    if not x_admin_token or not secrets.compare_digest(x_admin_token.encode(), config.ADMIN_TOKEN.encode()):
+        raise HTTPException(401, "Missing or invalid admin token")
+
+
 def _customer_id(customer_id: str | None) -> str:
+    """The configured customer, unless this server explicitly allows choosing another."""
+    if customer_id is not None and not config.ALLOW_CUSTOMER_OVERRIDE:
+        raise HTTPException(403, "Choosing a customer is disabled on this server")
     return nessie.validate_id(customer_id or nessie.default_customer_id(), "customer id")
 
 
@@ -75,20 +113,28 @@ def health(db: Database = Depends(get_database)):
         "ok": connected,
         "mock_data": config.USE_MOCK_DATA,
         "gemini_configured": bool(config.GEMINI_API_KEY),
-        "db": {"connected": connected, "name": config.MONGODB_DB},
+        "db": {"connected": connected},
         "last_sync": last_sync,
     }
 
 
 @router.get("/customers")
 def customers():
+    if not config.ALLOW_CUSTOMER_OVERRIDE:
+        raise HTTPException(403, "Listing customers is disabled on this server")
     return nessie.list_customers()
 
 
-@router.post("/sync")
+@router.post("/sync", dependencies=[Depends(require_admin)])
 def sync(customer_id: str | None = None, db: Database = Depends(get_database)):
-    """Re-pull a customer from Nessie into Atlas. Safe to run repeatedly."""
-    return ingest.sync_customer(db, _customer_id(customer_id))
+    """Re-pull a customer from Nessie into Atlas. Admin only; safe to run repeatedly."""
+    cid = nessie.validate_id(customer_id or nessie.default_customer_id(), "customer id")
+    if not sync_guard.try_acquire():
+        raise HTTPException(429, f"A sync ran recently; try again in {SYNC_COOLDOWN_SECONDS} seconds")
+    try:
+        return ingest.sync_customer(db, cid)
+    finally:
+        sync_guard.release()
 
 
 @router.get("/spending/summary", response_model=SpendingSummary)
@@ -158,11 +204,21 @@ def all_supply_chains(customer_id: str | None = None, db: Database = Depends(get
 
 
 def create_app() -> FastAPI:
-    app = FastAPI(title="Accountable API", version="0.2.0", lifespan=lifespan)
+    production = config.is_production()
+    app = FastAPI(
+        title="Accountable API",
+        version="0.2.0",
+        lifespan=lifespan,
+        # The interactive API explorer is for local development only.
+        docs_url=None if production else "/docs",
+        redoc_url=None if production else "/redoc",
+        openapi_url=None if production else "/openapi.json",
+    )
+    dev_origins = () if production else DEV_ORIGINS
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=sorted({*config.FRONTEND_ORIGINS, *DEV_ORIGINS}),
-        allow_methods=["*"],
+        allow_origins=sorted({*config.FRONTEND_ORIGINS, *dev_origins}),
+        allow_methods=["GET", "PUT", "POST"],
         allow_headers=["*"],
     )
     app.include_router(router)
