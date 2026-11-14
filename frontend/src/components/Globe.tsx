@@ -11,7 +11,6 @@ import type { Topology } from "topojson-specification";
 import type { LineString } from "geojson";
 import world from "world-atlas/countries-110m.json";
 import type { SupplyChain } from "../api/types";
-import { CITY_LIGHTS } from "../lib/cityLights";
 
 const topo = world as unknown as Topology;
 const LAND = feature(topo, topo.objects.land) as unknown as GeoPermissibleObjects;
@@ -23,7 +22,7 @@ const FONT = `"Hanken Grotesk", ui-sans-serif, system-ui, sans-serif`;
 // Deep atlas palette (see DESIGN.md). Land is a step lighter than the field so continents read on a projector.
 const C = {
   ocean: ["#152c40", "#10222f", "#0b1822"],
-  land: "#20384e",
+  land: "#243f57",
   border: "rgba(255,255,255,0.07)",
   grid: "rgba(255,255,255,0.045)",
   route: "242,176,74",
@@ -74,37 +73,6 @@ function rng(seed: number) {
     seed = (seed * 1664525 + 1013904223) % 4294967296;
     return seed / 4294967296;
   };
-}
-
-// City lights: each metro is a bright core plus a few dimmer suburbs scattered around it.
-const LIGHTS: { ll: [number, number]; size: number; alpha: number }[] = (() => {
-  const r = rng(7);
-  const out: { ll: [number, number]; size: number; alpha: number }[] = [];
-  for (const [lng, lat, w] of CITY_LIGHTS) {
-    out.push({ ll: [lng, lat], size: 1 + w * 0.9, alpha: 0.55 + w * 0.15 });
-    for (let i = 0; i < w * 4; i++) {
-      const d = (0.25 + r() * 1.1) * (0.6 + w * 0.3);
-      const a = r() * Math.PI * 2;
-      out.push({ ll: [lng + Math.cos(a) * d * 1.3, lat + Math.sin(a) * d], size: 0.5 + r() * 0.9, alpha: 0.25 + r() * 0.35 });
-    }
-  }
-  return out;
-})();
-
-// A soft warm glow sprite, drawn once and stamped for every light.
-let glowSprite: HTMLCanvasElement | null = null;
-function glow() {
-  if (glowSprite) return glowSprite;
-  const c = document.createElement("canvas");
-  c.width = c.height = 32;
-  const g = c.getContext("2d")!;
-  const grad = g.createRadialGradient(16, 16, 0, 16, 16, 16);
-  grad.addColorStop(0, "rgba(255,236,196,1)");
-  grad.addColorStop(0.25, "rgba(255,206,140,0.55)");
-  grad.addColorStop(1, "rgba(255,190,120,0)");
-  g.fillStyle = grad;
-  g.fillRect(0, 0, 32, 32);
-  return (glowSprite = c);
 }
 
 interface Star { x: number; y: number; r: number; a: number; tw: number }
@@ -282,19 +250,6 @@ export default function Globe({
       ctx.lineWidth = 0.5;
       ctx.stroke();
 
-      // City lights, like a night-time satellite map. Additive so dense regions bloom.
-      const sprite = glow();
-      const scale = clamp(r / 320, 0.7, 3.2);
-      ctx.globalCompositeOperation = "lighter";
-      for (const L of LIGHTS) {
-        if (!visible(L.ll)) continue;
-        const [x, y] = proj(L.ll)!;
-        const d = L.size * 6 * scale;
-        ctx.globalAlpha = L.alpha * (highlight && highlight.length ? 0.55 : 0.85);
-        ctx.drawImage(sprite, x - d / 2, y - d / 2, d, d);
-      }
-      ctx.globalAlpha = 1;
-      ctx.globalCompositeOperation = "source-over";
 
       // Routes: the lit set in white with a slow flow, everything else in the warm accent.
       const lit = highlight && highlight.length ? new Set(highlight) : null;
