@@ -8,6 +8,7 @@ import { api } from "../api/client";
 import type { MerchantSummary, SpendingSummary, SupplyChain } from "../api/types";
 import Globe, { type GlobeLayout } from "../components/Globe";
 import MockBanner from "../components/MockBanner";
+import { footprintLead, formatKg } from "../lib/footprint";
 import { continentOf, habits, whereItStarts } from "../lib/insights";
 
 const usd = (n: number) => n.toLocaleString("en-US", { style: "currency", currency: "USD" });
@@ -109,7 +110,8 @@ export default function Dashboard() {
       const pts = stops.map((p) => [p!.lng, p!.lat] as [number, number]);
       return pts.length ? { ids, focus: sphericalMean(pts) } : null;
     };
-    return { chainById, originOf, where, hab, latest, names, spotFor };
+    const lead = footprintLead(data.merchants);
+    return { chainById, originOf, where, hab, latest, names, spotFor, lead };
   }, [data, chains]);
 
   if (err) {
@@ -161,6 +163,9 @@ export default function Dashboard() {
               <div><dt>purchases</dt><dd>{model.hab.purchases}</dd></div>
               {hasRoutes && <div><dt>continents of origin</dt><dd>{model.where.continents.length}</dd></div>}
               {hasRoutes && <div><dt>starts outside the US</dt><dd>{pct(model.where.abroadShare)}</dd></div>}
+              {data.estimated_kg_co2e != null && (
+                <div><dt>CO₂e, estimated</dt><dd>≈ {formatKg(data.estimated_kg_co2e)}</dd></div>
+              )}
             </dl>
             {hasRoutes && (
               <p className="dash-hero-caption">
@@ -177,11 +182,28 @@ export default function Dashboard() {
         <div className="dash-sheet">
           <MockBanner />
 
-          {hasRoutes && (
+          {(hasRoutes || model.lead) && (
             <section aria-labelledby="glance-title">
               <h2 id="glance-title" className="sheet-title">At a glance</h2>
               <ul className="glance" onMouseLeave={clear}>
-                {model.where.abroadIds.length > 0 && (
+                {model.lead && (
+                  <li>
+                    <button type="button" className="glance-item" onClick={lightUp([model.lead.merchant.merchant_id])} onMouseEnter={lightUp([model.lead.merchant.merchant_id])} onFocus={lightUp([model.lead.merchant.merchant_id])} onBlur={clear}>
+                      <span className="glance-figure">{pct(model.lead.footprintShare)}</span>
+                      <span>
+                        of your estimated footprint comes from {model.lead.merchant.name}, which is only{" "}
+                        {pct(model.lead.spendShare)} of your spending
+                        {model.lead.merchant.carbon?.includes_use_phase ? " (burning fuel counts)" : ""}
+                      </span>
+                      <span className="split" aria-hidden="true">
+                        <span style={{ flexGrow: model.lead.footprintShare, background: TINTS[0] }} />
+                        <span style={{ flexGrow: 1 - model.lead.footprintShare, background: "rgba(255, 255, 255, 0.12)" }} />
+                      </span>
+                      <span className="split-key"><span>Estimates from US industry averages, not company data</span></span>
+                    </button>
+                  </li>
+                )}
+                {hasRoutes && model.where.abroadIds.length > 0 && (
                   <li>
                     <button type="button" className="glance-item" onClick={lightUp(model.where.abroadIds)} onMouseEnter={lightUp(model.where.abroadIds)} onFocus={lightUp(model.where.abroadIds)} onBlur={clear}>
                       <span className="glance-figure">{pct(model.where.abroadShare)}</span>
@@ -189,7 +211,7 @@ export default function Dashboard() {
                     </button>
                   </li>
                 )}
-                {model.where.continents[0] && (
+                {hasRoutes && model.where.continents[0] && (
                   <li>
                     <button type="button" className="glance-item" onClick={lightUp(model.where.continents[0].merchantIds)} onMouseEnter={lightUp(model.where.continents[0].merchantIds)} onFocus={lightUp(model.where.continents[0].merchantIds)} onBlur={clear}>
                       <span className="glance-figure">{pct(model.where.continents[0].share)}</span>
@@ -308,6 +330,7 @@ function CompanyRow({
           <span className="cr-spend">{usd(m.total_spent)}</span>
           <span className="cr-meta">
             {pct(share)} · {m.purchase_count} {m.purchase_count === 1 ? "purchase" : "purchases"} · last {shortDate(m.last_purchase)}
+            {m.carbon && <> · ≈ {formatKg(m.carbon.kg_co2e)} CO₂e</>}
           </span>
         </span>
         {active && <span className="cr-open">Tap again to open</span>}

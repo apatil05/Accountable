@@ -383,6 +383,31 @@ body.on-field { background: var(--field); }
 .co-source.is-missing { color: rgba(238, 243, 247, 0.5); }
 
 /* Alternatives: rows */
+/* Footprint and record: three fact cards, same glass as the research topics. Numbers lead, sources follow. */
+.facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr)); gap: 16px; align-items: start; }
+.fact {
+  display: flex; flex-direction: column; align-items: flex-start; gap: 10px;
+  padding: 22px 24px 22px; border-radius: 18px; background: rgba(11, 24, 34, 0.6); border: 1px solid var(--glass-line);
+}
+.fact h3 { margin: 0; font-size: 13px; font-weight: 600; letter-spacing: 0.02em; color: var(--on-field-dim); }
+.fact-figure {
+  margin: 4px 0 0; display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap;
+  font-size: clamp(34px, 3.2vw, 46px); font-weight: 300; letter-spacing: -0.045em; line-height: 1;
+  color: var(--on-field); font-variant-numeric: tabular-nums;
+}
+.fact-figure.is-word { font-size: clamp(26px, 2.4vw, 32px); letter-spacing: -0.03em; }
+.fact-unit { font-size: 15px; font-weight: 500; letter-spacing: 0; color: var(--on-field-dim); }
+.fact-caption { margin: 0; font-size: 14.5px; line-height: 1.5; color: var(--on-field-dim); max-width: 40ch; }
+.fact-source { margin: 0; font-size: 12.5px; line-height: 1.5; color: rgba(238, 243, 247, 0.55); }
+.fact-list { width: 100%; margin: 4px 0 2px; display: grid; gap: 0; }
+.fact-list div {
+  display: flex; justify-content: space-between; gap: 16px; padding: 8px 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.08); font-size: 13.5px;
+}
+.fact-list dt { color: var(--on-field-dim); }
+.fact-list dd { margin: 0; color: var(--on-field); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.fact-aside { width: 100%; display: grid; gap: 6px; margin-top: 8px; padding-top: 14px; border-top: 1px dashed var(--glass-line); }
+
 .co-alts { list-style: none; padding: 0; margin: 0; }
 .co-alts li { display: grid; grid-template-columns: minmax(180px, 1fr) 2fr auto; gap: 6px 24px; align-items: baseline; padding: 16px 0; border-top: 1px solid rgba(255, 255, 255, 0.08); }
 .co-alts li:last-child { border-bottom: 1px solid rgba(255, 255, 255, 0.08); }

@@ -3,7 +3,16 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { api } from "../api/client";
-import { CATEGORY_LABELS, type Alternative, type EthicsReport, type MerchantSummary, type SupplyChain } from "../api/types";
+import {
+  CATEGORY_LABELS,
+  type Alternative,
+  type CompanyEmissions,
+  type EthicsReport,
+  type LaborSummary,
+  type MerchantSummary,
+  type SupplyChain,
+} from "../api/types";
+import Footprint from "../components/Footprint";
 import Globe, { type StopRef } from "../components/Globe";
 import MockBanner from "../components/MockBanner";
 import StopDetail from "../components/StopDetail";
@@ -35,16 +44,22 @@ export default function MerchantDetail() {
   const [chain, setChain] = useState<SupplyChain | null | "missing">(null);
   const [alts, setAlts] = useState<Alternative[]>([]);
   const [me, setMe] = useState<MerchantSummary | null>(null);
+  const [emissions, setEmissions] = useState<CompanyEmissions[] | null | "missing">(null);
+  const [labor, setLabor] = useState<LaborSummary | null | "missing">(null);
   const [stop, setStop] = useState<StopRef | null>(null);
   const [zoom, setZoom] = useState(1);
 
   useEffect(() => {
     setReport(null);
     setChain(null);
+    setEmissions(null);
+    setLabor(null);
     setStop(null);
     setZoom(1);
     window.scrollTo(0, 0);
     api.ethics(id).then(setReport).catch(() => setReport("missing"));
+    api.emissions(id).then(setEmissions).catch(() => setEmissions("missing"));
+    api.labor(id).then(setLabor).catch(() => setLabor("missing"));
     api.supplyChain(id).then(setChain).catch(() => setChain("missing"));
     api.alternatives(id).then(setAlts).catch(() => setAlts([]));
     api.summary().then((s) => setMe(s.merchants.find((m) => m.merchant_id === id) ?? null)).catch(() => setMe(null));
@@ -155,7 +170,10 @@ export default function MerchantDetail() {
         </section>
       )}
 
-      {/* 3. What research found, by topic */}
+      {/* 3. Carbon, reported emissions, and labor record */}
+      <Footprint name={name} me={me} emissions={emissions} labor={labor} />
+
+      {/* 4. What research found, by topic */}
       <section className="co-section" aria-labelledby="facts-title">
         <div className="co-section-head">
           <h2 id="facts-title">What we found</h2>
@@ -194,7 +212,7 @@ export default function MerchantDetail() {
         )}
       </section>
 
-      {/* 4. Alternatives */}
+      {/* 5. Alternatives */}
       <section className="co-section" aria-labelledby="alts-title">
         <div className="co-section-head">
           <h2 id="alts-title">Alternatives</h2>
