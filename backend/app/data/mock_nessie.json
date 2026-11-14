@@ -1,0 +1,803 @@
+{
+ "customer": {
+  "_id": "cust_demo",
+  "first_name": "Demo",
+  "last_name": "User"
+ },
+ "accounts": [
+  {
+   "_id": "acct_demo",
+   "type": "Credit Card",
+   "nickname": "Demo card",
+   "customer_id": "cust_demo"
+  }
+ ],
+ "merchants": [
+  {
+   "_id": "m_starbucks",
+   "name": "Starbucks",
+   "category": [
+    "Food",
+    "Coffee"
+   ],
+   "address": {
+    "street_number": "",
+    "street_name": "",
+    "city": "",
+    "state": "",
+    "zip": ""
+   },
+   "geocode": {
+    "lat": 42.3732,
+    "lng": -72.5199
+   }
+  },
+  {
+   "_id": "m_amazon",
+   "name": "Amazon",
+   "category": [
+    "Shopping",
+    "Online"
+   ],
+   "address": {
+    "street_number": "",
+    "street_name": "",
+    "city": "",
+    "state": "",
+    "zip": ""
+   },
+   "geocode": {
+    "lat": 47.6223,
+    "lng": -122.3366
+   }
+  },
+  {
+   "_id": "m_walmart",
+   "name": "Walmart",
+   "category": [
+    "Shopping",
+    "Groceries"
+   ],
+   "address": {
+    "street_number": "",
+    "street_name": "",
+    "city": "",
+    "state": "",
+    "zip": ""
+   },
+   "geocode": {
+    "lat": 42.348,
+    "lng": -72.549
+   }
+  },
+  {
+   "_id": "m_target",
+   "name": "Target",
+   "category": [
+    "Shopping"
+   ],
+   "address": {
+    "street_number": "",
+    "street_name": "",
+    "city": "",
+    "state": "",
+    "zip": ""
+   },
+   "geocode": {
+    "lat": 42.354,
+    "lng": -72.6
+   }
+  },
+  {
+   "_id": "m_nike",
+   "name": "Nike",
+   "category": [
+    "Apparel"
+   ],
+   "address": {
+    "street_number": "",
+    "street_name": "",
+    "city": "",
+    "state": "",
+    "zip": ""
+   },
+   "geocode": {
+    "lat": 42.36,
+    "lng": -71.057
+   }
+  },
+  {
+   "_id": "m_apple",
+   "name": "Apple",
+   "category": [
+    "Electronics"
+   ],
+   "address": {
+    "street_number": "",
+    "street_name": "",
+    "city": "",
+    "state": "",
+    "zip": ""
+   },
+   "geocode": {
+    "lat": 42.355,
+    "lng": -71.06
+   }
+  },
+  {
+   "_id": "m_chipotle",
+   "name": "Chipotle",
+   "category": [
+    "Food",
+    "Restaurant"
+   ],
+   "address": {
+    "street_number": "",
+    "street_name": "",
+    "city": "",
+    "state": "",
+    "zip": ""
+   },
+   "geocode": {
+    "lat": 42.376,
+    "lng": -72.518
+   }
+  },
+  {
+   "_id": "m_traderjoes",
+   "name": "Trader Joe's",
+   "category": [
+    "Groceries"
+   ],
+   "address": {
+    "street_number": "",
+    "street_name": "",
+    "city": "",
+    "state": "",
+    "zip": ""
+   },
+   "geocode": {
+    "lat": 42.346,
+    "lng": -72.528
+   }
+  },
+  {
+   "_id": "m_shell",
+   "name": "Shell",
+   "category": [
+    "Gas"
+   ],
+   "address": {
+    "street_number": "",
+    "street_name": "",
+    "city": "",
+    "state": "",
+    "zip": ""
+   },
+   "geocode": {
+    "lat": 42.37,
+    "lng": -72.53
+   }
+  },
+  {
+   "_id": "m_hm",
+   "name": "H&M",
+   "category": [
+    "Apparel"
+   ],
+   "address": {
+    "street_number": "",
+    "street_name": "",
+    "city": "",
+    "state": "",
+    "zip": ""
+   },
+   "geocode": {
+    "lat": 42.35,
+    "lng": -71.06
+   }
+  }
+ ],
+ "purchases": [
+  {
+   "_id": "p_015",
+   "merchant_id": "m_starbucks",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-11-08",
+   "amount": 6.78,
+   "status": "executed",
+   "medium": "balance",
+   "description": ""
+  },
+  {
+   "_id": "p_014",
+   "merchant_id": "m_starbucks",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-11-07",
+   "amount": 8.88,
+   "status": "executed",
+   "medium": "balance",
+   "description": ""
+  },
+  {
+   "_id": "p_005",
+   "merchant_id": "m_starbucks",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-11-06",
+   "amount": 8.55,
+   "status": "executed",
+   "medium": "balance",
+   "description": ""
+  },
+  {
+   "_id": "p_053",
+   "merchant_id": "m_shell",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-11-06",
+   "amount": 39.36,
+   "status": "executed",
+   "medium": "balance",
+   "description": ""
+  },
+  {
+   "_id": "p_043",
+   "merchant_id": "m_chipotle",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-11-05",
+   "amount": 15.2,
+   "status": "executed",
+   "medium": "balance",
+   "description": ""
+  },
+  {
+   "_id": "p_003",
+   "merchant_id": "m_starbucks",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-11-04",
+   "amount": 8.11,
+   "status": "executed",
+   "medium": "balance",
+   "description": ""
+  },
+  {
+   "_id": "p_034",
+   "merchant_id": "m_target",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-11-04",
+   "amount": 21.49,
+   "status": "executed",
+   "medium": "balance",
+   "description": ""
+  },
+  {
+   "_id": "p_030",
+   "merchant_id": "m_walmart",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-11-03",
+   "amount": 54.47,
+   "status": "executed",
+   "medium": "balance",
+   "description": ""
+  },
+  {
+   "_id": "p_004",
+   "merchant_id": "m_starbucks",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-11-01",
+   "amount": 5.83,
+   "status": "executed",
+   "medium": "balance",
+   "description": ""
+  },
+  {
+   "_id": "p_016",
+   "merchant_id": "m_starbucks",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-10-27",
+   "amount": 5.45,
+   "status": "executed",
+   "medium": "balance",
+   "description": ""
+  },
+  {
+   "_id": "p_017",
+   "merchant_id": "m_starbucks",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-10-26",
+   "amount": 6.7,
+   "status": "executed",
+   "medium": "balance",
+   "description": ""
+  },
+  {
+   "_id": "p_021",
+   "merchant_id": "m_amazon",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-10-20",
+   "amount": 41.05,
+   "status": "executed",
+   "medium": "balance",
+   "description": ""
+  },
+  {
+   "_id": "p_024",
+   "merchant_id": "m_amazon",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-10-18",
+   "amount": 50.72,
+   "status": "executed",
+   "medium": "balance",
+   "description": ""
+  },
+  {
+   "_id": "p_006",
+   "merchant_id": "m_starbucks",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-10-17",
+   "amount": 4.19,
+   "status": "executed",
+   "medium": "balance",
+   "description": ""
+  },
+  {
+   "_id": "p_011",
+   "merchant_id": "m_starbucks",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-10-16",
+   "amount": 7.15,
+   "status": "executed",
+   "medium": "balance",
+   "description": ""
+  },
+  {
+   "_id": "p_008",
+   "merchant_id": "m_starbucks",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-10-14",
+   "amount": 4.45,
+   "status": "executed",
+   "medium": "balance",
+   "description": ""
+  },
+  {
+   "_id": "p_028",
+   "merchant_id": "m_walmart",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-10-13",
+   "amount": 67.66,
+   "status": "executed",
+   "medium": "balance",
+   "description": ""
+  },
+  {
+   "_id": "p_055",
+   "merchant_id": "m_shell",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-10-13",
+   "amount": 42.96,
+   "status": "executed",
+   "medium": "balance",
+   "description": ""
+  },
+  {
+   "_id": "p_044",
+   "merchant_id": "m_chipotle",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-10-10",
+   "amount": 13.37,
+   "status": "executed",
+   "medium": "balance",
+   "description": ""
+  },
+  {
+   "_id": "p_058",
+   "merchant_id": "m_shell",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-10-09",
+   "amount": 52.67,
+   "status": "executed",
+   "medium": "balance",
+   "description": ""
+  },
+  {
+   "_id": "p_060",
+   "merchant_id": "m_hm",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-10-09",
+   "amount": 49.72,
+   "status": "executed",
+   "medium": "balance",
+   "description": ""
+  },
+  {
+   "_id": "p_033",
+   "merchant_id": "m_target",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-10-08",
+   "amount": 48.49,
+   "status": "executed",
+   "medium": "balance",
+   "description": ""
+  },
+  {
+   "_id": "p_054",
+   "merchant_id": "m_shell",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-10-08",
+   "amount": 37.59,
+   "status": "executed",
+   "medium": "balance",
+   "description": ""
+  },
+  {
+   "_id": "p_026",
+   "merchant_id": "m_amazon",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-10-04",
+   "amount": 48.32,
+   "status": "executed",
+   "medium": "balance",
+   "description": ""
+  },
+  {
+   "_id": "p_040",
+   "merchant_id": "m_chipotle",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-10-04",
+   "amount": 12.7,
+   "status": "executed",
+   "medium": "balance",
+   "description": ""
+  },
+  {
+   "_id": "p_001",
+   "merchant_id": "m_starbucks",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-10-03",
+   "amount": 8.74,
+   "status": "executed",
+   "medium": "balance",
+   "description": ""
+  },
+  {
+   "_id": "p_032",
+   "merchant_id": "m_walmart",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-10-01",
+   "amount": 63.77,
+   "status": "executed",
+   "medium": "balance",
+   "description": ""
+  },
+  {
+   "_id": "p_036",
+   "merchant_id": "m_target",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-10-01",
+   "amount": 23.36,
+   "status": "executed",
+   "medium": "balance",
+   "description": ""
+  },
+  {
+   "_id": "p_041",
+   "merchant_id": "m_chipotle",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-09-30",
+   "amount": 13.97,
+   "status": "executed",
+   "medium": "balance",
+   "description": ""
+  },
+  {
+   "_id": "p_050",
+   "merchant_id": "m_traderjoes",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-09-30",
+   "amount": 31.02,
+   "status": "executed",
+   "medium": "balance",
+   "description": ""
+  },
+  {
+   "_id": "p_049",
+   "merchant_id": "m_traderjoes",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-09-25",
+   "amount": 69.92,
+   "status": "executed",
+   "medium": "balance",
+   "description": ""
+  },
+  {
+   "_id": "p_002",
+   "merchant_id": "m_starbucks",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-09-24",
+   "amount": 7.25,
+   "status": "executed",
+   "medium": "balance",
+   "description": ""
+  },
+  {
+   "_id": "p_035",
+   "merchant_id": "m_target",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-09-21",
+   "amount": 24.07,
+   "status": "executed",
+   "medium": "balance",
+   "description": ""
+  },
+  {
+   "_id": "p_009",
+   "merchant_id": "m_starbucks",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-09-20",
+   "amount": 4.3,
+   "status": "executed",
+   "medium": "balance",
+   "description": ""
+  },
+  {
+   "_id": "p_007",
+   "merchant_id": "m_starbucks",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-09-19",
+   "amount": 6.09,
+   "status": "executed",
+   "medium": "balance",
+   "description": ""
+  },
+  {
+   "_id": "p_059",
+   "merchant_id": "m_hm",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-09-19",
+   "amount": 55.24,
+   "status": "executed",
+   "medium": "balance",
+   "description": ""
+  },
+  {
+   "_id": "p_048",
+   "merchant_id": "m_traderjoes",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-09-17",
+   "amount": 42.81,
+   "status": "executed",
+   "medium": "balance",
+   "description": ""
+  },
+  {
+   "_id": "p_057",
+   "merchant_id": "m_shell",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-09-17",
+   "amount": 43.03,
+   "status": "executed",
+   "medium": "balance",
+   "description": ""
+  },
+  {
+   "_id": "p_027",
+   "merchant_id": "m_amazon",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-09-16",
+   "amount": 40.2,
+   "status": "executed",
+   "medium": "balance",
+   "description": ""
+  },
+  {
+   "_id": "p_051",
+   "merchant_id": "m_traderjoes",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-09-15",
+   "amount": 46.0,
+   "status": "executed",
+   "medium": "balance",
+   "description": ""
+  },
+  {
+   "_id": "p_037",
+   "merchant_id": "m_nike",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-09-12",
+   "amount": 111.08,
+   "status": "executed",
+   "medium": "balance",
+   "description": ""
+  },
+  {
+   "_id": "p_056",
+   "merchant_id": "m_shell",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-09-11",
+   "amount": 36.61,
+   "status": "executed",
+   "medium": "balance",
+   "description": ""
+  },
+  {
+   "_id": "p_031",
+   "merchant_id": "m_walmart",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-09-07",
+   "amount": 49.71,
+   "status": "executed",
+   "medium": "balance",
+   "description": ""
+  },
+  {
+   "_id": "p_025",
+   "merchant_id": "m_amazon",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-09-06",
+   "amount": 45.35,
+   "status": "executed",
+   "medium": "balance",
+   "description": ""
+  },
+  {
+   "_id": "p_022",
+   "merchant_id": "m_amazon",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-09-04",
+   "amount": 67.54,
+   "status": "executed",
+   "medium": "balance",
+   "description": ""
+  },
+  {
+   "_id": "p_039",
+   "merchant_id": "m_chipotle",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-09-03",
+   "amount": 13.87,
+   "status": "executed",
+   "medium": "balance",
+   "description": ""
+  },
+  {
+   "_id": "p_010",
+   "merchant_id": "m_starbucks",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-09-02",
+   "amount": 4.62,
+   "status": "executed",
+   "medium": "balance",
+   "description": ""
+  },
+  {
+   "_id": "p_023",
+   "merchant_id": "m_amazon",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-09-02",
+   "amount": 16.65,
+   "status": "executed",
+   "medium": "balance",
+   "description": ""
+  },
+  {
+   "_id": "p_013",
+   "merchant_id": "m_starbucks",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-09-01",
+   "amount": 6.93,
+   "status": "executed",
+   "medium": "balance",
+   "description": ""
+  },
+  {
+   "_id": "p_018",
+   "merchant_id": "m_starbucks",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-09-01",
+   "amount": 5.54,
+   "status": "executed",
+   "medium": "balance",
+   "description": ""
+  },
+  {
+   "_id": "p_047",
+   "merchant_id": "m_traderjoes",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-09-01",
+   "amount": 74.69,
+   "status": "executed",
+   "medium": "balance",
+   "description": ""
+  },
+  {
+   "_id": "p_012",
+   "merchant_id": "m_starbucks",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-08-31",
+   "amount": 8.74,
+   "status": "executed",
+   "medium": "balance",
+   "description": ""
+  },
+  {
+   "_id": "p_020",
+   "merchant_id": "m_amazon",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-08-31",
+   "amount": 56.55,
+   "status": "executed",
+   "medium": "balance",
+   "description": ""
+  },
+  {
+   "_id": "p_042",
+   "merchant_id": "m_chipotle",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-08-31",
+   "amount": 14.98,
+   "status": "executed",
+   "medium": "balance",
+   "description": ""
+  },
+  {
+   "_id": "p_052",
+   "merchant_id": "m_traderjoes",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-08-27",
+   "amount": 35.27,
+   "status": "executed",
+   "medium": "balance",
+   "description": ""
+  },
+  {
+   "_id": "p_038",
+   "merchant_id": "m_apple",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-08-20",
+   "amount": 261.1,
+   "status": "executed",
+   "medium": "balance",
+   "description": ""
+  },
+  {
+   "_id": "p_045",
+   "merchant_id": "m_chipotle",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-08-20",
+   "amount": 11.32,
+   "status": "executed",
+   "medium": "balance",
+   "description": ""
+  },
+  {
+   "_id": "p_019",
+   "merchant_id": "m_amazon",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-08-18",
+   "amount": 26.1,
+   "status": "executed",
+   "medium": "balance",
+   "description": ""
+  },
+  {
+   "_id": "p_029",
+   "merchant_id": "m_walmart",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-08-16",
+   "amount": 66.79,
+   "status": "executed",
+   "medium": "balance",
+   "description": ""
+  },
+  {
+   "_id": "p_046",
+   "merchant_id": "m_chipotle",
+   "payer_id": "acct_demo",
+   "purchase_date": "2026-08-16",
+   "amount": 12.55,
+   "status": "executed",
+   "medium": "balance",
+   "description": ""
+  }
+ ]
+}

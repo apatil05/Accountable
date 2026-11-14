@@ -1,0 +1,882 @@
+{
+ "m_starbucks": {
+  "categories": [
+   {
+    "category": "labor",
+    "score": 47,
+    "summary": "Placeholder. The Gemini research engine will replace this with a sourced summary of Starbucks's labor record.",
+    "claims": [
+     {
+      "text": "Example claim (mock data, not real research).",
+      "source_url": null,
+      "source_name": null,
+      "confidence": 0.5,
+      "validated": false
+     }
+    ]
+   },
+   {
+    "category": "environment",
+    "score": 68,
+    "summary": "Placeholder. The Gemini research engine will replace this with a sourced summary of Starbucks's environment record.",
+    "claims": [
+     {
+      "text": "Example claim (mock data, not real research).",
+      "source_url": null,
+      "source_name": null,
+      "confidence": 0.5,
+      "validated": false
+     }
+    ]
+   },
+   {
+    "category": "political",
+    "score": 81,
+    "summary": "Placeholder. The Gemini research engine will replace this with a sourced summary of Starbucks's political record.",
+    "claims": [
+     {
+      "text": "Example claim (mock data, not real research).",
+      "source_url": null,
+      "source_name": null,
+      "confidence": 0.5,
+      "validated": false
+     }
+    ]
+   },
+   {
+    "category": "animal_welfare",
+    "score": 49,
+    "summary": "Placeholder. The Gemini research engine will replace this with a sourced summary of Starbucks's animal welfare record.",
+    "claims": [
+     {
+      "text": "Example claim (mock data, not real research).",
+      "source_url": null,
+      "source_name": null,
+      "confidence": 0.5,
+      "validated": false
+     }
+    ]
+   },
+   {
+    "category": "community",
+    "score": 39,
+    "summary": "Placeholder. The Gemini research engine will replace this with a sourced summary of Starbucks's community record.",
+    "claims": [
+     {
+      "text": "Example claim (mock data, not real research).",
+      "source_url": null,
+      "source_name": null,
+      "confidence": 0.5,
+      "validated": false
+     }
+    ]
+   },
+   {
+    "category": "privacy",
+    "score": 34,
+    "summary": "Placeholder. The Gemini research engine will replace this with a sourced summary of Starbucks's privacy record.",
+    "claims": [
+     {
+      "text": "Example claim (mock data, not real research).",
+      "source_url": null,
+      "source_name": null,
+      "confidence": 0.5,
+      "validated": false
+     }
+    ]
+   }
+  ]
+ },
+ "m_amazon": {
+  "categories": [
+   {
+    "category": "labor",
+    "score": 30,
+    "summary": "Placeholder. The Gemini research engine will replace this with a sourced summary of Amazon's labor record.",
+    "claims": [
+     {
+      "text": "Example claim (mock data, not real research).",
+      "source_url": null,
+      "source_name": null,
+      "confidence": 0.5,
+      "validated": false
+     }
+    ]
+   },
+   {
+    "category": "environment",
+    "score": 36,
+    "summary": "Placeholder. The Gemini research engine will replace this with a sourced summary of Amazon's environment record.",
+    "claims": [
+     {
+      "text": "Example claim (mock data, not real research).",
+      "source_url": null,
+      "source_name": null,
+      "confidence": 0.5,
+      "validated": false
+     }
+    ]
+   },
+   {
+    "category": "political",
+    "score": 34,
+    "summary": "Placeholder. The Gemini research engine will replace this with a sourced summary of Amazon's political record.",
+    "claims": [
+     {
+      "text": "Example claim (mock data, not real research).",
+      "source_url": null,
+      "source_name": null,
+      "confidence": 0.5,
+      "validated": false
+     }
+    ]
+   },
+   {
+    "category": "animal_welfare",
+    "score": 39,
+    "summary": "Placeholder. The Gemini research engine will replace this with a sourced summary of Amazon's animal welfare record.",
+    "claims": [
+     {
+      "text": "Example claim (mock data, not real research).",
+      "source_url": null,
+      "source_name": null,
+      "confidence": 0.5,
+      "validated": false
+     }
+    ]
+   },
+   {
+    "category": "community",
+    "score": 67,
+    "summary": "Placeholder. The Gemini research engine will replace this with a sourced summary of Amazon's community record.",
+    "claims": [
+     {
+      "text": "Example claim (mock data, not real research).",
+      "source_url": null,
+      "source_name": null,
+      "confidence": 0.5,
+      "validated": false
+     }
+    ]
+   },
+   {
+    "category": "privacy",
+    "score": 39,
+    "summary": "Placeholder. The Gemini research engine will replace this with a sourced summary of Amazon's privacy record.",
+    "claims": [
+     {
+      "text": "Example claim (mock data, not real research).",
+      "source_url": null,
+      "source_name": null,
+      "confidence": 0.5,
+      "validated": false
+     }
+    ]
+   }
+  ]
+ },
+ "m_walmart": {
+  "categories": [
+   {
+    "category": "labor",
+    "score": 25,
+    "summary": "Placeholder. The Gemini research engine will replace this with a sourced summary of Walmart's labor record.",
+    "claims": [
+     {
+      "text": "Example claim (mock data, not real research).",
+      "source_url": null,
+      "source_name": null,
+      "confidence": 0.5,
+      "validated": false
+     }
+    ]
+   },
+   {
+    "category": "environment",
+    "score": 56,
+    "summary": "Placeholder. The Gemini research engine will replace this with a sourced summary of Walmart's environment record.",
+    "claims": [
+     {
+      "text": "Example claim (mock data, not real research).",
+      "source_url": null,
+      "source_name": null,
+      "confidence": 0.5,
+      "validated": false
+     }
+    ]
+   },
+   {
+    "category": "political",
+    "score": 78,
+    "summary": "Placeholder. The Gemini research engine will replace this with a sourced summary of Walmart's political record.",
+    "claims": [
+     {
+      "text": "Example claim (mock data, not real research).",
+      "source_url": null,
+      "source_name": null,
+      "confidence": 0.5,
+      "validated": false
+     }
+    ]
+   },
+   {
+    "category": "animal_welfare",
+    "score": 62,
+    "summary": "Placeholder. The Gemini research engine will replace this with a sourced summary of Walmart's animal welfare record.",
+    "claims": [
+     {
+      "text": "Example claim (mock data, not real research).",
+      "source_url": null,
+      "source_name": null,
+      "confidence": 0.5,
+      "validated": false
+     }
+    ]
+   },
+   {
+    "category": "community",
+    "score": 36,
+    "summary": "Placeholder. The Gemini research engine will replace this with a sourced summary of Walmart's community record.",
+    "claims": [
+     {
+      "text": "Example claim (mock data, not real research).",
+      "source_url": null,
+      "source_name": null,
+      "confidence": 0.5,
+      "validated": false
+     }
+    ]
+   },
+   {
+    "category": "privacy",
+    "score": 41,
+    "summary": "Placeholder. The Gemini research engine will replace this with a sourced summary of Walmart's privacy record.",
+    "claims": [
+     {
+      "text": "Example claim (mock data, not real research).",
+      "source_url": null,
+      "source_name": null,
+      "confidence": 0.5,
+      "validated": false
+     }
+    ]
+   }
+  ]
+ },
+ "m_target": {
+  "categories": [
+   {
+    "category": "labor",
+    "score": 43,
+    "summary": "Placeholder. The Gemini research engine will replace this with a sourced summary of Target's labor record.",
+    "claims": [
+     {
+      "text": "Example claim (mock data, not real research).",
+      "source_url": null,
+      "source_name": null,
+      "confidence": 0.5,
+      "validated": false
+     }
+    ]
+   },
+   {
+    "category": "environment",
+    "score": 25,
+    "summary": "Placeholder. The Gemini research engine will replace this with a sourced summary of Target's environment record.",
+    "claims": [
+     {
+      "text": "Example claim (mock data, not real research).",
+      "source_url": null,
+      "source_name": null,
+      "confidence": 0.5,
+      "validated": false
+     }
+    ]
+   },
+   {
+    "category": "political",
+    "score": 34,
+    "summary": "Placeholder. The Gemini research engine will replace this with a sourced summary of Target's political record.",
+    "claims": [
+     {
+      "text": "Example claim (mock data, not real research).",
+      "source_url": null,
+      "source_name": null,
+      "confidence": 0.5,
+      "validated": false
+     }
+    ]
+   },
+   {
+    "category": "animal_welfare",
+    "score": 51,
+    "summary": "Placeholder. The Gemini research engine will replace this with a sourced summary of Target's animal welfare record.",
+    "claims": [
+     {
+      "text": "Example claim (mock data, not real research).",
+      "source_url": null,
+      "source_name": null,
+      "confidence": 0.5,
+      "validated": false
+     }
+    ]
+   },
+   {
+    "category": "community",
+    "score": 59,
+    "summary": "Placeholder. The Gemini research engine will replace this with a sourced summary of Target's community record.",
+    "claims": [
+     {
+      "text": "Example claim (mock data, not real research).",
+      "source_url": null,
+      "source_name": null,
+      "confidence": 0.5,
+      "validated": false
+     }
+    ]
+   },
+   {
+    "category": "privacy",
+    "score": 48,
+    "summary": "Placeholder. The Gemini research engine will replace this with a sourced summary of Target's privacy record.",
+    "claims": [
+     {
+      "text": "Example claim (mock data, not real research).",
+      "source_url": null,
+      "source_name": null,
+      "confidence": 0.5,
+      "validated": false
+     }
+    ]
+   }
+  ]
+ },
+ "m_nike": {
+  "categories": [
+   {
+    "category": "labor",
+    "score": 64,
+    "summary": "Placeholder. The Gemini research engine will replace this with a sourced summary of Nike's labor record.",
+    "claims": [
+     {
+      "text": "Example claim (mock data, not real research).",
+      "source_url": null,
+      "source_name": null,
+      "confidence": 0.5,
+      "validated": false
+     }
+    ]
+   },
+   {
+    "category": "environment",
+    "score": 61,
+    "summary": "Placeholder. The Gemini research engine will replace this with a sourced summary of Nike's environment record.",
+    "claims": [
+     {
+      "text": "Example claim (mock data, not real research).",
+      "source_url": null,
+      "source_name": null,
+      "confidence": 0.5,
+      "validated": false
+     }
+    ]
+   },
+   {
+    "category": "political",
+    "score": 45,
+    "summary": "Placeholder. The Gemini research engine will replace this with a sourced summary of Nike's political record.",
+    "claims": [
+     {
+      "text": "Example claim (mock data, not real research).",
+      "source_url": null,
+      "source_name": null,
+      "confidence": 0.5,
+      "validated": false
+     }
+    ]
+   },
+   {
+    "category": "animal_welfare",
+    "score": 85,
+    "summary": "Placeholder. The Gemini research engine will replace this with a sourced summary of Nike's animal welfare record.",
+    "claims": [
+     {
+      "text": "Example claim (mock data, not real research).",
+      "source_url": null,
+      "source_name": null,
+      "confidence": 0.5,
+      "validated": false
+     }
+    ]
+   },
+   {
+    "category": "community",
+    "score": 33,
+    "summary": "Placeholder. The Gemini research engine will replace this with a sourced summary of Nike's community record.",
+    "claims": [
+     {
+      "text": "Example claim (mock data, not real research).",
+      "source_url": null,
+      "source_name": null,
+      "confidence": 0.5,
+      "validated": false
+     }
+    ]
+   },
+   {
+    "category": "privacy",
+    "score": 69,
+    "summary": "Placeholder. The Gemini research engine will replace this with a sourced summary of Nike's privacy record.",
+    "claims": [
+     {
+      "text": "Example claim (mock data, not real research).",
+      "source_url": null,
+      "source_name": null,
+      "confidence": 0.5,
+      "validated": false
+     }
+    ]
+   }
+  ]
+ },
+ "m_apple": {
+  "categories": [
+   {
+    "category": "labor",
+    "score": 79,
+    "summary": "Placeholder. The Gemini research engine will replace this with a sourced summary of Apple's labor record.",
+    "claims": [
+     {
+      "text": "Example claim (mock data, not real research).",
+      "source_url": null,
+      "source_name": null,
+      "confidence": 0.5,
+      "validated": false
+     }
+    ]
+   },
+   {
+    "category": "environment",
+    "score": 57,
+    "summary": "Placeholder. The Gemini research engine will replace this with a sourced summary of Apple's environment record.",
+    "claims": [
+     {
+      "text": "Example claim (mock data, not real research).",
+      "source_url": null,
+      "source_name": null,
+      "confidence": 0.5,
+      "validated": false
+     }
+    ]
+   },
+   {
+    "category": "political",
+    "score": 85,
+    "summary": "Placeholder. The Gemini research engine will replace this with a sourced summary of Apple's political record.",
+    "claims": [
+     {
+      "text": "Example claim (mock data, not real research).",
+      "source_url": null,
+      "source_name": null,
+      "confidence": 0.5,
+      "validated": false
+     }
+    ]
+   },
+   {
+    "category": "animal_welfare",
+    "score": 64,
+    "summary": "Placeholder. The Gemini research engine will replace this with a sourced summary of Apple's animal welfare record.",
+    "claims": [
+     {
+      "text": "Example claim (mock data, not real research).",
+      "source_url": null,
+      "source_name": null,
+      "confidence": 0.5,
+      "validated": false
+     }
+    ]
+   },
+   {
+    "category": "community",
+    "score": 66,
+    "summary": "Placeholder. The Gemini research engine will replace this with a sourced summary of Apple's community record.",
+    "claims": [
+     {
+      "text": "Example claim (mock data, not real research).",
+      "source_url": null,
+      "source_name": null,
+      "confidence": 0.5,
+      "validated": false
+     }
+    ]
+   },
+   {
+    "category": "privacy",
+    "score": 68,
+    "summary": "Placeholder. The Gemini research engine will replace this with a sourced summary of Apple's privacy record.",
+    "claims": [
+     {
+      "text": "Example claim (mock data, not real research).",
+      "source_url": null,
+      "source_name": null,
+      "confidence": 0.5,
+      "validated": false
+     }
+    ]
+   }
+  ]
+ },
+ "m_chipotle": {
+  "categories": [
+   {
+    "category": "labor",
+    "score": 72,
+    "summary": "Placeholder. The Gemini research engine will replace this with a sourced summary of Chipotle's labor record.",
+    "claims": [
+     {
+      "text": "Example claim (mock data, not real research).",
+      "source_url": null,
+      "source_name": null,
+      "confidence": 0.5,
+      "validated": false
+     }
+    ]
+   },
+   {
+    "category": "environment",
+    "score": 28,
+    "summary": "Placeholder. The Gemini research engine will replace this with a sourced summary of Chipotle's environment record.",
+    "claims": [
+     {
+      "text": "Example claim (mock data, not real research).",
+      "source_url": null,
+      "source_name": null,
+      "confidence": 0.5,
+      "validated": false
+     }
+    ]
+   },
+   {
+    "category": "political",
+    "score": 54,
+    "summary": "Placeholder. The Gemini research engine will replace this with a sourced summary of Chipotle's political record.",
+    "claims": [
+     {
+      "text": "Example claim (mock data, not real research).",
+      "source_url": null,
+      "source_name": null,
+      "confidence": 0.5,
+      "validated": false
+     }
+    ]
+   },
+   {
+    "category": "animal_welfare",
+    "score": 82,
+    "summary": "Placeholder. The Gemini research engine will replace this with a sourced summary of Chipotle's animal welfare record.",
+    "claims": [
+     {
+      "text": "Example claim (mock data, not real research).",
+      "source_url": null,
+      "source_name": null,
+      "confidence": 0.5,
+      "validated": false
+     }
+    ]
+   },
+   {
+    "category": "community",
+    "score": 80,
+    "summary": "Placeholder. The Gemini research engine will replace this with a sourced summary of Chipotle's community record.",
+    "claims": [
+     {
+      "text": "Example claim (mock data, not real research).",
+      "source_url": null,
+      "source_name": null,
+      "confidence": 0.5,
+      "validated": false
+     }
+    ]
+   },
+   {
+    "category": "privacy",
+    "score": 74,
+    "summary": "Placeholder. The Gemini research engine will replace this with a sourced summary of Chipotle's privacy record.",
+    "claims": [
+     {
+      "text": "Example claim (mock data, not real research).",
+      "source_url": null,
+      "source_name": null,
+      "confidence": 0.5,
+      "validated": false
+     }
+    ]
+   }
+  ]
+ },
+ "m_traderjoes": {
+  "categories": [
+   {
+    "category": "labor",
+    "score": 85,
+    "summary": "Placeholder. The Gemini research engine will replace this with a sourced summary of Trader Joe's's labor record.",
+    "claims": [
+     {
+      "text": "Example claim (mock data, not real research).",
+      "source_url": null,
+      "source_name": null,
+      "confidence": 0.5,
+      "validated": false
+     }
+    ]
+   },
+   {
+    "category": "environment",
+    "score": 80,
+    "summary": "Placeholder. The Gemini research engine will replace this with a sourced summary of Trader Joe's's environment record.",
+    "claims": [
+     {
+      "text": "Example claim (mock data, not real research).",
+      "source_url": null,
+      "source_name": null,
+      "confidence": 0.5,
+      "validated": false
+     }
+    ]
+   },
+   {
+    "category": "political",
+    "score": 68,
+    "summary": "Placeholder. The Gemini research engine will replace this with a sourced summary of Trader Joe's's political record.",
+    "claims": [
+     {
+      "text": "Example claim (mock data, not real research).",
+      "source_url": null,
+      "source_name": null,
+      "confidence": 0.5,
+      "validated": false
+     }
+    ]
+   },
+   {
+    "category": "animal_welfare",
+    "score": 76,
+    "summary": "Placeholder. The Gemini research engine will replace this with a sourced summary of Trader Joe's's animal welfare record.",
+    "claims": [
+     {
+      "text": "Example claim (mock data, not real research).",
+      "source_url": null,
+      "source_name": null,
+      "confidence": 0.5,
+      "validated": false
+     }
+    ]
+   },
+   {
+    "category": "community",
+    "score": 60,
+    "summary": "Placeholder. The Gemini research engine will replace this with a sourced summary of Trader Joe's's community record.",
+    "claims": [
+     {
+      "text": "Example claim (mock data, not real research).",
+      "source_url": null,
+      "source_name": null,
+      "confidence": 0.5,
+      "validated": false
+     }
+    ]
+   },
+   {
+    "category": "privacy",
+    "score": 50,
+    "summary": "Placeholder. The Gemini research engine will replace this with a sourced summary of Trader Joe's's privacy record.",
+    "claims": [
+     {
+      "text": "Example claim (mock data, not real research).",
+      "source_url": null,
+      "source_name": null,
+      "confidence": 0.5,
+      "validated": false
+     }
+    ]
+   }
+  ]
+ },
+ "m_shell": {
+  "categories": [
+   {
+    "category": "labor",
+    "score": 50,
+    "summary": "Placeholder. The Gemini research engine will replace this with a sourced summary of Shell's labor record.",
+    "claims": [
+     {
+      "text": "Example claim (mock data, not real research).",
+      "source_url": null,
+      "source_name": null,
+      "confidence": 0.5,
+      "validated": false
+     }
+    ]
+   },
+   {
+    "category": "environment",
+    "score": 50,
+    "summary": "Placeholder. The Gemini research engine will replace this with a sourced summary of Shell's environment record.",
+    "claims": [
+     {
+      "text": "Example claim (mock data, not real research).",
+      "source_url": null,
+      "source_name": null,
+      "confidence": 0.5,
+      "validated": false
+     }
+    ]
+   },
+   {
+    "category": "political",
+    "score": 50,
+    "summary": "Placeholder. The Gemini research engine will replace this with a sourced summary of Shell's political record.",
+    "claims": [
+     {
+      "text": "Example claim (mock data, not real research).",
+      "source_url": null,
+      "source_name": null,
+      "confidence": 0.5,
+      "validated": false
+     }
+    ]
+   },
+   {
+    "category": "animal_welfare",
+    "score": 31,
+    "summary": "Placeholder. The Gemini research engine will replace this with a sourced summary of Shell's animal welfare record.",
+    "claims": [
+     {
+      "text": "Example claim (mock data, not real research).",
+      "source_url": null,
+      "source_name": null,
+      "confidence": 0.5,
+      "validated": false
+     }
+    ]
+   },
+   {
+    "category": "community",
+    "score": 55,
+    "summary": "Placeholder. The Gemini research engine will replace this with a sourced summary of Shell's community record.",
+    "claims": [
+     {
+      "text": "Example claim (mock data, not real research).",
+      "source_url": null,
+      "source_name": null,
+      "confidence": 0.5,
+      "validated": false
+     }
+    ]
+   },
+   {
+    "category": "privacy",
+    "score": 65,
+    "summary": "Placeholder. The Gemini research engine will replace this with a sourced summary of Shell's privacy record.",
+    "claims": [
+     {
+      "text": "Example claim (mock data, not real research).",
+      "source_url": null,
+      "source_name": null,
+      "confidence": 0.5,
+      "validated": false
+     }
+    ]
+   }
+  ]
+ },
+ "m_hm": {
+  "categories": [
+   {
+    "category": "labor",
+    "score": 50,
+    "summary": "Placeholder. The Gemini research engine will replace this with a sourced summary of H&M's labor record.",
+    "claims": [
+     {
+      "text": "Example claim (mock data, not real research).",
+      "source_url": null,
+      "source_name": null,
+      "confidence": 0.5,
+      "validated": false
+     }
+    ]
+   },
+   {
+    "category": "environment",
+    "score": 28,
+    "summary": "Placeholder. The Gemini research engine will replace this with a sourced summary of H&M's environment record.",
+    "claims": [
+     {
+      "text": "Example claim (mock data, not real research).",
+      "source_url": null,
+      "source_name": null,
+      "confidence": 0.5,
+      "validated": false
+     }
+    ]
+   },
+   {
+    "category": "political",
+    "score": 37,
+    "summary": "Placeholder. The Gemini research engine will replace this with a sourced summary of H&M's political record.",
+    "claims": [
+     {
+      "text": "Example claim (mock data, not real research).",
+      "source_url": null,
+      "source_name": null,
+      "confidence": 0.5,
+      "validated": false
+     }
+    ]
+   },
+   {
+    "category": "animal_welfare",
+    "score": 29,
+    "summary": "Placeholder. The Gemini research engine will replace this with a sourced summary of H&M's animal welfare record.",
+    "claims": [
+     {
+      "text": "Example claim (mock data, not real research).",
+      "source_url": null,
+      "source_name": null,
+      "confidence": 0.5,
+      "validated": false
+     }
+    ]
+   },
+   {
+    "category": "community",
+    "score": 38,
+    "summary": "Placeholder. The Gemini research engine will replace this with a sourced summary of H&M's community record.",
+    "claims": [
+     {
+      "text": "Example claim (mock data, not real research).",
+      "source_url": null,
+      "source_name": null,
+      "confidence": 0.5,
+      "validated": false
+     }
+    ]
+   },
+   {
+    "category": "privacy",
+    "score": 53,
+    "summary": "Placeholder. The Gemini research engine will replace this with a sourced summary of H&M's privacy record.",
+    "claims": [
+     {
+      "text": "Example claim (mock data, not real research).",
+      "source_url": null,
+      "source_name": null,
+      "confidence": 0.5,
+      "validated": false
+     }
+    ]
+   }
+  ]
+ }
+}
