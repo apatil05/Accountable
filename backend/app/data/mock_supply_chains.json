@@ -1,0 +1,444 @@
+{
+ "m_starbucks": {
+  "product": "Latte",
+  "stages": [
+   {
+    "order": 1,
+    "stage": "Coffee farming",
+    "place": "Huila, Colombia",
+    "lat": 2.53,
+    "lng": -75.52,
+    "description": ""
+   },
+   {
+    "order": 2,
+    "stage": "Export",
+    "place": "Cartagena, Colombia",
+    "lat": 10.39,
+    "lng": -75.48,
+    "description": ""
+   },
+   {
+    "order": 3,
+    "stage": "Roasting",
+    "place": "York, PA",
+    "lat": 39.96,
+    "lng": -76.73,
+    "description": ""
+   },
+   {
+    "order": 4,
+    "stage": "Distribution",
+    "place": "Regional DC",
+    "lat": 41.76,
+    "lng": -72.67,
+    "description": ""
+   },
+   {
+    "order": 5,
+    "stage": "Your purchase",
+    "place": "Amherst, MA",
+    "lat": 42.3732,
+    "lng": -72.5199,
+    "description": ""
+   }
+  ]
+ },
+ "m_amazon": {
+  "product": "Smart speaker",
+  "stages": [
+   {
+    "order": 1,
+    "stage": "Mineral mining",
+    "place": "Baotou, China",
+    "lat": 40.66,
+    "lng": 109.84,
+    "description": ""
+   },
+   {
+    "order": 2,
+    "stage": "Component manufacturing",
+    "place": "Shenzhen, China",
+    "lat": 22.54,
+    "lng": 114.06,
+    "description": ""
+   },
+   {
+    "order": 3,
+    "stage": "Ocean freight",
+    "place": "Port of Long Beach, CA",
+    "lat": 33.75,
+    "lng": -118.21,
+    "description": ""
+   },
+   {
+    "order": 4,
+    "stage": "Fulfillment center",
+    "place": "Fulfillment center, NJ",
+    "lat": 40.5,
+    "lng": -74.45,
+    "description": ""
+   },
+   {
+    "order": 5,
+    "stage": "Your purchase",
+    "place": "Amherst, MA",
+    "lat": 42.3732,
+    "lng": -72.5199,
+    "description": ""
+   }
+  ]
+ },
+ "m_walmart": {
+  "product": "Cotton T-shirt",
+  "stages": [
+   {
+    "order": 1,
+    "stage": "Cotton farming",
+    "place": "Gujarat, India",
+    "lat": 22.26,
+    "lng": 71.19,
+    "description": ""
+   },
+   {
+    "order": 2,
+    "stage": "Cut & sew",
+    "place": "Dhaka, Bangladesh",
+    "lat": 23.81,
+    "lng": 90.41,
+    "description": ""
+   },
+   {
+    "order": 3,
+    "stage": "Ocean freight",
+    "place": "Savannah, GA",
+    "lat": 32.08,
+    "lng": -81.09,
+    "description": ""
+   },
+   {
+    "order": 4,
+    "stage": "Distribution",
+    "place": "Bentonville, AR",
+    "lat": 36.37,
+    "lng": -94.21,
+    "description": ""
+   },
+   {
+    "order": 5,
+    "stage": "Your purchase",
+    "place": "Amherst, MA",
+    "lat": 42.3732,
+    "lng": -72.5199,
+    "description": ""
+   }
+  ]
+ },
+ "m_target": {
+  "product": "Ceramic mug",
+  "stages": [
+   {
+    "order": 1,
+    "stage": "Clay & glazing",
+    "place": "Guangdong, China",
+    "lat": 23.13,
+    "lng": 113.26,
+    "description": ""
+   },
+   {
+    "order": 2,
+    "stage": "Ocean freight",
+    "place": "Port of Tacoma, WA",
+    "lat": 47.27,
+    "lng": -122.41,
+    "description": ""
+   },
+   {
+    "order": 3,
+    "stage": "Distribution",
+    "place": "Regional DC, CT",
+    "lat": 41.6,
+    "lng": -72.7,
+    "description": ""
+   },
+   {
+    "order": 4,
+    "stage": "Your purchase",
+    "place": "Amherst, MA",
+    "lat": 42.3732,
+    "lng": -72.5199,
+    "description": ""
+   }
+  ]
+ },
+ "m_nike": {
+  "product": "Running shoes",
+  "stages": [
+   {
+    "order": 1,
+    "stage": "Rubber",
+    "place": "Southern Thailand",
+    "lat": 7.88,
+    "lng": 98.39,
+    "description": ""
+   },
+   {
+    "order": 2,
+    "stage": "Synthetic textiles",
+    "place": "Taichung, Taiwan",
+    "lat": 24.15,
+    "lng": 120.67,
+    "description": ""
+   },
+   {
+    "order": 3,
+    "stage": "Assembly",
+    "place": "Ho Chi Minh City, Vietnam",
+    "lat": 10.82,
+    "lng": 106.63,
+    "description": ""
+   },
+   {
+    "order": 4,
+    "stage": "Ocean freight",
+    "place": "Port of Los Angeles",
+    "lat": 33.73,
+    "lng": -118.26,
+    "description": ""
+   },
+   {
+    "order": 5,
+    "stage": "Distribution",
+    "place": "Memphis, TN",
+    "lat": 35.15,
+    "lng": -90.05,
+    "description": ""
+   },
+   {
+    "order": 6,
+    "stage": "Your purchase",
+    "place": "Amherst, MA",
+    "lat": 42.3732,
+    "lng": -72.5199,
+    "description": ""
+   }
+  ]
+ },
+ "m_apple": {
+  "product": "Smartphone",
+  "stages": [
+   {
+    "order": 1,
+    "stage": "Cobalt mining",
+    "place": "Katanga, DR Congo",
+    "lat": -11.66,
+    "lng": 27.48,
+    "description": ""
+   },
+   {
+    "order": 2,
+    "stage": "Chip fabrication",
+    "place": "Hsinchu, Taiwan",
+    "lat": 24.8,
+    "lng": 120.97,
+    "description": ""
+   },
+   {
+    "order": 3,
+    "stage": "Final assembly",
+    "place": "Zhengzhou, China",
+    "lat": 34.75,
+    "lng": 113.63,
+    "description": ""
+   },
+   {
+    "order": 4,
+    "stage": "Air freight",
+    "place": "Louisville, KY",
+    "lat": 38.25,
+    "lng": -85.76,
+    "description": ""
+   },
+   {
+    "order": 5,
+    "stage": "Your purchase",
+    "place": "Amherst, MA",
+    "lat": 42.3732,
+    "lng": -72.5199,
+    "description": ""
+   }
+  ]
+ },
+ "m_chipotle": {
+  "product": "Burrito bowl",
+  "stages": [
+   {
+    "order": 1,
+    "stage": "Avocados",
+    "place": "Michoac\u00e1n, Mexico",
+    "lat": 19.57,
+    "lng": -101.71,
+    "description": ""
+   },
+   {
+    "order": 2,
+    "stage": "Beef",
+    "place": "Nebraska",
+    "lat": 41.49,
+    "lng": -99.9,
+    "description": ""
+   },
+   {
+    "order": 3,
+    "stage": "Rice",
+    "place": "Arkansas",
+    "lat": 34.8,
+    "lng": -92.2,
+    "description": ""
+   },
+   {
+    "order": 4,
+    "stage": "Distribution",
+    "place": "Regional DC, NY",
+    "lat": 42.65,
+    "lng": -73.75,
+    "description": ""
+   },
+   {
+    "order": 5,
+    "stage": "Your purchase",
+    "place": "Amherst, MA",
+    "lat": 42.3732,
+    "lng": -72.5199,
+    "description": ""
+   }
+  ]
+ },
+ "m_traderjoes": {
+  "product": "Bananas",
+  "stages": [
+   {
+    "order": 1,
+    "stage": "Banana farming",
+    "place": "Guayas, Ecuador",
+    "lat": -2.19,
+    "lng": -79.89,
+    "description": ""
+   },
+   {
+    "order": 2,
+    "stage": "Ocean freight",
+    "place": "Port of Philadelphia",
+    "lat": 39.95,
+    "lng": -75.14,
+    "description": ""
+   },
+   {
+    "order": 3,
+    "stage": "Distribution",
+    "place": "Regional DC, CT",
+    "lat": 41.66,
+    "lng": -72.78,
+    "description": ""
+   },
+   {
+    "order": 4,
+    "stage": "Your purchase",
+    "place": "Amherst, MA",
+    "lat": 42.3732,
+    "lng": -72.5199,
+    "description": ""
+   }
+  ]
+ },
+ "m_shell": {
+  "product": "Gasoline",
+  "stages": [
+   {
+    "order": 1,
+    "stage": "Crude extraction",
+    "place": "Permian Basin, TX",
+    "lat": 31.85,
+    "lng": -102.37,
+    "description": ""
+   },
+   {
+    "order": 2,
+    "stage": "Refining",
+    "place": "Deer Park, TX",
+    "lat": 29.71,
+    "lng": -95.12,
+    "description": ""
+   },
+   {
+    "order": 3,
+    "stage": "Pipeline",
+    "place": "Linden, NJ",
+    "lat": 40.62,
+    "lng": -74.24,
+    "description": ""
+   },
+   {
+    "order": 4,
+    "stage": "Terminal",
+    "place": "Springfield, MA",
+    "lat": 42.1,
+    "lng": -72.59,
+    "description": ""
+   },
+   {
+    "order": 5,
+    "stage": "Your purchase",
+    "place": "Amherst, MA",
+    "lat": 42.3732,
+    "lng": -72.5199,
+    "description": ""
+   }
+  ]
+ },
+ "m_hm": {
+  "product": "Jeans",
+  "stages": [
+   {
+    "order": 1,
+    "stage": "Cotton farming",
+    "place": "Southeastern Anatolia, Turkey",
+    "lat": 37.16,
+    "lng": 38.79,
+    "description": ""
+   },
+   {
+    "order": 2,
+    "stage": "Denim mill",
+    "place": "Izmir, Turkey",
+    "lat": 38.42,
+    "lng": 27.14,
+    "description": ""
+   },
+   {
+    "order": 3,
+    "stage": "Cut & sew",
+    "place": "Dhaka, Bangladesh",
+    "lat": 23.81,
+    "lng": 90.41,
+    "description": ""
+   },
+   {
+    "order": 4,
+    "stage": "Ocean freight",
+    "place": "Port Newark, NJ",
+    "lat": 40.68,
+    "lng": -74.15,
+    "description": ""
+   },
+   {
+    "order": 5,
+    "stage": "Your purchase",
+    "place": "Amherst, MA",
+    "lat": 42.3732,
+    "lng": -72.5199,
+    "description": ""
+   }
+  ]
+ }
+}

@@ -1,0 +1,123 @@
+{
+ "Coffee": [
+  {
+   "name": "Local independent caf\u00e9",
+   "reason": "Keeps money in the local economy; ask about direct-trade beans.",
+   "is_local": true,
+   "estimated_score": null,
+   "url": null
+  },
+  {
+   "name": "Fair-trade certified roaster",
+   "reason": "Third-party certified farmer pay standards.",
+   "is_local": false,
+   "estimated_score": null,
+   "url": null
+  }
+ ],
+ "Online": [
+  {
+   "name": "Local independent retailer",
+   "reason": "Shorter supply chain, local jobs.",
+   "is_local": true,
+   "estimated_score": null,
+   "url": null
+  },
+  {
+   "name": "Secondhand / refurbished marketplace",
+   "reason": "Avoids new manufacturing.",
+   "is_local": false,
+   "estimated_score": null,
+   "url": null
+  }
+ ],
+ "Groceries": [
+  {
+   "name": "Local farmers market",
+   "reason": "Seasonal, short supply chain.",
+   "is_local": true,
+   "estimated_score": null,
+   "url": null
+  },
+  {
+   "name": "Food co-op",
+   "reason": "Member-owned, often local sourcing.",
+   "is_local": true,
+   "estimated_score": null,
+   "url": null
+  }
+ ],
+ "Shopping": [
+  {
+   "name": "Local independent retailer",
+   "reason": "Keeps money in the local economy.",
+   "is_local": true,
+   "estimated_score": null,
+   "url": null
+  },
+  {
+   "name": "Thrift / secondhand store",
+   "reason": "Avoids new manufacturing.",
+   "is_local": true,
+   "estimated_score": null,
+   "url": null
+  }
+ ],
+ "Apparel": [
+  {
+   "name": "Thrift / consignment store",
+   "reason": "Extends garment life.",
+   "is_local": true,
+   "estimated_score": null,
+   "url": null
+  },
+  {
+   "name": "B Corp certified apparel brand",
+   "reason": "Audited social and environmental standards.",
+   "is_local": false,
+   "estimated_score": null,
+   "url": null
+  }
+ ],
+ "Electronics": [
+  {
+   "name": "Certified refurbished",
+   "reason": "Avoids new mining and manufacturing.",
+   "is_local": false,
+   "estimated_score": null,
+   "url": null
+  },
+  {
+   "name": "Local repair shop",
+   "reason": "Extend the life of what you own.",
+   "is_local": true,
+   "estimated_score": null,
+   "url": null
+  }
+ ],
+ "Restaurant": [
+  {
+   "name": "Local family-owned restaurant",
+   "reason": "Keeps money in the local economy.",
+   "is_local": true,
+   "estimated_score": null,
+   "url": null
+  }
+ ],
+ "Gas": [
+  {
+   "name": "Public transit / bike",
+   "reason": "Cuts fuel use entirely.",
+   "is_local": true,
+   "estimated_score": null,
+   "url": null
+  },
+  {
+   "name": "Local EV charging",
+   "reason": "Lower emissions per mile.",
+   "is_local": true,
+   "estimated_score": null,
+   "url": null
+  }
+ ]
+}
