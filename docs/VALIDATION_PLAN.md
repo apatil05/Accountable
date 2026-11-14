@@ -1,0 +1,110 @@
+# Validation plan: verifying Gemini research
+
+Owner: Person B (Research engine). Branch: `gemini-research` (same PR as the research work).
+
+## Why
+
+A live run on Starbucks (2026-11-14) produced 18 claims and all 18 came back `validated=True`. The old rule in `validation.py` was "has a URL and confidence >= 0.6", and Gemini set confidence itself (17 of 18 were 0.95), so in practice the LLM decided `validated`. Nothing fetched the page or checked that it supported the claim. One validated claim cited a reddit thread; others cited a union campaign site and a plaintiff law firm press release as plain fact.
+
+## Status
+
+| Step | Status |
+| --- | --- |
+| 1. Domain tiers + blocklist | Done |
+| 2. Fetcher (HTML + PDF, SSRF guard) | Done |
+| 3. Judge call (per source page, passages only, 30s cap) | Done |
+| 4. Decision logic + per-claim logging | Done |
+| 5. Rescore on validated claims, shrink toward 50, null when none | Done |
+| 6. Scoring / verdict skip null categories | Done |
+| 7. Research prompt: 4-6 claims per area, source steering | Done |
+| 8. Caching: don't cache incomplete reports; profile-independent validated cache | Done (in memory; persistence still TODO) |
+| 9. Evaluation set + script | Not started |
+| 10. Pre-warm script for demo merchants | Not started |
+| Frontend null score + hide empty claim list | Done, not type-checked (no Node on the dev machine; run `npm run build`) |
+
+## Decisions
+
+| Topic | Decision |
+| --- | --- |
+| Bar for `validated=True` | Page fetched, page mentions the merchant, AND a Gemini judge reading the page says it supports the claim, with a verbatim quote that code finds in the page |
+| Failed claims | Hidden from the report and excluded from scoring |
+| Source quality | Blocklist forums/social; tier the rest; user's `trusted_sources` move up one tier. Tiers only affect wording and confidence, not scoring |
+| Low-tier sources (company, advocacy, law firm, unknown) | Validated if supported, but the judge rewrites the claim with attribution ("A lawsuit alleges...", "Starbucks says...") |
+| "supported" vs "partial" | Rewording or adding attribution is still "supported". "partial" only when a specific detail (number, date, scope, actor) had to be removed or corrected; the rewritten claim must be fully supported |
+| Category fit | The judge names the category each claim is evidence about. "none" (not about the merchant's conduct) fails the claim; a different category moves it there |
+| Fetch blocked / paywalled / JS / PDF | httpx + pypdf first; if that fails, the judge reads the page via Gemini's `url_context` tool. If neither can read it, the claim is dropped |
+| `url_context` verdicts | Accepted for any non-blocked domain (code can't check the quote on this path). Logged as `method=url_context` so eval can measure it; restrict to tier 1-2 if precision is poor |
+| Judge input | Only the page passages most relevant to the claims (~9k chars, neighbors included), not the whole page. The quote check still runs against the full page |
+| Judge time cap | 30s per judge call on both paths. On timeout the claims are dropped and the report is still complete (cached) |
+| Judge batching | One judge call per source URL, parallel, global cap of 8 concurrent calls |
+| Judge model | Same `GEMINI_MODEL` |
+| Judge failure (rate limit, outage, not a timeout) | Claims hidden, report NOT cached so the next request retries; research stays cached |
+| Category score | Gemini rescores each category (no search) from its validated claims only, then code shrinks it toward 50 by evidence count: `50 + (s - 50) * n / (n + 2)` |
+| Category summary | Written by the same rescore call from validated claims only, keeping the claims' attribution |
+| Category with no validated claims | `score = None`, summary "Not enough verified evidence was found for this category.", skipped by overall/personalized/deal-breakers/verdict |
+| Rescore failure | Show research scores with only validated claims; don't cache, so the next request retries |
+| Recency | The judge extracts the event year (internal `Claim._event_year`, not serialized); the rescore prompt weights the last 5 years more |
+| Validation details (quote, tier, reason, timing) | Never exposed by the API. Logged only |
+| Domain tiers / blocklist / aliases | Python constants in `validation.py` |
+| Mock mode | No fetch, judge, or rescore. Placeholder claims are unsourced, so they are hidden; mock scores stay so the offline demo still has a dashboard and verdicts |
+| Research variability | Results differ between research runs; rely on caching (one stable result per merchant), re-research only on demand |
+| Evaluation | Hand-labeled set of ~30 claims across 3 merchants plus planted fakes; script reports judge precision/recall |
+
+## Pipeline
+
+```text
+research_with_gemini            (grounded search, 4-6 claims/area, steered sources)
+  -> validation.validate_claims
+       1. group claims by source URL
+       2. per URL, in parallel (cap 8):
+            fetch (httpx 10s, redirects checked, PDF via pypdf)
+            -> domain tier on the final URL (blocked -> fail)
+            -> judge call (30s cap) on relevant passages, or url_context if fetch failed
+            -> per claim: verdict, quote, rewritten text, event year, category
+       3. code decides validated:
+            fetched by us: supported/partial AND merchant (or alias) in page AND quote in page
+            url_context:   supported/partial
+            unreadable / timeout / blocked: not validated
+          then: category "none" fails; another category moves the claim;
+                partial or tier 3-4 -> use the judge's rewritten (attributed) text
+  -> drop unvalidated claims
+  -> rescore (Gemini, no search, validated claims only) -> score shrunk toward 50, summary
+     (no claims -> score None)
+  -> scoring.overall / personalized / verdict (skip None)
+```
+
+Profile-independent results (research, then validated + rescored categories) are cached per merchant + trusted sources, so changing weights in `PUT /api/profile` only recomputes scores and the verdict.
+
+## Domain tiers
+
+- **Blocked:** reddit, x/twitter, facebook, instagram, tiktok, quora, medium, youtube, glassdoor, indeed, pinterest, linkedin, threads, wikipedia
+- **Tier 1, government/court:** `.gov`, `.mil`, `.gov.uk`, `.europa.eu`, `.gc.ca`, `.gov.au`, `europa.eu`, `uscourts.gov`, `un.org`, `oecd.org`, `ilo.org`
+- **Tier 2, established news / trade press / ratings:** ~90 domains (US, international, Industry Dive trade press, security press, ratings orgs). See `TIER2` in `validation.py`
+- **Tier 3, company self-report:** the domain contains the merchant's name or an alias (e.g. `about.starbucks.com`)
+- **Tier 4, everything else** (advocacy, law firms, blogs, unknown)
+
+## API contract change
+
+- `backend/app/models.py`: `CategoryScore.score: Optional[float] = None`
+- `frontend/src/api/types.ts`: `score: number | null`
+- `frontend/src/pages/MerchantDetail.tsx`: renders a null score as "—" with a "Not enough verified evidence" tooltip; hides the claim list when empty. (Person C: heads-up, minimal change in your file.)
+
+`Claim.confidence` is now set by code from tier and verdict (supported > partial; tier 1 > tier 4), not by the LLM.
+
+## Measured (Starbucks, single merchant)
+
+| Run | Change | Claims | Validated | Validation | Rescore |
+| --- | --- | --- | --- | --- | --- |
+| 0 | old stub | 18 | 18 (nothing checked) | - | - |
+| 1 | steps 1-4 | 23 | 21 | not timed | - |
+| 2 | stricter partial, category fit, tier-2 list | 21 | 12 | 96s | - |
+| 3 | 4-6 claims, steering, 25s url_context cap | 31 | 16 (10 lost to a timeout bug, fixed) | 80s | - |
+| 4 | passages only, steps 5-6 | 29 | 16 | 54s | 16s |
+
+Research itself takes 80-100s per merchant and is the other half of the latency. Pre-warming hides both for the demo.
+
+## Next
+
+1. Evaluation set (step 9): labeled claims + planted fakes (real URL + false claim, wrong merchant, dead URL, blocked domain). Measure precision overall and on the `url_context` path.
+2. Pre-warm script (step 10) for the demo merchants, with Gemini rate limits in mind (4 merchants at a time x 8 judge calls).
+3. Persist the research and validated caches (shared with Person A's DB work).

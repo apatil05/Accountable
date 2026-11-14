@@ -54,7 +54,7 @@ export interface Claim {
 
 export interface CategoryScore {
   category: EthicsCategory;
-  score: number;
+  score: number | null; // null = not enough verified evidence
   summary: string;
   claims: Claim[];
 }

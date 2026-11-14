@@ -3,7 +3,7 @@ Change a model here -> update types.ts in the same PR."""
 
 from typing import Literal, Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, PrivateAttr
 
 # The ethical dimensions a user can weigh. Keep in sync with the frontend.
 EthicsCategory = Literal[
@@ -74,11 +74,13 @@ class Claim(BaseModel):
     source_name: Optional[str] = None
     confidence: float = 0.0  # 0-1, from the LLM
     validated: bool = False  # set by services/validation.py, never by the LLM
+    # Internal only (not serialized): year of the event, from the validation judge. Used in rescoring.
+    _event_year: int = PrivateAttr(default=0)
 
 
 class CategoryScore(BaseModel):
     category: str
-    score: float  # 0-100, higher = better
+    score: Optional[float] = None  # 0-100, higher = better; None = not enough verified evidence
     summary: str
     claims: list[Claim] = []
 

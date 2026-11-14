@@ -44,13 +44,15 @@ export default function MerchantDetail() {
             <div key={c.category} className="cat">
               <button className="cat-head" onClick={() => setOpen(open === c.category ? null : c.category)}>
                 <span>{CATEGORY_LABELS[c.category] ?? c.category}</span>
-                <div className={`cat-bar tone-${scoreTone(c.score)}`}><div style={{ width: `${c.score}%` }} /></div>
-                <span className="cat-score">{Math.round(c.score)}</span>
+                <div className={`cat-bar tone-${scoreTone(c.score)}`}><div style={{ width: `${c.score ?? 0}%` }} /></div>
+                <span className="cat-score" title={c.score == null ? "Not enough verified evidence" : undefined}>
+                  {c.score == null ? "—" : Math.round(c.score)}
+                </span>
               </button>
               {open === c.category && (
                 <div className="cat-body">
                   <p>{c.summary}</p>
-                  <ul className="claims">
+                  {c.claims.length > 0 && <ul className="claims">
                     {c.claims.map((cl, i) => (
                       <li key={i}>
                         <span className={`pill ${cl.validated ? "pill-ok" : "pill-warn"}`}>
@@ -60,7 +62,7 @@ export default function MerchantDetail() {
                         {cl.source_url && <a href={cl.source_url} target="_blank" rel="noreferrer">{cl.source_name ?? "source"}</a>}
                       </li>
                     ))}
-                  </ul>
+                  </ul>}
                 </div>
               )}
             </div>

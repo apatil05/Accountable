@@ -12,10 +12,16 @@ DEAL_BREAKER_WEIGHT = 5
 DEAL_BREAKER_BELOW = 40
 
 
+def _scored(categories: list[CategoryScore]) -> list[CategoryScore]:
+    """Categories with a score. score=None means not enough verified evidence; it is skipped."""
+    return [c for c in categories if c.score is not None]
+
+
 def overall(categories: list[CategoryScore]) -> float:
-    if not categories:
+    scored = _scored(categories)
+    if not scored:
         return 0.0
-    return round(sum(c.score for c in categories) / len(categories), 1)
+    return round(sum(c.score for c in scored) / len(scored), 1)
 
 
 def personalized(categories: list[CategoryScore], profile: UserProfile) -> float:
@@ -23,11 +29,11 @@ def personalized(categories: list[CategoryScore], profile: UserProfile) -> float
 
     Weight 5 ("deal-breaker") is handled in verdict(), not here.
 
-    TODO(Person B): down-weight categories whose claims aren't validated
+    Categories without a score (no verified evidence) are skipped.
     """
     total_w = 0.0
     acc = 0.0
-    for c in categories:
+    for c in _scored(categories):
         w = profile.weights.get(c.category, 0)
         acc += w * c.score
         total_w += w
@@ -40,7 +46,7 @@ def verdict(
     """Decide aligns / mixed / against. Code decides this, never the LLM."""
     deal_breakers = [
         c.category
-        for c in categories
+        for c in _scored(categories)
         if profile.weights.get(c.category, 0) >= DEAL_BREAKER_WEIGHT and c.score < DEAL_BREAKER_BELOW
     ]
     if deal_breakers:

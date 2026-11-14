@@ -170,6 +170,8 @@ def build_verdict(
     personalized_score: float,
     use_ai: bool,
 ) -> ValuesVerdict:
+    # Unscored categories (not enough verified evidence) can't be strengths or weaknesses.
+    categories = [c for c in categories if c.score is not None]
     label, deal_breakers = scoring.verdict(categories, profile, personalized_score)
     args = (name, label, deal_breakers, categories, profile, personalized_score)
     blurb, source = template_blurb(*args), "template"
