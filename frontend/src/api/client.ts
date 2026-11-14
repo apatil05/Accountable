@@ -1,6 +1,8 @@
 import type {
   Alternative,
+  CompanyEmissions,
   EthicsReport,
+  LaborSummary,
   SpendingSummary,
   SupplyChain,
   UserProfile,
@@ -24,4 +26,6 @@ export const api = {
   supplyChain: (id: string) => req<SupplyChain>(`/merchants/${id}/supply-chain`),
   alternatives: (id: string) => req<Alternative[]>(`/merchants/${id}/alternatives`),
   allSupplyChains: () => req<SupplyChain[]>("/supply-chains"),
+  emissions: (id: string) => req<CompanyEmissions[]>(`/merchants/${id}/emissions`),
+  labor: (id: string) => req<LaborSummary>(`/merchants/${id}/labor`),
 };

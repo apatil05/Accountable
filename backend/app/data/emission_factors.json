@@ -1,0 +1,201 @@
+{
+  "version": "1.4.0",
+  "source": {
+    "name": "Supply Chain Greenhouse Gas Emission Factors for U.S. Commodities v1.4.0 (Ingwersen & Young, Cornerstone Sustainability Data Initiative)",
+    "url": "https://doi.org/10.5281/zenodo.17202747",
+    "license": "CC-BY-4.0",
+    "sha256": "e47f19ba7330d4adfb77bd4663a2964af1c7b77197a74ea17a76434c9434f6b2",
+    "emissions_data_year": 2023,
+    "dollar_year": 2024,
+    "retrieved_at": "2026-11-14T20:52:07.485084+00:00"
+  },
+  "unit": "kg CO2e per 2024 USD, purchaser price (with margins)",
+  "cpi": {
+    "series": "CUUR0000SA0",
+    "base_year": 2024,
+    "base_value": 313.689,
+    "monthly": {
+      "2024-01": 308.417,
+      "2024-02": 310.326,
+      "2024-03": 312.332,
+      "2024-04": 313.548,
+      "2024-05": 314.069,
+      "2024-06": 314.175,
+      "2024-07": 314.54,
+      "2024-08": 314.796,
+      "2024-09": 315.301,
+      "2024-10": 315.664,
+      "2024-11": 315.493,
+      "2024-12": 315.605,
+      "2025-01": 317.671,
+      "2025-02": 319.082,
+      "2025-03": 319.799,
+      "2025-04": 320.795,
+      "2025-05": 321.465,
+      "2025-06": 322.561,
+      "2025-07": 323.048,
+      "2025-08": 323.976,
+      "2025-09": 324.8,
+      "2025-11": 324.122,
+      "2025-12": 324.054,
+      "2026-01": 325.252,
+      "2026-02": 326.785,
+      "2026-03": 330.213,
+      "2026-04": 333.02,
+      "2026-05": 335.123,
+      "2026-06": 333.952,
+      "2026-07": 333.918,
+      "2026-08": 334.98,
+      "2026-09": 336.94,
+      "2026-10": 337.511
+    }
+  },
+  "factors": {
+    "coffee_shop": {
+      "naics": "722515",
+      "label": "Coffee shops and snack bars",
+      "confidence": "medium",
+      "kg_per_usd": 0.117,
+      "use_phase_kg_per_usd": 0.0,
+      "basis": "NAICS 722515 Snack and Nonalcoholic Beverage Bars"
+    },
+    "limited_service_restaurant": {
+      "naics": "722513",
+      "label": "Limited-service (fast casual) restaurants",
+      "confidence": "medium",
+      "kg_per_usd": 0.22,
+      "use_phase_kg_per_usd": 0.0,
+      "basis": "NAICS 722513 Limited-Service Restaurants"
+    },
+    "full_service_restaurant": {
+      "naics": "722511",
+      "label": "Full-service restaurants",
+      "confidence": "medium",
+      "kg_per_usd": 0.168,
+      "use_phase_kg_per_usd": 0.0,
+      "basis": "NAICS 722511 Full-Service Restaurants"
+    },
+    "groceries": {
+      "naics": "311xxx",
+      "label": "Groceries (median of US food manufacturing)",
+      "confidence": "low",
+      "kg_per_usd": 0.363,
+      "use_phase_kg_per_usd": 0.0,
+      "basis": "median of 43 NAICS 311 factors"
+    },
+    "gasoline": {
+      "naics": "324110",
+      "label": "Gasoline, including burning it",
+      "confidence": "high",
+      "kg_per_usd": 0.414,
+      "use_phase_kg_per_usd": 2.6898,
+      "basis": "NAICS 324110 Petroleum Refineries"
+    },
+    "apparel": {
+      "naics": "315240",
+      "label": "Clothing",
+      "confidence": "medium",
+      "kg_per_usd": 0.104,
+      "use_phase_kg_per_usd": 0.0,
+      "basis": "NAICS 315240 Women's, Girls', and Infants' Cut and Sew Apparel Manufacturing"
+    },
+    "footwear": {
+      "naics": "316210",
+      "label": "Footwear",
+      "confidence": "medium",
+      "kg_per_usd": 0.251,
+      "use_phase_kg_per_usd": 0.0,
+      "basis": "NAICS 316210 Footwear Manufacturing"
+    },
+    "electronics": {
+      "naics": "334210",
+      "label": "Phones and communications equipment",
+      "confidence": "medium",
+      "kg_per_usd": 0.085,
+      "use_phase_kg_per_usd": 0.0,
+      "basis": "NAICS 334210 Telephone Apparatus Manufacturing"
+    },
+    "general_merchandise": {
+      "naics": "339999",
+      "label": "Mixed manufactured goods",
+      "confidence": "low",
+      "kg_per_usd": 0.159,
+      "use_phase_kg_per_usd": 0.0,
+      "basis": "NAICS 339999 All Other Miscellaneous Manufacturing"
+    },
+    "pharmacy": {
+      "naics": "325412",
+      "label": "Medicines and pharmacy goods",
+      "confidence": "medium",
+      "kg_per_usd": 0.093,
+      "use_phase_kg_per_usd": 0.0,
+      "basis": "NAICS 325412 Pharmaceutical Preparation Manufacturing"
+    },
+    "insurance": {
+      "naics": "524126",
+      "label": "Insurance",
+      "confidence": "medium",
+      "kg_per_usd": 0.028,
+      "use_phase_kg_per_usd": 0.0,
+      "basis": "NAICS 524126 Direct Property and Casualty Insurance Carriers"
+    },
+    "subscriptions": {
+      "naics": "515210",
+      "label": "Streaming and subscription media",
+      "confidence": "medium",
+      "kg_per_usd": 0.102,
+      "use_phase_kg_per_usd": 0.0,
+      "basis": "NAICS 515210 Cable and Other Subscription Programming"
+    },
+    "rideshare_taxi": {
+      "naics": "485310",
+      "label": "Taxi and rideshare",
+      "confidence": "medium",
+      "kg_per_usd": 0.493,
+      "use_phase_kg_per_usd": 0.0,
+      "basis": "NAICS 485310 Taxi Service"
+    },
+    "air_travel": {
+      "naics": "481111",
+      "label": "Air travel",
+      "confidence": "low",
+      "kg_per_usd": 0.685,
+      "use_phase_kg_per_usd": 0.0,
+      "basis": "NAICS 481111 Scheduled Passenger Air Transportation"
+    },
+    "entertainment": {
+      "naics": "512131",
+      "label": "Movies and entertainment",
+      "confidence": "low",
+      "kg_per_usd": 0.049,
+      "use_phase_kg_per_usd": 0.0,
+      "basis": "NAICS 512131 Motion Picture Theaters (except Drive-Ins)"
+    },
+    "housing_rent": {
+      "naics": "531110",
+      "label": "Residential rent",
+      "confidence": "medium",
+      "kg_per_usd": 0.027,
+      "use_phase_kg_per_usd": 0.0,
+      "basis": "NAICS 531110 Lessors of Residential Buildings and Dwellings"
+    }
+  },
+  "categories": {
+    "Apparel": "apparel",
+    "Coffee": "coffee_shop",
+    "Electronics": "electronics",
+    "Entertainment": "entertainment",
+    "Food": "limited_service_restaurant",
+    "Gas": "gasoline",
+    "Groceries": "groceries",
+    "Health": "pharmacy",
+    "Housing": "housing_rent",
+    "Insurance": "insurance",
+    "Online": "general_merchandise",
+    "Restaurant": "full_service_restaurant",
+    "Shopping": "general_merchandise",
+    "Subscriptions": "subscriptions",
+    "Transport": "rideshare_taxi",
+    "Travel": "air_travel"
+  }
+}

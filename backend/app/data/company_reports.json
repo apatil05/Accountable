@@ -1,0 +1,116 @@
+[
+  {
+    "brand_id": "chipotle",
+    "status": "reported",
+    "data_year": 2024,
+    "source_name": "Chipotle Mexican Grill 2024 Sustainability Report",
+    "report_url": "https://www.chipotle.com/content/dam/chipotle/pages/sustainability/us/2025/2024-Sustainability-Report-Final.pdf",
+    "page": 86,
+    "figures": {
+      "scope1": 158526,
+      "scope2_market": 45337,
+      "scope2_location": 164183,
+      "scope12_market": 203863,
+      "scope3": 4865709,
+      "total": 5069572
+    }
+  },
+  {
+    "brand_id": "amazon",
+    "status": "reported",
+    "data_year": 2025,
+    "source_name": "Amazon 2025 Sustainability Report: Accessible Tables (market-based)",
+    "report_url": "https://sustainability.aboutamazon.com/2025-sustainability-report-accessible-tables.pdf",
+    "page": 5,
+    "reported_unit": "MtCO2e",
+    "figures": {
+      "scope1": 15.37,
+      "scope2_market": 3.74,
+      "scope3": 61.74,
+      "total": 80.85
+    }
+  },
+  {
+    "brand_id": "hm",
+    "status": "reported",
+    "data_year": 2025,
+    "source_name": "H&M Group Sustainability-Linked Bond Progress Report 2025 (Scope 1+2, Sep 2024 to Aug 2025; market/location basis not stated)",
+    "report_url": "https://hmgroup.com/wp-content/uploads/2026/04/Sustainability-Linked-Bond-Progress-Report-2025.pdf",
+    "page": 2,
+    "figures": {
+      "scope12_market": 44372
+    }
+  },
+  {
+    "brand_id": "apple",
+    "status": "reported",
+    "data_year": 2025,
+    "source_name": "Apple Environmental Progress Report 2026 (fiscal year 2025, corporate emissions)",
+    "report_url": "https://www.apple.com/environment/pdf/Apple_Environmental_Progress_Report_2026.pdf",
+    "page": 76,
+    "figures": {
+      "scope1": 55200,
+      "scope2_market": 1100
+    }
+  },
+  {
+    "brand_id": "nike",
+    "status": "reported",
+    "data_year": 2024,
+    "source_name": "NIKE, Inc. FY24 Sustainability Data (June 2023 to May 2024; Scope 1 and 2 not machine-readable in the PDF)",
+    "report_url": "https://media.about.nike.com/files/c6cc3831-dc4e-4485-8e31-f60de30b890d/FY24_NIKE%2CInc._Sustainability_Data.pdf",
+    "page": 12,
+    "figures": {
+      "scope3": 8196965,
+      "total": 8266474
+    }
+  },
+  {
+    "brand_id": "target",
+    "status": "reported",
+    "data_year": 2025,
+    "source_name": "Target 2026 Sustainability and Governance Report Appendix (FY2025)",
+    "report_url": "https://corporate.target.com/getmedia/059a4de0-74c8-42fa-b590-c44a7b724b6c/2026-Sustainability-and-Governance-Report-Appendix.pdf",
+    "page": 17,
+    "figures": {
+      "scope1": 811489,
+      "scope3": 55678000
+    }
+  },
+  {
+    "brand_id": "target",
+    "status": "reported",
+    "data_year": 2024,
+    "source_name": "Target 2026 Sustainability and Governance Report Appendix (FY2024)",
+    "report_url": "https://corporate.target.com/getmedia/059a4de0-74c8-42fa-b590-c44a7b724b6c/2026-Sustainability-and-Governance-Report-Appendix.pdf",
+    "page": 17,
+    "figures": {
+      "scope1": 867450,
+      "scope12_market": 1507897,
+      "scope2_location": 2261764,
+      "scope3": 57757000
+    }
+  },
+  {
+    "brand_id": "walmart",
+    "status": "reported",
+    "data_year": 2025,
+    "source_name": "Walmart FY2026 ESG Report (fiscal year Feb 2025 to Jan 2026)",
+    "report_url": "https://corporate.walmart.com/content/dam/corporate/documents/esgreport/2026/FY2026-Walmart-ESG-Report.pdf",
+    "page": 126,
+    "reported_unit": "MtCO2e",
+    "figures": {
+      "scope1": 8.16,
+      "scope2_market": 6.24,
+      "scope2_location": 9.66,
+      "scope12_market": 14.4
+    }
+  },
+  {
+    "brand_id": "traderjoes",
+    "status": "not_reported",
+    "data_year": 2024,
+    "source_name": "Trader Joe's",
+    "reason": "Privately held; no public greenhouse gas inventory or CDP disclosure found (checked 2026-11-14)"
+  }
+]

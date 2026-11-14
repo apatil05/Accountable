@@ -4,7 +4,7 @@ import pytest
 
 from app.db import repos
 from app.models import UserProfile
-from app.services import aggregation, ethics, ingest, nessie
+from app.services import aggregation, ingest, nessie
 
 COLLECTIONS = ("customers", "merchants", "purchases", "brands")
 
@@ -91,7 +91,8 @@ def test_messy_nessie_style_data_is_normalized(db, monkeypatch):
     amazon = next(m for m in summary.merchants if m.merchant_id == "amazon")
     assert amazon.total_spent == 30.15  # cancelled excluded, pending included
     assert amazon.purchase_count == 2
-    assert ethics.cached_report("junk-demo-groceries") is None  # junk is never researched
+    assert repos.get_ethics_research(db, "junk-demo-groceries") is None  # junk is never researched
+    assert next(m for m in summary.merchants if m.merchant_id == "junk-demo-groceries").personalized_score is None
 
 
 def test_unusable_amounts_are_skipped_not_fatal(db, monkeypatch):

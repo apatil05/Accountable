@@ -111,6 +111,106 @@ def save_profile(db: Database, customer_id: str, profile: Mapping[str, Any]) -> 
     db.profiles.update_one({"_id": customer_id}, {"$set": doc}, upsert=True)
 
 
+# ---------- research cache ----------
+# One document per brand slug, independent of any user's profile. Only real research is
+# stored here; mock data is served from data/*.json and never written to these collections.
+ETHICS_REPORTS = "ethics_reports"
+SUPPLY_CHAINS = "supply_chains"
+
+
+def _save_research(db: Database, collection: str, brand_id: str, fields: Mapping[str, Any],
+                   researched_at: datetime | None) -> None:
+    doc = {**fields, "researched_at": researched_at or utcnow()}
+    db[collection].replace_one({"_id": brand_id}, doc, upsert=True)
+
+
+def save_ethics_research(db: Database, brand_id: str, merchant_name: str, categories: Sequence[Mapping[str, Any]],
+                         data_source: str, researched_at: datetime | None = None) -> None:
+    fields = {"merchant_name": merchant_name, "categories": list(categories), "data_source": data_source}
+    _save_research(db, ETHICS_REPORTS, brand_id, fields, researched_at)
+
+
+def get_ethics_research(db: Database, brand_id: str) -> dict | None:
+    return db[ETHICS_REPORTS].find_one({"_id": brand_id})
+
+
+def get_ethics_researches(db: Database, ids: Iterable[str]) -> list[dict]:
+    return list(db[ETHICS_REPORTS].find({"_id": {"$in": list(ids)}}))
+
+
+def save_supply_chain(db: Database, brand_id: str, product: str, stages: Sequence[Mapping[str, Any]],
+                      data_source: str, researched_at: datetime | None = None) -> None:
+    fields = {"product": product, "stages": list(stages), "data_source": data_source}
+    _save_research(db, SUPPLY_CHAINS, brand_id, fields, researched_at)
+
+
+def get_supply_chain(db: Database, brand_id: str) -> dict | None:
+    return db[SUPPLY_CHAINS].find_one({"_id": brand_id})
+
+
+def get_supply_chains(db: Database, ids: Iterable[str]) -> dict[str, dict]:
+    return {d["_id"]: d for d in db[SUPPLY_CHAINS].find({"_id": {"$in": list(ids)}})}
+
+
+def researched_at_by_id(db: Database, collection: str, ids: Iterable[str]) -> dict[str, datetime]:
+    """When each cached brand was last researched; brands with no cache entry are absent."""
+    cursor = db[collection].find({"_id": {"$in": list(ids)}}, {"researched_at": 1})
+    return {d["_id"]: d["researched_at"] for d in cursor}
+
+
+def researchable_brands(db: Database, ids: Iterable[str] | None = None) -> list[tuple[str, str]]:
+    """(slug, name) of non-junk brands, optionally limited to `ids`, sorted by slug."""
+    query: dict[str, Any] = {"is_junk": {"$ne": True}}
+    if ids is not None:
+        query["_id"] = {"$in": list(ids)}
+    return [(d["_id"], d["name"]) for d in db.brands.find(query, {"name": 1}).sort("_id", 1)]
+
+
+# ---------- outside-source facts ----------
+COMPANY_EMISSIONS = "company_emissions"
+LABOR_CASES = "labor_cases"
+
+
+def get_company_emissions(db: Database, brand_id: str) -> list[dict]:
+    """Every emissions document for a brand (all sources and years), newest year first."""
+    return list(db[COMPANY_EMISSIONS].find({"brand_id": brand_id}).sort([("data_year", -1), ("_id", 1)]))
+
+
+EMPTY_LABOR_TOTALS = {"cases": 0, "violations": 0, "employees": 0, "back_wages_cents": 0,
+                      "penalties_cents": 0, "child_labor_cases": 0, "earliest": None, "latest": None}
+
+
+def labor_totals(db: Database, brand_id: str) -> dict:
+    """Sums over a brand's cases, computed by MongoDB (one small document back)."""
+    pipeline = [
+        {"$match": {"brand_id": brand_id}},
+        {"$group": {
+            "_id": None,
+            "cases": {"$sum": 1},
+            "violations": {"$sum": "$violations"},
+            "employees": {"$sum": "$employees_affected"},
+            "back_wages_cents": {"$sum": "$back_wages_cents"},
+            "penalties_cents": {"$sum": "$penalties_cents"},
+            "child_labor_cases": {"$sum": {"$cond": [{"$gt": [{"$ifNull": ["$child_labor_violations", 0]}, 0]}, 1, 0]}},
+            "earliest": {"$min": "$findings_start"},
+            "latest": {"$max": "$findings_end"},
+        }},
+    ]
+    rows = list(db[LABOR_CASES].aggregate(pipeline))
+    return {**EMPTY_LABOR_TOTALS, **{k: v for k, v in rows[0].items() if k != "_id"}} if rows else dict(EMPTY_LABOR_TOTALS)
+
+
+def delete_company_reports_except(db: Database, keep_ids: Iterable[str]) -> int:
+    """Remove report entries that were deleted or re-dated in company_reports.json."""
+    stale = {"provenance.source": {"$in": ["company_report", "manual"]}, "_id": {"$nin": list(keep_ids)}}
+    return db[COMPANY_EMISSIONS].delete_many(stale).deleted_count
+
+
+def delete_labor_cases_except(db: Database, brand_id: str, keep_ids: Iterable[str]) -> int:
+    """Drop a brand's cases that a fresh load no longer matched (e.g. after narrowing its patterns)."""
+    return db[LABOR_CASES].delete_many({"brand_id": brand_id, "_id": {"$nin": list(keep_ids)}}).deleted_count
+
+
 # ---------- sync log ----------
 def record_sync_run(db: Database, run: Mapping[str, Any]) -> None:
     db.sync_runs.insert_one(dict(run))
