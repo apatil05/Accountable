@@ -14,7 +14,7 @@ const TOPIC_HINTS: Record<string, string> = {
   community: "Local jobs, taxes and impact on the places a company operates.",
   privacy: "How much data a company collects about you and what it does with it.",
 };
-const SHOWN = CATEGORIES.filter((c) => c !== "political");
+const SHOWN = CATEGORIES; // "political" was removed from the categories in the backend
 const usd = (n: number) => n.toLocaleString("en-US", { style: "currency", currency: "USD" });
 const shortDate = (iso: string) => {
   const [y, m, d] = iso.slice(0, 10).split("-").map(Number);

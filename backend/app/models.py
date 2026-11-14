@@ -4,13 +4,12 @@ Change a model here -> update types.ts in the same PR."""
 from datetime import date, datetime
 from typing import Literal, Optional
 
-from pydantic import BaseModel, Field, field_validator, model_validator
+from pydantic import BaseModel, Field, PrivateAttr, field_validator, model_validator
 
 # The ethical dimensions a user can weigh. Keep in sync with the frontend.
 EthicsCategory = Literal[
     "labor",
     "environment",
-    "political",
     "animal_welfare",
     "community",
     "privacy",
@@ -196,7 +195,6 @@ class UserProfile(BaseModel):
     # 0 = don't care, 5 = deal-breaker
     weights: dict[str, int] = Field(default_factory=lambda: {c: 3 for c in CATEGORIES})
     stances: str = Field("", max_length=2000)  # free-text, fed to the research engine as context
-    trusted_sources: list[str] = Field(default_factory=list, max_length=20)
     prefer_local: bool = True
 
     @field_validator("weights")
@@ -209,13 +207,6 @@ class UserProfile(BaseModel):
             raise ValueError("weights must be between 0 and 5")
         return weights
 
-    @field_validator("trusted_sources")
-    @classmethod
-    def _sources_are_short(cls, sources: list[str]) -> list[str]:
-        if any(len(s) > 200 for s in sources):
-            raise ValueError("each trusted source must be 200 characters or fewer")
-        return sources
-
 
 # ---------- Ethics research ----------
 class Claim(BaseModel):
@@ -224,13 +215,32 @@ class Claim(BaseModel):
     source_name: Optional[str] = None
     confidence: float = 0.0  # 0-1, from the LLM
     validated: bool = False  # set by services/validation.py, never by the LLM
+    # Internal only (not serialized), set by services/validation.py and used by scoring.category_score:
+    _event_year: int = PrivateAttr(default=0)  # year of the event, 0 = unknown
+    _direction: str = PrivateAttr(default="")  # "positive" / "negative" (neutral claims are dropped)
+    _severity: str = PrivateAttr(default="")  # "minor" / "notable" / "major"
+    _tier: int = PrivateAttr(default=0)  # source tier 1-4 (validation.domain_tier), 0 = unknown
 
 
 class CategoryScore(BaseModel):
     category: str
-    score: float  # 0-100, higher = better
+    score: Optional[float] = None  # 0-100, higher = better; None = not enough verified evidence
     summary: str
     claims: list[Claim] = []
+
+
+VerdictLabel = Literal["aligns", "mixed", "against"]
+
+
+class ValuesVerdict(BaseModel):
+    """Bottom line for the user. The label is computed by services/scoring.py,
+    never by the LLM; Gemini may only write the blurb that explains it."""
+
+    label: VerdictLabel
+    headline: str  # fixed per label, e.g. "We think Starbucks aligns with your values"
+    blurb: str  # 2-3 sentences
+    deal_breakers: list[str] = []  # weight-5 categories that forced "against"
+    source: Literal["gemini", "template"] = "template"
 
 
 class EthicsReport(BaseModel):
@@ -239,6 +249,7 @@ class EthicsReport(BaseModel):
     overall_score: float
     personalized_score: float
     categories: list[CategoryScore]
+    verdict: ValuesVerdict
     data_source: Literal["mock", "gemini"] = "mock"
     researched_at: Optional[str] = None
 

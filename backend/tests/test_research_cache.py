@@ -10,7 +10,7 @@ import pytest
 from app import config
 from app.db import repos
 from app.models import CategoryScore, Claim, SupplyChainStage, UserProfile
-from app.services import ethics, supply_chain
+from app.services import ethics, gemini, supply_chain, validation
 from app.services.research import ResearchUnavailable
 
 RESEARCHED = [
@@ -93,8 +93,13 @@ def test_unknown_brand_without_cache_or_mock_has_no_report(db):
 
 def test_api_reads_never_research_live_even_with_gemini_configured(db, gemini_on, monkeypatch):
     monkeypatch.setattr(ethics, "research_with_gemini", lambda name: pytest.fail("public read called Gemini"))
-    assert ethics.get_report(db, "starbucks", "Starbucks", UserProfile()).data_source == "mock"
+    monkeypatch.setattr(gemini, "client", lambda: pytest.fail("public read called Gemini"))
+    report = ethics.get_report(db, "starbucks", "Starbucks", UserProfile())
+    assert report.data_source == "mock"
+    assert report.verdict.source == "template"
     assert repos.get_ethics_research(db, "starbucks") is None
+    _save_ethics(db)
+    assert ethics.get_report(db, "starbucks", "Starbucks", UserProfile()).verdict.source == "template"
 
 
 # ---------- ethics refresh (used by prewarm) ----------
@@ -104,19 +109,62 @@ def test_refresh_requires_a_gemini_key(db, monkeypatch):
         ethics.refresh(db, "starbucks", "Starbucks")
 
 
-def test_refresh_reports_unimplemented_research_as_unavailable(db, monkeypatch):
-    monkeypatch.setattr(config, "GEMINI_API_KEY", "key")
-    with pytest.raises(ResearchUnavailable):
-        ethics.refresh(db, "starbucks", "Starbucks")  # research_with_gemini is still a stub
-
-
-def test_refresh_validates_then_saves_even_in_mock_mode(db, monkeypatch):
+def test_refresh_drops_unsourced_claims_even_in_mock_mode(db, monkeypatch):
     monkeypatch.setattr(config, "GEMINI_API_KEY", "key")
     unsourced = [CategoryScore(category="labor", score=50, summary="s", claims=[Claim(text="x", confidence=0.99)])]
     monkeypatch.setattr(ethics, "research_with_gemini", lambda name: unsourced)
+    monkeypatch.setattr(gemini, "client", lambda: pytest.fail("nothing to judge or summarize"))
     ethics.refresh(db, "starbucks", "Starbucks")
-    saved = repos.get_ethics_research(db, "starbucks")
-    assert saved["categories"][0]["claims"][0]["validated"] is False  # no source, never validated
+    saved = repos.get_ethics_research(db, "starbucks")["categories"][0]
+    assert saved["claims"] == []  # no source, never validated, never saved
+    assert saved["score"] is None
+    assert saved["summary"] == ethics.NO_EVIDENCE_SUMMARY
+
+
+def _labeled(text: str, validated: bool, direction: str = "negative") -> Claim:
+    claim = Claim(text=text, source_url="https://example.org/" + text, confidence=0.9)
+    claim.validated = validated
+    claim._direction, claim._severity, claim._tier, claim._event_year = direction, "major", 1, 2025
+    return claim
+
+
+def test_refresh_saves_only_validated_scored_claims(db, monkeypatch):
+    monkeypatch.setattr(config, "GEMINI_API_KEY", "key")
+    research = [CategoryScore(category="labor", score=99, summary="research", claims=[Claim(text="a"), Claim(text="b")])]
+    judged = [CategoryScore(category="labor", score=99, summary="research",
+                            claims=[_labeled("fine", True), _labeled("rumor", False)])]
+    monkeypatch.setattr(ethics, "research_with_gemini", lambda name: research)
+    monkeypatch.setattr(validation, "validate_claims", lambda name, cats: (judged, True))
+    monkeypatch.setattr(ethics, "summarize", lambda name, cats: None)
+    ethics.refresh(db, "starbucks", "Starbucks")
+    saved = repos.get_ethics_research(db, "starbucks")["categories"][0]
+    assert [c["text"] for c in saved["claims"]] == ["fine"]
+    assert saved["score"] is not None and saved["score"] < 50  # computed in code from one major negative
+    assert saved["score"] != 99  # the research rating is never used
+
+
+def test_refresh_incomplete_validation_saves_nothing(db, monkeypatch):
+    monkeypatch.setattr(config, "GEMINI_API_KEY", "key")
+    monkeypatch.setattr(ethics, "research_with_gemini", lambda name: [c.model_copy(deep=True) for c in RESEARCHED])
+    monkeypatch.setattr(validation, "validate_claims", lambda name, cats: (cats, False))
+    with pytest.raises(RuntimeError, match="incomplete"):
+        ethics.refresh(db, "starbucks", "Starbucks")
+    assert repos.get_ethics_research(db, "starbucks") is None
+
+
+def test_refresh_failed_summary_saves_nothing(db, monkeypatch):
+    monkeypatch.setattr(config, "GEMINI_API_KEY", "key")
+    judged = [CategoryScore(category="labor", summary="research", claims=[_labeled("fine", True)])]
+    monkeypatch.setattr(ethics, "research_with_gemini", lambda name: judged)
+    monkeypatch.setattr(validation, "validate_claims", lambda name, cats: (cats, True))
+
+    def boom(name, cats):
+        raise ValueError("summary skipped categories")
+
+    monkeypatch.setattr(ethics, "summarize", boom)
+    with pytest.raises(ValueError):
+        ethics.refresh(db, "starbucks", "Starbucks")
+    assert repos.get_ethics_research(db, "starbucks") is None
 
 
 # ---------- supply chains ----------
