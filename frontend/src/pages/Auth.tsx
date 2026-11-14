@@ -5,17 +5,18 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { api } from "../api/client";
-import type { SupplyChain } from "../api/types";
+import type { SupplierReport } from "../api/types";
 import Globe, { type GlobeLayout } from "../components/Globe";
+import { toGlobe } from "../lib/suppliers";
 
 export default function Auth({ mode }: { mode: "login" | "register" }) {
   const navigate = useNavigate();
-  const [chains, setChains] = useState<SupplyChain[]>([]);
+  const [reports, setReports] = useState<SupplierReport[]>([]);
   const layout = useRef<GlobeLayout>({ cx: 0.5, cy: 1.05, r: 1.6 });
   const isLogin = mode === "login";
 
   useEffect(() => {
-    api.allSupplyChains().then(setChains).catch(() => setChains([]));
+    api.allSuppliers().then(setReports).catch(() => setReports([]));
   }, []);
 
   const onSubmit = (e: FormEvent) => {
@@ -26,7 +27,7 @@ export default function Auth({ mode }: { mode: "login" | "register" }) {
   return (
     <div className="auth">
       <div className="landing-globe auth-globe" aria-hidden="true">
-        <Globe chains={chains} interactive={false} layoutRef={layout} spin={0.03} />
+        <Globe {...toGlobe(reports)} interactive={false} layoutRef={layout} spin={0.03} />
       </div>
 
       <header className="public-bar">

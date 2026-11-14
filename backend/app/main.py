@@ -1,3 +1,4 @@
+from typing import Optional
 import logging
 import secrets
 import threading
@@ -20,12 +21,14 @@ from .models import (
     CompanyEmissions,
     EthicsReport,
     LaborSummary,
+    NearbyPlace,
     Purchase,
     SpendingSummary,
+    SupplierReport,
     SupplyChain,
     UserProfile,
 )
-from .services import aggregation, ethics, ingest, labor, nessie, supply_chain
+from .services import aggregation, ethics, ingest, labor, nessie, suppliers, supply_chain
 
 logger = logging.getLogger(__name__)
 
@@ -216,6 +219,42 @@ def merchant_labor(merchant_id: str, db: Database = Depends(get_database)):
     """Totals of concluded US Department of Labor wage and hour cases for this brand."""
     _brand_or_404(db, merchant_id)
     return labor.summarize(db, merchant_id)
+
+
+@router.get("/merchants/{merchant_id}/suppliers", response_model=SupplierReport)
+def merchant_suppliers(merchant_id: str, db: Database = Depends(get_database)):
+    """Top real suppliers from US import records (ImportYeti), geocoded, each with a nearby Wikipedia place."""
+    _brand_or_404(db, merchant_id)
+    try:
+        return suppliers.get_report(db, merchant_id)
+    except suppliers.SuppliersNotConfigured:
+        raise HTTPException(503, "Supplier data isn't set up on this server (IMPORTYETI_API_KEY).")
+    except suppliers.SuppliersUnavailable as e:
+        raise HTTPException(502, f"Supplier lookup failed: {e}")
+
+
+@router.get("/suppliers", response_model=list[SupplierReport])
+def all_suppliers(customer_id: str | None = None, db: Database = Depends(get_database)):
+    """Real supplier reports for every company the user buys from (for the globes)."""
+    ids = sorted(repos.distinct_brand_ids(db, _customer_id(customer_id)))
+    try:
+        return suppliers.get_reports(db, ids)
+    except suppliers.SuppliersNotConfigured:
+        raise HTTPException(503, "Supplier data isn't set up on this server (IMPORTYETI_API_KEY).")
+    except suppliers.SuppliersUnavailable as e:
+        raise HTTPException(502, f"Supplier lookup failed: {e}")
+
+
+@router.get("/places/nearby", response_model=Optional[NearbyPlace])
+def places_nearby(lat: float, lng: float, db: Database = Depends(get_database)):
+    """A Wikipedia place near a coordinate. Null when nothing is close or Wikipedia is unreachable."""
+    if not (-90 <= lat <= 90 and -180 <= lng <= 180):
+        raise HTTPException(422, "lat/lng out of range")
+    try:
+        return suppliers.nearby_place(db, lat, lng)
+    except Exception:  # Wikipedia down or offline: the UI simply shows no place
+        logger.warning("nearby place lookup failed", exc_info=True)
+        return None
 
 
 @router.get("/supply-chains", response_model=list[SupplyChain])

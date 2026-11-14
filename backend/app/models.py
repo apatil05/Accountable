@@ -350,3 +350,45 @@ class Alternative(BaseModel):
     is_local: bool = False
     estimated_score: Optional[float] = None
     url: Optional[str] = None
+
+
+# ---------- Real suppliers (ImportYeti) + nearby places (Wikipedia) ----------
+class NearbyPlace(BaseModel):
+    """A Wikipedia article about a place near a coordinate, to learn about where something comes from."""
+
+    title: str
+    url: str
+    summary: Optional[str] = None
+    thumbnail_url: Optional[str] = None
+    distance_km: Optional[float] = None
+    source: Literal["wikipedia"] = "wikipedia"
+
+
+class Supplier(BaseModel):
+    name: str
+    address: Optional[str] = None
+    country: Optional[str] = None  # English country name, from geocoding the listed address
+    country_code: Optional[str] = None  # ISO 3166-1 alpha-3 of that same geocoded country (e.g. "CHN")
+    shipments: Optional[int] = None
+    lat: float  # approximate: geocoded from the supplier's listed address
+    lng: float
+    place: Optional[NearbyPlace] = None
+
+
+class Importer(BaseModel):
+    """The company's own importing entity in US records: where its suppliers' shipments go."""
+
+    name: str
+    address: Optional[str] = None
+    lat: Optional[float] = None
+    lng: Optional[float] = None
+    place: Optional[NearbyPlace] = None  # Wikipedia article about where the importer is
+
+
+class SupplierReport(BaseModel):
+    merchant_id: str
+    company_name: Optional[str] = None  # the importer record used; None = no trusted import records
+    importer: Optional[Importer] = None
+    suppliers: list[Supplier]
+    source: Literal["importyeti"] = "importyeti"
+    fetched_at: str

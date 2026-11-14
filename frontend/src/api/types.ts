@@ -197,3 +197,42 @@ export interface Alternative {
   estimated_score: number | null;
   url: string | null;
 }
+
+// Real suppliers (ImportYeti) + nearby places (Wikipedia). Mirrors models.NearbyPlace / Supplier / SupplierReport.
+export interface NearbyPlace {
+  title: string;
+  url: string;
+  summary: string | null;
+  thumbnail_url: string | null;
+  distance_km: number | null;
+  source: "wikipedia";
+}
+
+export interface Supplier {
+  name: string;
+  address: string | null;
+  country: string | null; // from geocoding the supplier's listed address
+  country_code: string | null; // ISO alpha-3 of that country, e.g. "CHN"
+  shipments: number | null;
+  lat: number; // approximate: geocoded from the supplier's listed address
+  lng: number;
+  place: NearbyPlace | null;
+}
+
+/** The company's own importing entity in US records: where its suppliers' shipments go. */
+export interface Importer {
+  name: string;
+  address: string | null;
+  lat: number | null;
+  lng: number | null;
+  place: NearbyPlace | null; // Wikipedia article about where the importer is
+}
+
+export interface SupplierReport {
+  merchant_id: string;
+  company_name: string | null; // importer record used; null = no trusted import records
+  importer: Importer | null;
+  suppliers: Supplier[];
+  source: "importyeti";
+  fetched_at: string;
+}

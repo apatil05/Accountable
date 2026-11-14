@@ -1,0 +1,12 @@
+{
+  "_comment": "Which ImportYeti importer record is each brand. Picked by hand from free /company/search results (2026-11-14), because name matching alone picks wrong records (e.g. 'Apple Tree International', 'Chipotle Publishing'). query = what to search, title = the exact record to use. A brand missing here has no import records we trust, so the app shows none rather than a wrong match.",
+  "amazon": { "query": "Amazon Logistics", "title": "Amazon Logistics" },
+  "walmart": { "query": "Wal Mart", "title": "Wal Mart" },
+  "traderjoes": { "query": "Trader Joe S", "title": "Trader Joe S" },
+  "apple": { "query": "Apple Inc", "title": "Apple" },
+  "shell": { "query": "Shell Oil", "title": "Shell Trade Us" },
+  "starbucks": { "query": "Starbucks", "title": "Starbucks Coffee Trade" },
+  "target": { "query": "Target", "title": "Target Stores Division Of Target C" },
+  "nike": { "query": "Nike Usa", "title": "Nike Usa" },
+  "hm": { "query": "H M Hennes", "title": "H&M Hennes & Mauritz L P" }
+}

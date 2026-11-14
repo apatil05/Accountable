@@ -2,24 +2,25 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { api } from "../api/client";
-import type { SupplyChain } from "../api/types";
+import type { SupplierReport } from "../api/types";
 import Globe, { type GlobeLayout } from "../components/Globe";
+import { toGlobe } from "../lib/suppliers";
 
 export default function Landing() {
-  const [chains, setChains] = useState<SupplyChain[]>([]);
+  const [reports, setReports] = useState<SupplierReport[]>([]);
   // The globe rises from the lower right like a horizon; on phones it sits low and centered.
   const narrow = typeof window !== "undefined" && window.matchMedia("(max-width: 900px)").matches;
   const layout = useRef<GlobeLayout>(narrow ? { cx: 0.5, cy: 0.98, r: 1.5 } : { cx: 0.72, cy: 0.74, r: 1.42 });
 
   useEffect(() => {
-    // Routes are for show here; if the API is down the globe simply spins without them.
-    api.allSupplyChains().then(setChains).catch(() => setChains([]));
+    // Real supplier routes from import records, for atmosphere; if the API is down the globe spins without them.
+    api.allSuppliers().then(setReports).catch(() => setReports([]));
   }, []);
 
   return (
     <div className="landing">
       <div className="landing-globe" aria-hidden="true">
-        <Globe chains={chains} interactive={false} layoutRef={layout} spin={0.035} />
+        <Globe {...toGlobe(reports)} interactive={false} layoutRef={layout} spin={0.035} />
       </div>
 
       <header className="public-bar">

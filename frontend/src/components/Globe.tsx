@@ -1,16 +1,16 @@
-// Spinnable 3D globe of supply routes. Owner: Person C. Used by Landing, Dashboard and the Map page.
+// Spinnable 3D globe of real supplier routes. Owner: Person C. Used by Landing, Auth, Dashboard, Map, company pages.
 // Orthographic d3-geo projection drawn to canvas (no extra packages, works offline).
-//  - drag / arrow keys spin it; wheel and +/- zoom it (when `zoomable`)
-//  - `focus` turns it to a place, `zoom` scales it, `highlight` lights only those routes
-//  - `layoutRef` lets a page move/resize the globe every frame (e.g. scroll-linked) without re-rendering
-//  - `onStopClick` reports which supply-chain stop was clicked (for stop details / place info)
+//  - routes: great-circle lines (supplier -> the company's US importer), grouped by company id
+//  - points: suppliers (diamonds) and importers (rings), clickable
+//  - highlight lights one or more companies; focus turns the globe; zoom scales it; layoutRef moves it per frame
+//  - zooming (when `zoomable`): pinch (trackpad or touch), double-click, Ctrl/⌘ + scroll, keyboard +/-, or plain
+//    scroll when wheel="zoom". It zooms toward the pointer, and loads finer coastlines once you're zoomed in.
 import { useEffect, useRef, type MutableRefObject } from "react";
 import { geoDistance, geoGraticule10, geoOrthographic, geoPath, type GeoPermissibleObjects } from "d3-geo";
 import { feature, mesh } from "topojson-client";
 import type { Topology } from "topojson-specification";
 import type { LineString } from "geojson";
 import world from "world-atlas/countries-110m.json";
-import type { SupplyChain } from "../api/types";
 
 const topo = world as unknown as Topology;
 const LAND = feature(topo, topo.objects.land) as unknown as GeoPermissibleObjects;
@@ -18,6 +18,23 @@ const BORDERS = mesh(topo, topo.objects.countries as never, (a, b) => a !== b) a
 const GRATICULE = geoGraticule10();
 const SPHERE = { type: "Sphere" } as GeoPermissibleObjects;
 const FONT = `"Hanken Grotesk", ui-sans-serif, system-ui, sans-serif`;
+const MAX_ZOOM = 12;
+const DETAIL_AT = 2.2; // zoom level where finer coastlines take over
+
+// Finer 1:50m coastlines and borders, loaded once on first zoom-in (kept out of the initial bundle).
+let DETAIL: { land: GeoPermissibleObjects; borders: GeoPermissibleObjects } | null = null;
+let detailRequested = false;
+function loadDetail() {
+  if (detailRequested) return;
+  detailRequested = true;
+  import("world-atlas/countries-50m.json").then((m) => {
+    const t = (m.default ?? m) as unknown as Topology;
+    DETAIL = {
+      land: feature(t, t.objects.land) as unknown as GeoPermissibleObjects,
+      borders: mesh(t, t.objects.countries as never, (a, b) => a !== b) as unknown as GeoPermissibleObjects,
+    };
+  }).catch(() => (detailRequested = false));
+}
 
 // Deep atlas palette (see DESIGN.md). Land is a step lighter than the field so continents read on a projector.
 const C = {
@@ -36,29 +53,40 @@ export interface GlobeLayout {
   cy: number;
   r: number;
 }
-export interface StopRef {
-  merchantId: string;
-  index: number;
+export interface GlobeRoute {
+  group: string; // company id: lights together
+  from: [number, number]; // [lng, lat]
+  to: [number, number];
+}
+export interface GlobePoint {
+  id: string;
+  group: string;
+  lat: number;
+  lng: number;
+  kind: "supplier" | "importer";
+  label?: string;
 }
 
 interface Props {
-  chains: SupplyChain[];
+  routes?: GlobeRoute[];
+  points?: GlobePoint[];
+  /** company ids to light; null = everything at rest. */
   highlight?: string[] | null;
+  /** [lng, lat] to turn toward; null = gentle auto-spin. */
   focus?: [number, number] | null;
-  /** Zoom multiplier (1 = whole globe). */
+  /** Controlled zoom (1 = whole globe). Leave undefined to let the globe manage its own zoom. */
   zoom?: number;
   onZoomChange?: (z: number) => void;
   zoomable?: boolean;
-  labels?: Record<string, string>;
-  /** Target layout, read every frame and eased toward. */
+  /** "zoom": plain scroll zooms (full-screen maps). "modifier": scroll scrolls the page; pinch or Ctrl/⌘ + scroll zooms. */
+  wheel?: "zoom" | "modifier";
+  /** Allow two-finger pinch on touch screens (turn off where the globe must not capture page scrolling). */
+  touchZoom?: boolean;
   layoutRef?: MutableRefObject<GlobeLayout>;
   /** false = decorative backdrop: no pointer/keyboard input, no labels. */
   interactive?: boolean;
-  /** Label every stop of lit routes (Map page), not just their origins. */
-  labelAllStops?: boolean;
-  selectedStop?: StopRef | null;
-  onStopClick?: (stop: StopRef) => void;
-  /** Degrees per frame of idle spin. */
+  selectedPointId?: string | null;
+  onPointClick?: (id: string) => void;
   spin?: number;
   tweenMs?: number;
   className?: string;
@@ -66,15 +94,16 @@ interface Props {
 }
 
 const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v));
+const easeOutExpo = (t: number) => (t >= 1 ? 1 : 1 - Math.pow(2, -10 * t));
+const DEFAULT_LAYOUT: GlobeLayout = { cx: 0.5, cy: 0.5, r: 0.94 };
 
-// Deterministic pseudo-random numbers, so stars and city sprawl look the same on every load.
+// Deterministic pseudo-random numbers, so the starfield looks the same on every load.
 function rng(seed: number) {
   return () => {
     seed = (seed * 1664525 + 1013904223) % 4294967296;
     return seed / 4294967296;
   };
 }
-
 interface Star { x: number; y: number; r: number; a: number; tw: number }
 function makeStars(w: number, h: number): Star[] {
   const r = rng(Math.round(w * 7 + h));
@@ -86,22 +115,21 @@ function makeStars(w: number, h: number): Star[] {
     tw: r() * Math.PI * 2,
   }));
 }
-const easeOutExpo = (t: number) => (t >= 1 ? 1 : 1 - Math.pow(2, -10 * t));
-const DEFAULT_LAYOUT: GlobeLayout = { cx: 0.5, cy: 0.5, r: 0.94 };
 
 export default function Globe({
-  chains,
+  routes = [],
+  points = [],
   highlight = null,
   focus = null,
-  zoom = 1,
+  zoom,
   onZoomChange,
   zoomable = false,
-  labels = {},
+  wheel = "modifier",
+  touchZoom = true,
   layoutRef,
   interactive = true,
-  labelAllStops = false,
-  selectedStop = null,
-  onStopClick,
+  selectedPointId = null,
+  onPointClick,
   spin = 0.05,
   tweenMs = 1500,
   className,
@@ -121,12 +149,22 @@ export default function Globe({
     visible: true,
     size: { w: 0, h: 0, dpr: 1 },
     layout: { ...(layoutRef?.current ?? DEFAULT_LAYOUT) },
-    zoom: zoom,
-    stops: [] as { x: number; y: number; ref: StopRef }[],
+    zoom: zoom ?? 1,
+    targetZoom: zoom ?? 1,
+    proj: null as null | ReturnType<typeof geoOrthographic>,
+    pointers: new Map<number, { x: number; y: number }>(),
+    pinch: null as null | { d: number },
+    pinched: false,
+    hits: [] as { x: number; y: number; id: string }[],
     stars: [] as Star[],
-    props: { chains, highlight, labels, focus, zoom, labelAllStops, selectedStop, interactive, spin },
+    props: { routes, points, highlight, focus, selectedPointId, interactive, spin, zoomable, wheel, onZoomChange },
   });
-  s.current.props = { chains, highlight, labels, focus, zoom, labelAllStops, selectedStop, interactive, spin };
+  s.current.props = { routes, points, highlight, focus, selectedPointId, interactive, spin, zoomable, wheel, onZoomChange };
+
+  // A controlled zoom (e.g. the +/- buttons) sets the target the globe eases toward.
+  useEffect(() => {
+    if (zoom != null) s.current.targetZoom = clamp(zoom, 1, MAX_ZOOM);
+  }, [zoom]);
 
   // Turn toward the focus point whenever it changes.
   useEffect(() => {
@@ -151,7 +189,6 @@ export default function Globe({
 
     const resize = () => {
       const r = wrap.getBoundingClientRect();
-      // Large canvases (full-screen backdrops) cap their pixel ratio to stay smooth.
       const dpr = Math.min(window.devicePixelRatio || 1, r.width * r.height > 900_000 ? 1.5 : 2);
       st.size = { w: r.width, h: r.height, dpr };
       st.stars = makeStars(r.width, r.height);
@@ -169,7 +206,7 @@ export default function Globe({
       raf = requestAnimationFrame(draw);
       if (!st.visible || !st.size.w) return;
       const { w, h, dpr } = st.size;
-      const { chains, highlight, labels, focus, labelAllStops, selectedStop, spin } = st.props;
+      const { routes, points, highlight, focus, selectedPointId, spin, interactive } = st.props;
 
       // Ease layout and zoom toward their targets: continuous, never snapping.
       const target = layoutRef?.current ?? DEFAULT_LAYOUT;
@@ -179,9 +216,10 @@ export default function Globe({
         cy: st.layout.cy + (target.cy - st.layout.cy) * k,
         r: st.layout.r + (target.r - st.layout.r) * k,
       };
-      st.zoom += (st.props.zoom - st.zoom) * (reduced ? 1 : 0.14);
+      st.zoom += (st.targetZoom - st.zoom) * (reduced ? 1 : 0.16);
+      if (st.zoom > DETAIL_AT) loadDetail();
+      const fine = st.zoom > DETAIL_AT && DETAIL;
 
-      // Rotation: tween > drag > idle spin (only when nothing is focused).
       if (st.tween) {
         const t = easeOutExpo((now - st.tween.start) / st.tween.dur);
         st.rot = [
@@ -197,6 +235,7 @@ export default function Globe({
       const cx = w * st.layout.cx;
       const cy = h * st.layout.cy;
       const proj = geoOrthographic().scale(r).translate([cx, cy]).rotate([st.rot[0], st.rot[1]]).clipAngle(90);
+      st.proj = proj;
       const path = geoPath(proj, ctx);
       const center: [number, number] = [-st.rot[0], -st.rot[1]];
       const visible = (p: [number, number]) => geoDistance(p, center) < Math.PI / 2 - 0.02;
@@ -204,15 +243,13 @@ export default function Globe({
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       ctx.clearRect(0, 0, w, h);
 
-      // Night sky: a quiet starfield that drifts slowly with the spin and twinkles very slightly.
+      // Night sky: a quiet starfield that drifts slowly with the spin.
       const drift = ((st.rot[0] * 0.8) % w + w) % w;
       for (const sr of st.stars) {
-        const x = (sr.x + drift) % w;
-        const tw = reduced ? 1 : 0.78 + 0.22 * Math.sin(now / 1400 + sr.tw);
-        ctx.globalAlpha = sr.a * tw;
+        ctx.globalAlpha = sr.a * (reduced ? 1 : 0.78 + 0.22 * Math.sin(now / 1400 + sr.tw));
         ctx.fillStyle = "#e8eef6";
         ctx.beginPath();
-        ctx.arc(x, sr.y, sr.r, 0, Math.PI * 2);
+        ctx.arc((sr.x + drift) % w, sr.y, sr.r, 0, Math.PI * 2);
         ctx.fill();
       }
       ctx.globalAlpha = 1;
@@ -233,134 +270,118 @@ export default function Globe({
       path(SPHERE);
       ctx.fillStyle = sea;
       ctx.fill();
-
       ctx.beginPath();
       path(GRATICULE);
       ctx.strokeStyle = C.grid;
       ctx.lineWidth = 0.6;
       ctx.stroke();
-
       ctx.beginPath();
-      path(LAND);
+      path(fine ? DETAIL!.land : LAND);
       ctx.fillStyle = C.land;
       ctx.fill();
       ctx.beginPath();
-      path(BORDERS);
+      path(fine ? DETAIL!.borders : BORDERS);
       ctx.strokeStyle = C.border;
       ctx.lineWidth = 0.5;
       ctx.stroke();
 
-
-      // Routes: the lit set in white with a slow flow, everything else in the warm accent.
+      // Routes: lit companies in white with a slow flow, everything else in the warm accent.
       const lit = highlight && highlight.length ? new Set(highlight) : null;
-      const order = lit ? [...chains].sort((a, b) => Number(lit.has(a.merchant_id)) - Number(lit.has(b.merchant_id))) : chains;
       ctx.lineCap = "round";
-      for (const c of order) {
-        const on = lit?.has(c.merchant_id);
-        const line: LineString = { type: "LineString", coordinates: c.stages.map((p) => [p.lng, p.lat]) };
+      const ordered = lit ? [...routes].sort((a, b) => Number(lit.has(a.group)) - Number(lit.has(b.group))) : routes;
+      for (const rt of ordered) {
+        const on = lit?.has(rt.group);
+        const line: LineString = { type: "LineString", coordinates: [rt.from, rt.to] };
         ctx.beginPath();
         path(line);
         if (on) {
           ctx.strokeStyle = `rgba(${C.selected},0.95)`;
-          ctx.lineWidth = 2.2;
+          ctx.lineWidth = 2;
           ctx.setLineDash(reduced ? [] : [6, 6]);
           ctx.lineDashOffset = reduced ? 0 : -(now / 60) % 12;
         } else {
-          ctx.strokeStyle = `rgba(${C.route},${lit ? 0.16 : 0.8})`;
-          ctx.lineWidth = 1.5;
+          ctx.strokeStyle = `rgba(${C.route},${lit ? 0.14 : 0.75})`;
+          ctx.lineWidth = 1.4;
           ctx.setLineDash([]);
         }
         ctx.stroke();
       }
       ctx.setLineDash([]);
 
-      // Stops (dots), remembered for hit-testing; labels are queued and drawn last on plates.
-      const labelQueue: { text: string; x: number; y: number; weight: number; align?: CanvasTextAlign }[] = [];
-      st.stops = [];
-      const showLabels = st.props.interactive;
-      for (const c of order) {
-        const on = lit?.has(c.merchant_id);
-        c.stages.forEach((p, i) => {
-          const ll: [number, number] = [p.lng, p.lat];
-          if (i === c.stages.length - 1 || !visible(ll)) return;
-          const [x, y] = proj(ll)!;
-          const isSel = selectedStop?.merchantId === c.merchant_id && selectedStop.index === i;
+      // Points: suppliers are diamonds, importers are rings. Remembered for hit-testing; labels drawn last.
+      const labels: { text: string; x: number; y: number; weight: number }[] = [];
+      st.hits = [];
+      for (const pt of points) {
+        const ll: [number, number] = [pt.lng, pt.lat];
+        if (!visible(ll)) continue;
+        const [x, y] = proj(ll)!;
+        const on = !lit || lit.has(pt.group);
+        const sel = pt.id === selectedPointId;
+        ctx.globalAlpha = on ? 1 : 0.25;
+        if (pt.kind === "supplier") {
+          const d = sel ? 6.5 : lit && on ? 5 : 3.2;
           ctx.beginPath();
-          ctx.arc(x, y, isSel ? 5 : on && i === 0 ? 3.5 : on ? 2.6 : 1.8, 0, Math.PI * 2);
-          ctx.fillStyle = on || isSel ? `rgba(${C.selected},1)` : `rgba(${C.route},${lit ? 0.25 : 0.9})`;
+          ctx.moveTo(x, y - d);
+          ctx.lineTo(x + d, y);
+          ctx.lineTo(x, y + d);
+          ctx.lineTo(x - d, y);
+          ctx.closePath();
+          ctx.fillStyle = lit && on ? "#fff" : `rgba(${C.route},1)`;
           ctx.fill();
-          if (isSel) {
-            ctx.beginPath();
-            ctx.arc(x, y, 10, 0, Math.PI * 2);
-            ctx.strokeStyle = `rgba(${C.route},0.9)`;
-            ctx.lineWidth = 1.5;
+          if (lit && on) {
+            ctx.strokeStyle = C.plate;
+            ctx.lineWidth = 1.2;
             ctx.stroke();
           }
-          if (on || !lit) st.stops.push({ x, y, ref: { merchantId: c.merchant_id, index: i } });
-          if (!showLabels || !on || !lit) return;
-          if (i === 0 && lit.size <= 3) {
-            labelQueue.push({ text: `${labels[c.merchant_id] ?? c.product} · ${p.place}`, x: x + 9, y: y - 9, weight: 500 });
-          } else if (i > 0 && labelAllStops && lit.size === 1) {
-            labelQueue.push({ text: p.place, x: x + 9, y: y - 9, weight: 400 });
-          }
-        });
-      }
-
-      // Terminus: where every route ends.
-      const end = chains[0]?.stages[chains[0].stages.length - 1];
-      if (end && visible([end.lng, end.lat])) {
-        const [x, y] = proj([end.lng, end.lat])!;
-        const pulse = reduced ? 0.5 : (now % 2400) / 2400;
-        ctx.beginPath();
-        ctx.arc(x, y, 5 + pulse * 10, 0, Math.PI * 2);
-        ctx.strokeStyle = `rgba(255,255,255,${0.5 * (1 - pulse)})`;
-        ctx.lineWidth = 1;
-        ctx.stroke();
-        ctx.beginPath();
-        ctx.arc(x, y, 4.5, 0, Math.PI * 2);
-        ctx.fillStyle = "#fff";
-        ctx.fill();
-        if (showLabels) {
-          const text = `You · ${end.place}`;
-          ctx.font = `600 12px ${FONT}`;
-          const tw = ctx.measureText(text).width;
-          const fitsRight = x + 12 + tw < w - 6;
-          labelQueue.push({ text, x: fitsRight ? x + 12 : Math.max(x - 12, tw + 6), y: y + 18, weight: 600, align: fitsRight ? "left" : "right" });
+        } else {
+          ctx.beginPath();
+          ctx.arc(x, y, lit && on ? 4.5 : 3, 0, Math.PI * 2);
+          ctx.fillStyle = C.plate;
+          ctx.fill();
+          ctx.strokeStyle = lit && on ? "#fff" : `rgba(${C.route},1)`;
+          ctx.lineWidth = 1.6;
+          ctx.stroke();
+        }
+        if (sel) {
+          ctx.beginPath();
+          ctx.arc(x, y, 12, 0, Math.PI * 2);
+          ctx.strokeStyle = `rgba(${C.route},0.95)`;
+          ctx.lineWidth = 1.5;
+          ctx.stroke();
+        }
+        ctx.globalAlpha = 1;
+        if (on) st.hits.push({ x, y, id: pt.id });
+        if (interactive && pt.label && (sel || (lit && on))) {
+          labels.push({ text: pt.label, x: x + 11, y: y - 9, weight: sel ? 650 : pt.kind === "importer" ? 550 : 450 });
         }
       }
 
-      // Labels sit on a field-colored plate, so no route can show through gaps between glyphs.
-      // Heavier labels (you, origins) are placed first; any later label that would collide is skipped.
+      // Labels on plates; heavier first; try the other side and below before dropping a colliding label.
       const placed: { x: number; y: number; w: number; h: number }[] = [];
-      for (const l of [...labelQueue].sort((a, b) => b.weight - a.weight)) {
+      for (const l of labels.sort((a, b) => b.weight - a.weight)) {
         ctx.font = `${l.weight} 12px ${FONT}`;
         const tw = ctx.measureText(l.text).width;
-        const hits = (bx: { x: number; y: number; w: number; h: number }) =>
-          bx.x < 0 || bx.x + bx.w > w ||
-          placed.some((b) => bx.x < b.x + b.w + 2 && b.x < bx.x + bx.w + 2 && bx.y < b.y + b.h + 2 && b.y < bx.y + bx.h + 2);
-        // Preferred spot, then mirrored to the other side of the dot, then below it; drop only if all collide.
-        const anchorX = l.align === "right" ? l.x + 12 : l.x - 9; // the dot the label belongs to
-        const tries: { x: number; y: number; align: CanvasTextAlign }[] = [
-          { x: l.x, y: l.y, align: l.align ?? "left" },
-          { x: l.align === "right" ? anchorX + 9 : anchorX - 9, y: l.y, align: l.align === "right" ? "left" : "right" },
-          { x: anchorX + 9, y: l.y + 26, align: "left" },
+        const hit = (b2: { x: number; y: number; w: number; h: number }) =>
+          b2.x < 0 || b2.x + b2.w > w ||
+          placed.some((b) => b2.x < b.x + b.w + 2 && b.x < b2.x + b2.w + 2 && b2.y < b.y + b.h + 2 && b.y < b2.y + b2.h + 2);
+        const dotX = l.x - 11;
+        const tries = [
+          { x: l.x, y: l.y, align: "left" as CanvasTextAlign },
+          { x: dotX - 11, y: l.y, align: "right" as CanvasTextAlign },
+          { x: l.x, y: l.y + 26, align: "left" as CanvasTextAlign },
         ];
         const fit = tries
           .map((t) => ({ t, box: { x: (t.align === "right" ? t.x - tw : t.x) - 6, y: t.y - 13, w: tw + 12, h: 19 } }))
-          .find((c) => !hits(c.box));
+          .find((c) => !hit(c.box));
         if (!fit) continue;
         placed.push(fit.box);
-        l.x = fit.t.x;
-        l.y = fit.t.y;
-        l.align = fit.t.align;
-        const left = fit.box.x + 6;
         ctx.beginPath();
-        ctx.roundRect(left - 6, l.y - 13, tw + 12, 19, 6);
+        ctx.roundRect(fit.box.x, fit.box.y, fit.box.w, fit.box.h, 6);
         ctx.fillStyle = C.plate;
         ctx.fill();
-        ctx.textAlign = l.align ?? "left";
+        ctx.textAlign = fit.t.align;
         ctx.fillStyle = "rgba(255,255,255,0.96)";
-        ctx.fillText(l.text, l.x, l.y);
+        ctx.fillText(l.text, fit.t.x, fit.t.y);
       }
       ctx.textAlign = "left";
 
@@ -380,15 +401,72 @@ export default function Globe({
   }, [reduced]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ---- Input ----
-  const setZoom = (z: number) => onZoomChange?.(clamp(z, 1, 8));
+  // Zoom by a factor, keeping the place under (clientX, clientY) under the pointer.
+  const zoomAt = (clientX: number, clientY: number, f: number) => {
+    const st = s.current;
+    if (!st.props.zoomable) return;
+    const old = st.targetZoom;
+    const nz = clamp(old * f, 1, MAX_ZOOM);
+    if (nz === old) return;
+    st.targetZoom = nz;
+    st.props.onZoomChange?.(nz);
+    const rect = canvasRef.current!.getBoundingClientRect();
+    const p = st.proj?.invert?.([clientX - rect.left, clientY - rect.top]);
+    const c: [number, number] = [-st.rot[0], -st.rot[1]];
+    if (p && geoDistance(p as [number, number], c) < Math.PI / 2) {
+      const frac = 1 - old / nz; // move the view part of the way toward the pointed-at place
+      const dl = ((p[0] - c[0] + 540) % 360) - 180;
+      st.rot = [-(c[0] + dl * frac), clamp(-(c[1] + (p[1] - c[1]) * frac), -75, 75)];
+    }
+    st.tween = null;
+    st.resumeAt = performance.now() + 4000;
+  };
+
+  // Wheel needs a non-passive listener so a pinch or Ctrl+scroll zooms the globe instead of the whole page.
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas || !interactive) return;
+    const onWheel = (e: WheelEvent) => {
+      const st = s.current;
+      if (!st.props.zoomable) return;
+      const modifier = e.ctrlKey || e.metaKey; // trackpad pinch arrives as ctrl + wheel
+      if (st.props.wheel === "modifier" && !modifier) return; // let the page scroll
+      e.preventDefault();
+      const scale = e.deltaMode === 1 ? 33 : 1; // line-based wheels
+      zoomAt(e.clientX, e.clientY, Math.exp(-e.deltaY * scale * (e.ctrlKey ? 0.012 : 0.0022)));
+    };
+    canvas.addEventListener("wheel", onWheel, { passive: false });
+    return () => canvas.removeEventListener("wheel", onWheel);
+  }, [interactive]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const onPointerDown = (e: React.PointerEvent) => {
     const st = s.current;
-    st.drag = { x: e.clientX, y: e.clientY, moved: 0 };
-    st.tween = null;
+    st.pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
     (e.target as Element).setPointerCapture(e.pointerId);
+    st.tween = null;
+    if (st.pointers.size === 2 && zoomable && touchZoom) {
+      const [a, b] = [...st.pointers.values()];
+      st.pinch = { d: Math.hypot(a.x - b.x, a.y - b.y) };
+      st.pinched = true;
+      st.drag = null;
+      return;
+    }
+    if (st.pointers.size === 1) {
+      st.pinched = false;
+      st.drag = { x: e.clientX, y: e.clientY, moved: 0 };
+    }
   };
   const onPointerMove = (e: React.PointerEvent) => {
     const st = s.current;
+    if (!st.pointers.has(e.pointerId)) return;
+    st.pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (st.pinch && st.pointers.size === 2) {
+      const [a, b] = [...st.pointers.values()];
+      const d = Math.hypot(a.x - b.x, a.y - b.y);
+      if (st.pinch.d > 0) zoomAt((a.x + b.x) / 2, (a.y + b.y) / 2, d / st.pinch.d);
+      st.pinch.d = d;
+      return;
+    }
     if (!st.drag) return;
     const dx = e.clientX - st.drag.x;
     const dy = e.clientY - st.drag.y;
@@ -398,43 +476,46 @@ export default function Globe({
     st.rot = [st.rot[0] + dx * k, clamp(st.rot[1] - dy * k, -75, 75)];
     st.drag = { x: e.clientX, y: e.clientY, moved: st.drag.moved + Math.abs(dx) + Math.abs(dy) };
   };
-  const endDrag = (e: React.PointerEvent) => {
+  const endPointer = (e: React.PointerEvent) => {
     const st = s.current;
-    const click = st.drag && st.drag.moved < 5;
-    st.drag = null;
-    st.resumeAt = performance.now() + 4000;
-    if (click && onStopClick) {
+    st.pointers.delete(e.pointerId);
+    if (st.pointers.size < 2) st.pinch = null;
+    const click = st.drag && st.drag.moved < 5 && !st.pinched;
+    if (st.pointers.size === 0) {
+      st.drag = null;
+      st.resumeAt = performance.now() + 4000;
+    }
+    if (click && onPointClick) {
       const rect = canvasRef.current!.getBoundingClientRect();
       const px = e.clientX - rect.left;
       const py = e.clientY - rect.top;
-      let best: { d: number; ref: StopRef } | null = null;
-      for (const sp of st.stops) {
-        const d = Math.hypot(sp.x - px, sp.y - py);
-        if (d < 14 && (!best || d < best.d)) best = { d, ref: sp.ref };
+      let best: { d: number; id: string } | null = null;
+      for (const hp of st.hits) {
+        const d = Math.hypot(hp.x - px, hp.y - py);
+        if (d < 14 && (!best || d < best.d)) best = { d, id: hp.id };
       }
-      if (best) onStopClick(best.ref);
+      if (best) onPointClick(best.id);
     }
   };
-  const onWheel = (e: React.WheelEvent) => {
-    if (!zoomable) return;
-    setZoom(s.current.props.zoom * Math.exp(-e.deltaY * 0.0015));
-  };
+  const onDoubleClick = (e: React.MouseEvent) => zoomAt(e.clientX, e.clientY, e.shiftKey ? 1 / 1.8 : 1.8);
   const onKeyDown = (e: React.KeyboardEvent) => {
     const st = s.current;
-    if (zoomable && (e.key === "+" || e.key === "=")) return setZoom(st.props.zoom * 1.4);
-    if (zoomable && (e.key === "-" || e.key === "_")) return setZoom(st.props.zoom / 1.4);
+    const rect = canvasRef.current!.getBoundingClientRect();
+    const mid: [number, number] = [rect.left + rect.width / 2, rect.top + rect.height / 2];
+    if (zoomable && (e.key === "+" || e.key === "=")) return zoomAt(mid[0], mid[1], 1.4);
+    if (zoomable && (e.key === "-" || e.key === "_")) return zoomAt(mid[0], mid[1], 1 / 1.4);
     const step: Record<string, [number, number]> = { ArrowLeft: [10, 0], ArrowRight: [-10, 0], ArrowUp: [0, -8], ArrowDown: [0, 8] };
     const d = step[e.key];
     if (!d) return;
     e.preventDefault();
     st.tween = null;
-    const f = 1 / st.props.zoom;
+    const f = 1 / st.zoom;
     st.rot = [st.rot[0] + d[0] * f, clamp(st.rot[1] + d[1] * f, -75, 75)];
     st.resumeAt = performance.now() + 4000;
   };
 
   return (
-    <div ref={wrapRef} className={`globe ${interactive ? "" : "globe-static"} ${className ?? ""}`}>
+    <div ref={wrapRef} className={`globe ${interactive ? "" : "globe-static"} ${zoomable && touchZoom ? "globe-zoomable" : ""} ${className ?? ""}`}>
       <canvas
         ref={canvasRef}
         tabIndex={interactive ? 0 : -1}
@@ -442,10 +523,10 @@ export default function Globe({
         aria-roledescription={interactive ? "interactive globe" : undefined}
         aria-label={
           ariaLabel ??
-          `Globe showing ${chains.length} example supply routes ending where you live.${interactive ? " Drag, or use the arrow keys, to spin it." : ""}`
+          `Globe showing ${routes.length} real supplier routes from US import records.${interactive ? " Drag, or use the arrow keys, to spin it." : ""}`
         }
         {...(interactive
-          ? { onPointerDown, onPointerMove, onPointerUp: endDrag, onPointerCancel: endDrag, onKeyDown, onWheel }
+          ? { onPointerDown, onPointerMove, onPointerUp: endPointer, onPointerCancel: endPointer, onKeyDown, onDoubleClick }
           : {})}
       />
     </div>

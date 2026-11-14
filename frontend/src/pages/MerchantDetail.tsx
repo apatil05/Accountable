@@ -1,4 +1,4 @@
-// Company page: what you spent, where its product comes from, what research found, and alternatives.
+// Company page: what you spent, its real suppliers (US import records), what research found, and alternatives.
 // Owner: Person C. Facts, not ratings: the backend's scores are never shown, and political topics are left out.
 import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
@@ -10,13 +10,13 @@ import {
   type EthicsReport,
   type LaborSummary,
   type MerchantSummary,
-  type SupplyChain,
+  type SupplierReport,
 } from "../api/types";
 import Footprint from "../components/Footprint";
-import Globe, { type StopRef } from "../components/Globe";
+import Globe from "../components/Globe";
 import MockBanner from "../components/MockBanner";
-import StopDetail from "../components/StopDetail";
-import { continentOf } from "../lib/insights";
+import SupplierCard, { ImporterCard } from "../components/SupplierCard";
+import { possessive, supplierCountry, reportPoints, sphericalCenter, supplierPointId, toGlobe } from "../lib/suppliers";
 
 const usd = (n: number) => n.toLocaleString("en-US", { style: "currency", currency: "USD" });
 const HIDDEN_TOPICS = new Set(["political"]); // product decision: no political values
@@ -26,65 +26,53 @@ function localDate(iso: string) {
 }
 const shortDate = (iso: string) => localDate(iso).toLocaleDateString("en-US", { month: "short", day: "numeric" });
 
-// Center of a route on the sphere, so the whole route sits on the visible face.
-function routeCenter(c: SupplyChain): [number, number] {
-  let x = 0, y = 0, z = 0;
-  for (const s of c.stages) {
-    const l = (s.lng * Math.PI) / 180, p = (s.lat * Math.PI) / 180;
-    x += Math.cos(p) * Math.cos(l);
-    y += Math.cos(p) * Math.sin(l);
-    z += Math.sin(p);
-  }
-  return [(Math.atan2(y, x) * 180) / Math.PI, (Math.atan2(z, Math.hypot(x, y)) * 180) / Math.PI];
-}
-
 export default function MerchantDetail() {
   const { id = "" } = useParams();
   const [report, setReport] = useState<EthicsReport | null | "missing">(null);
-  const [chain, setChain] = useState<SupplyChain | null | "missing">(null);
+  const [sup, setSup] = useState<SupplierReport | null | "missing">(null);
   const [alts, setAlts] = useState<Alternative[]>([]);
   const [me, setMe] = useState<MerchantSummary | null>(null);
   const [emissions, setEmissions] = useState<CompanyEmissions[] | null | "missing">(null);
   const [labor, setLabor] = useState<LaborSummary | null | "missing">(null);
-  const [stop, setStop] = useState<StopRef | null>(null);
+  const [selected, setSelected] = useState<number | "importer" | null>(null);
   const [zoom, setZoom] = useState(1);
 
   useEffect(() => {
     setReport(null);
-    setChain(null);
+    setSup(null);
     setEmissions(null);
     setLabor(null);
-    setStop(null);
+    setSelected(null);
     setZoom(1);
     window.scrollTo(0, 0);
     api.ethics(id).then(setReport).catch(() => setReport("missing"));
     api.emissions(id).then(setEmissions).catch(() => setEmissions("missing"));
     api.labor(id).then(setLabor).catch(() => setLabor("missing"));
-    api.supplyChain(id).then(setChain).catch(() => setChain("missing"));
+    api.suppliers(id).then(setSup).catch(() => setSup("missing"));
     api.alternatives(id).then(setAlts).catch(() => setAlts([]));
     api.summary().then((s) => setMe(s.merchants.find((m) => m.merchant_id === id) ?? null)).catch(() => setMe(null));
   }, [id]);
 
-  const route = chain && chain !== "missing" ? chain : null;
+  const real = sup && sup !== "missing" ? sup : null;
   const research = report && report !== "missing" ? report : null;
   const name = research?.merchant_name ?? me?.name ?? "This company";
   const topics = useMemo(
     () => (research?.categories ?? []).filter((c) => !HIDDEN_TOPICS.has(c.category)),
     [research],
   );
-  const stopData = route && stop ? route.stages[stop.index] : null;
-  const focus: [number, number] | null = stopData ? [stopData.lng, stopData.lat] : route ? routeCenter(route) : null;
-  const origin = route?.stages[0];
+  const globe = useMemo(() => toGlobe(real ? [real] : [], { [id]: name }), [real, id, name]);
+  const supplier = real && typeof selected === "number" ? real.suppliers[selected] : undefined;
+  const importer = real && selected === "importer" ? real.importer : null;
+  const focus: [number, number] | null = supplier
+    ? [supplier.lng, supplier.lat]
+    : importer?.lat != null && importer.lng != null
+      ? [importer.lng, importer.lat]
+      : sphericalCenter(reportPoints(real));
+  const countries = [...new Set((real?.suppliers ?? []).map((s) => supplierCountry(s)).filter(Boolean))];
 
-  const pickStop = (i: number) => {
-    if (!route) return;
-    if (i === route.stages.length - 1) {
-      setStop(null);
-      setZoom(1);
-      return;
-    }
-    setStop({ merchantId: route.merchant_id, index: i });
-    setZoom(2.6);
+  const pick = (i: number | "importer" | null) => {
+    setSelected(i);
+    setZoom(i == null ? 1 : 2.8);
   };
 
   return (
@@ -106,67 +94,94 @@ export default function MerchantDetail() {
           )}
           <div className="co-tags">
             {me?.category.map((c) => <span key={c} className="tag">{c}</span>)}
-            {origin && <span className="tag">Starts in {continentOf(origin.lat, origin.lng)}</span>}
+            {countries.map((c) => <span key={c} className="tag">Supplier in {c}</span>)}
           </div>
-          {route && (
+          {real && real.suppliers.length > 0 && (
             <p className="co-lede">
-              We traced one example product, a {route.product.toLowerCase()}, from {origin?.place} to you in {route.stages.length - 1} stops.
-              This route is an example and hasn't been verified yet.
+              US import records show {real.suppliers.length} top supplier{real.suppliers.length === 1 ? "" : "s"} shipping to{" "}
+              {real.importer?.name ?? name}. Click one to see where it is and learn about the place.
             </p>
           )}
         </div>
 
         <div className="co-globe">
-          {route ? (
+          {real && real.suppliers.length > 0 ? (
             <>
               <Globe
-                chains={[route]}
-                highlight={[route.merchant_id]}
+                routes={globe.routes}
+                points={globe.points}
+                highlight={[id]}
                 focus={focus}
                 zoom={zoom}
                 onZoomChange={setZoom}
                 zoomable
-                labels={{ [route.merchant_id]: name }}
-                labelAllStops
-                selectedStop={stop}
-                onStopClick={(s) => pickStop(s.index)}
+                selectedPointId={selected === "importer" ? `${id}:importer` : selected != null ? supplierPointId(id, selected) : null}
+                onPointClick={(pid) => (pid.endsWith(":importer") ? pick("importer") : pick(Number(pid.split(":")[1])))}
                 tweenMs={900}
-                ariaLabel={`Globe showing ${name}'s example supply route. Drag to spin, scroll to zoom, click a stop for details.`}
+                ariaLabel={`Globe showing ${possessive(name)} real suppliers from US import records. Drag to spin, scroll to zoom, click a supplier for details.`}
               />
-              {stopData && (
-                <div className="stop-card">
-                  <button type="button" className="stop-close" onClick={() => pickStop(route.stages.length - 1)} aria-label="Close stop details">
-                    <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8" /></svg>
-                  </button>
-                  <StopDetail stage={stopData} />
-                </div>
-              )}
+              {supplier && <SupplierCard supplier={supplier} company={name} onClose={() => pick(null)} />}
+              {importer && <ImporterCard importer={importer} company={name} onClose={() => pick(null)} />}
+              <div className="mapx-controls co-zoom" role="group" aria-label="Zoom">
+                <button type="button" onClick={() => setZoom((z) => Math.min(12, z * 1.5))} aria-label="Zoom in">
+                  <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 3v10M3 8h10" /></svg>
+                </button>
+                <button type="button" onClick={() => setZoom((z) => Math.max(1, z / 1.5))} aria-label="Zoom out">
+                  <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8h10" /></svg>
+                </button>
+              </div>
+              <p className="co-globe-hint">Drag to spin · pinch, double-click or Ctrl + scroll to zoom</p>
             </>
           ) : (
-            <div className="co-globe-empty">{chain === null ? "Loading the route…" : "No route traced for this company yet."}</div>
+            <div className="co-globe-empty">
+              {sup === null ? "Looking up suppliers…" : sup === "missing" ? "Supplier data isn't available right now." : `No US import records found for ${name}.`}
+            </div>
           )}
         </div>
       </section>
 
-      {/* 2. The route, stop by stop */}
-      {route && (
-        <section className="co-section" aria-labelledby="route-title">
-          <h2 id="route-title">The route</h2>
-          <ol className="co-route">
-            {route.stages.map((s, i) => {
-              const active = stop?.index === i;
-              const isEnd = i === route.stages.length - 1;
-              return (
-                <li key={s.order}>
-                  <button type="button" className={`co-stop ${active ? "is-active" : ""} ${isEnd ? "is-end" : ""}`} onClick={() => pickStop(i)} aria-pressed={active}>
-                    <span className="co-stop-n">{i + 1}</span>
-                    <span className="co-stop-stage">{s.stage}</span>
-                    <span className="co-stop-place">{s.place}</span>
-                  </button>
-                </li>
-              );
-            })}
-          </ol>
+      {/* 2. Real suppliers, from US import records */}
+      {real && real.suppliers.length > 0 && (
+        <section className="co-section" aria-labelledby="sup-title">
+          <div className="co-section-head">
+            <h2 id="sup-title">Suppliers</h2>
+            <p>
+              From US import records (ImportYeti){real.company_name && <> for "{real.company_name}"</>}. Locations are approximate,
+              from each supplier's listed address; place articles from Wikipedia.
+            </p>
+          </div>
+          <ul className="co-suppliers">
+            {real.suppliers.map((s, i) => (
+              <li key={supplierPointId(id, i)}>
+                <button type="button" className={`co-supplier ${selected === i ? "is-active" : ""}`} onClick={() => pick(i)} aria-pressed={selected === i}>
+                  {s.place?.thumbnail_url ? <img src={s.place.thumbnail_url} alt="" /> : <span className="co-supplier-mark" aria-hidden="true" />}
+                  <span className="co-supplier-text">
+                    <span className="co-supplier-name">{s.name}</span>
+                    <span className="co-supplier-where">
+                      {[s.place?.title, supplierCountry(s)].filter(Boolean).join(" · ")}
+                      {s.shipments != null && ` · ${s.shipments.toLocaleString("en-US")} shipments`}
+                    </span>
+                  </span>
+                </button>
+              </li>
+            ))}
+          </ul>
+          {real.importer && (
+            <button
+              type="button"
+              className={`co-supplier co-importer-btn ${selected === "importer" ? "is-active" : ""}`}
+              onClick={() => pick("importer")}
+              disabled={real.importer.lat == null}
+            >
+              {real.importer.place?.thumbnail_url ? <img src={real.importer.place.thumbnail_url} alt="" /> : <span className="co-supplier-mark is-importer" aria-hidden="true" />}
+              <span className="co-supplier-text">
+                <span className="co-supplier-name">They ship to {real.importer.name}</span>
+                <span className="co-supplier-where">
+                  US importer{real.importer.place ? ` · ${real.importer.place.title}` : real.importer.address ? ` · ${real.importer.address}` : ""}
+                </span>
+              </span>
+            </button>
+          )}
         </section>
       )}
 
