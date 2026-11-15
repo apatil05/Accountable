@@ -3,13 +3,14 @@
 // (ImportYeti) -> each supplier and the company's US importer, geocoded, with a Wikipedia article per place.
 //  - point at a company to light its supplier routes; click it to open its page
 //  - "Suppliers" lists a company's suppliers; click one (or a diamond on the globe) to learn about where it is
-import { useEffect, useMemo, useState } from "react";
+//  - "Look up a company" searches ImportYeti for any company and plots it on the globe until removed (not saved)
+import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { Link } from "react-router-dom";
 import { api } from "../api/client";
 import type { SpendingSummary, SupplierReport } from "../api/types";
 import Globe from "../components/Globe";
 import SupplierCard, { ImporterCard } from "../components/SupplierCard";
-import { possessive, supplierCountry, reportPoints, sphericalCenter, supplierPointId, toGlobe } from "../lib/suppliers";
+import { isLookup, possessive, supplierCountry, reportPoints, sphericalCenter, splitPointId, supplierPointId, toGlobe } from "../lib/suppliers";
 
 const usd = (n: number) => n.toLocaleString("en-US", { style: "currency", currency: "USD" });
 const num = (n: number) => n.toLocaleString("en-US");
@@ -23,6 +24,11 @@ export default function MapPage() {
   const [selected, setSelected] = useState<string | null>(null); // point id: "company:index" or "company:importer"
   const [zoom, setZoom] = useState(1);
   const [query, setQuery] = useState("");
+  // Companies looked up from the search bar: shown on the globe for this visit only.
+  const [lookups, setLookups] = useState<{ report: SupplierReport; name: string }[]>([]);
+  const [lookupText, setLookupText] = useState("");
+  const [lookupBusy, setLookupBusy] = useState(false);
+  const [lookupMsg, setLookupMsg] = useState<string | null>(null);
   const coarse = typeof window !== "undefined" && window.matchMedia("(pointer: coarse)").matches;
 
   useEffect(() => {
@@ -40,9 +46,16 @@ export default function MapPage() {
     api.summary().then(setSummary).catch(() => setSummary(null));
   }, []);
 
-  const names = useMemo(() => Object.fromEntries((summary?.merchants ?? []).map((m) => [m.merchant_id, m.name])), [summary]);
-  const byId = useMemo(() => new Map((reports ?? []).map((r) => [r.merchant_id, r])), [reports]);
-  const globe = useMemo(() => toGlobe(reports ?? [], names), [reports, names]);
+  const names = useMemo(
+    () => ({
+      ...Object.fromEntries((summary?.merchants ?? []).map((m) => [m.merchant_id, m.name])),
+      ...Object.fromEntries(lookups.map((l) => [l.report.merchant_id, l.name])),
+    }),
+    [summary, lookups],
+  );
+  const allReports = useMemo(() => [...lookups.map((l) => l.report), ...(reports ?? [])], [reports, lookups]);
+  const byId = useMemo(() => new Map(allReports.map((r) => [r.merchant_id, r])), [allReports]);
+  const globe = useMemo(() => toGlobe(allReports, names), [allReports, names]);
   const companies = useMemo(() => {
     const q = query.trim().toLowerCase();
     return (summary?.merchants ?? []).filter((m) => {
@@ -53,7 +66,7 @@ export default function MapPage() {
     });
   }, [summary, byId, query]);
 
-  const [selCompany, selPart] = selected ? selected.split(":") : [null, ""];
+  const [selCompany, selPart] = selected ? splitPointId(selected) : [null, ""];
   const selReport = selCompany ? byId.get(selCompany) : undefined;
   const supplier = selPart !== "importer" ? selReport?.suppliers[Number(selPart)] : undefined;
   const importer = selPart === "importer" ? selReport?.importer ?? undefined : undefined;
@@ -78,11 +91,45 @@ export default function MapPage() {
     setZoom(1);
   };
   const pickSupplier = (id: string) => {
-    setPinned(id.split(":")[0]);
+    setPinned(splitPointId(id)[0]);
     setSelected(id);
     setZoom(3);
   };
   const onPointClick = (id: string) => pickSupplier(id); // suppliers and importers both open a card
+
+  const lookUp = (e: FormEvent) => {
+    e.preventDefault();
+    const name = lookupText.trim();
+    if (name.length < 2 || lookupBusy) return;
+    setLookupBusy(true);
+    setLookupMsg(null);
+    api
+      .lookupSuppliers(name)
+      .then((report) => {
+        if (!report.suppliers.length) {
+          setLookupMsg(`No US import records with supplier locations found for “${name}”.`);
+          return;
+        }
+        setLookups((ls) => [{ report, name }, ...ls.filter((l) => l.report.merchant_id !== report.merchant_id)]);
+        setLookupText("");
+        pin(report.merchant_id);
+      })
+      .catch((err) =>
+        setLookupMsg(
+          String(err).includes("search limit")
+            ? "ImportYeti’s search limit has been reached for now. Try again later."
+            : String(err).includes("503")
+              ? "Company lookups aren’t set up on this server yet (it needs an ImportYeti key)."
+              : "We couldn’t look that company up right now.",
+        ),
+      )
+      .finally(() => setLookupBusy(false));
+  };
+  const removeLookup = (id: string) => {
+    setLookups((ls) => ls.filter((l) => l.report.merchant_id !== id));
+    if (pinned === id) unpin();
+    if (preview === id) setPreview(null);
+  };
 
   return (
     <div className="mapx">
@@ -96,6 +143,51 @@ export default function MapPage() {
                 supplier routes, click it to open its page, or list its suppliers.
               </p>
             </div>
+            <form className="mapx-lookup" onSubmit={lookUp} role="search" aria-label="Look up any company">
+              <label htmlFor="mapx-lookup-input">Look up any company</label>
+              <div className="mapx-lookup-row">
+                <input
+                  id="mapx-lookup-input"
+                  type="search"
+                  placeholder="e.g. Patagonia, Lego, Dyson"
+                  value={lookupText}
+                  onChange={(e) => setLookupText(e.target.value)}
+                  autoComplete="off"
+                />
+                <button type="submit" className="button-light" disabled={lookupBusy || lookupText.trim().length < 2}>
+                  {lookupBusy ? "Finding…" : "Find"}
+                </button>
+              </div>
+              {lookupBusy && <p className="mapx-note" role="status">Searching US import records and placing suppliers. This takes a few seconds.</p>}
+              {lookupMsg && <p className="mapx-note" role="alert">{lookupMsg}</p>}
+            </form>
+            {lookups.length > 0 && (
+              <ul className="mapx-list mapx-lookups" aria-label="Companies you looked up" onMouseLeave={() => setPreview(null)}>
+                {lookups.map(({ report, name }) => (
+                  <li key={report.merchant_id} className="mapx-row">
+                    <button
+                      type="button"
+                      className={`mapx-item ${lit === report.merchant_id ? "is-active" : ""}`}
+                      onMouseEnter={() => setPreview(report.merchant_id)}
+                      onFocus={() => setPreview(report.merchant_id)}
+                      onClick={() => pin(report.merchant_id)}
+                    >
+                      <span className="mapx-item-top">
+                        <strong>{name}</strong>
+                        <span className="tag">Looked up</span>
+                      </span>
+                      <span className="mapx-item-sub">
+                        {report.suppliers.length} supplier{report.suppliers.length === 1 ? "" : "s"} ·{" "}
+                        {[...new Set(report.suppliers.map((s) => supplierCountry(s)).filter(Boolean))].join(", ")}
+                      </span>
+                    </button>
+                    <button type="button" className="mapx-sup-btn" onClick={() => removeLookup(report.merchant_id)} aria-label={`Remove ${name} from the globe`}>
+                      Remove
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
             <label className="mapx-search">
               <span className="visually-hidden">Filter companies</span>
               <input type="search" placeholder="Filter by company, supplier, place or country" value={query} onChange={(e) => setQuery(e.target.value)} />
@@ -153,6 +245,7 @@ export default function MapPage() {
             <button type="button" className="mapx-back" onClick={unpin}>All companies</button>
             <div className="mapx-head">
               <h1>{possessive(names[pinned] ?? pinned)} suppliers</h1>
+              {isLookup(pinned) && <p className="mapx-temp">Looked up just now. It stays on the globe until you remove it or leave this page.</p>}
               <p>
                 Top suppliers in US import records
                 {pinnedReport?.company_name && <> for "{pinnedReport.company_name}"</>}. Locations are approximate, from each
@@ -196,7 +289,11 @@ export default function MapPage() {
               </button>
             )}
             <p className="mapx-credit">Supplier data: ImportYeti (US bill-of-lading records). Places: Wikipedia.</p>
-            <Link to={`/merchant/${pinned}`} className="mapx-report">Open {possessive(names[pinned] ?? "company")} page</Link>
+            {isLookup(pinned) ? (
+              <button type="button" className="mapx-report mapx-remove" onClick={() => removeLookup(pinned)}>Remove {names[pinned] ?? "it"} from the globe</button>
+            ) : (
+              <Link to={`/merchant/${pinned}`} className="mapx-report">Open {possessive(names[pinned] ?? "company")} page</Link>
+            )}
           </>
         )}
       </aside>

@@ -372,7 +372,8 @@ class Supplier(BaseModel):
     shipments: Optional[int] = None
     lat: float  # approximate: geocoded from the supplier's listed address
     lng: float
-    place: Optional[NearbyPlace] = None
+    place: Optional[NearbyPlace] = None  # the town/district it is in
+    nearby: list[NearbyPlace] = []  # other Wikipedia articles close to the geocoded point, nearest first
 
 
 class Importer(BaseModel):
@@ -383,6 +384,7 @@ class Importer(BaseModel):
     lat: Optional[float] = None
     lng: Optional[float] = None
     place: Optional[NearbyPlace] = None  # Wikipedia article about where the importer is
+    nearby: list[NearbyPlace] = []  # other Wikipedia articles close to the importer, nearest first
 
 
 class SupplierReport(BaseModel):

@@ -216,7 +216,8 @@ export interface Supplier {
   shipments: number | null;
   lat: number; // approximate: geocoded from the supplier's listed address
   lng: number;
-  place: NearbyPlace | null;
+  place: NearbyPlace | null; // the town/district it is in
+  nearby?: NearbyPlace[]; // other Wikipedia articles close to the geocoded point, nearest first
 }
 
 /** The company's own importing entity in US records: where its suppliers' shipments go. */
@@ -226,6 +227,7 @@ export interface Importer {
   lat: number | null;
   lng: number | null;
   place: NearbyPlace | null; // Wikipedia article about where the importer is
+  nearby?: NearbyPlace[]; // other Wikipedia articles close to the importer, nearest first
 }
 
 export interface SupplierReport {
