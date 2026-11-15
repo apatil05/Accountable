@@ -16,7 +16,8 @@ Write path (`python -m scripts.prewarm`, which calls refresh()):
 
 Read path (get_report / reports_for): cached research -> mock data. Never calls Gemini.
 Research is profile-independent; the overall and personalized scores and the verdict
-(template blurb) are computed from the user's profile at read time.
+are computed from the user's profile at read time. The verdict blurb is the Gemini one
+that prewarm stored for this customer when it still matches, else the template.
 Mock data is never written to the cache.
 """
 
@@ -76,7 +77,7 @@ _STRUCTURE_PROMPT = """Convert the research below into JSON.
 Rules:
 - One entry per area, using exactly these keys for "category": {keys}.
 - score: the 0-100 rating given in the research for that area (50 if none was given).
-- summary: 2 sentences, neutral and factual.
+- summary: 1 short sentence (25 words max), neutral and factual.
 - claims: 4-6 specific factual claims for that area, taken from the CITED STATEMENTS.
   Each claim states one fact. Prefer claims with a source over claims without one.
   "source" is the number of the source that supports the claim, chosen from the numbers listed
@@ -214,8 +215,8 @@ _SUMMARY_PROMPT = """Summarize what the verified facts below say about the compa
 Use ONLY the listed facts. Do not use outside knowledge, and do not rate or score the company.
 
 Each fact is marked (+) if it reflects well on the company and (-) if it reflects badly, with the
-year in brackets when known. Give each area's summary in 2 neutral, factual sentences that cover
-the most important facts. When a fact is attributed ("According to X...", "A lawsuit alleges...",
+year in brackets when known. Give each area's summary as ONE short, neutral, factual sentence
+(25 words max) covering the most important fact. When a fact is attributed ("According to X...", "A lawsuit alleges...",
 "{merchant} says..."), keep that attribution; never restate an attributed claim as established fact.
 
 {areas}
@@ -322,7 +323,10 @@ def refresh(db: Database, merchant_id: str, merchant_name: str) -> list[Category
 
 
 def _build(merchant_id: str, merchant_name: str, categories: list[CategoryScore], data_source: str,
-           researched_at: str | None, profile: UserProfile) -> EthicsReport:
+           researched_at: str | None, profile: UserProfile, stored_blurb: dict | None = None) -> EthicsReport:
+    for c in categories:
+        for cl in c.claims:
+            cl.source_tier = validation.domain_tier(cl.source_url, merchant_name) if cl.source_url else None
     personalized = scoring.personalized(categories, profile)
     return EthicsReport(
         merchant_id=merchant_id,
@@ -330,17 +334,18 @@ def _build(merchant_id: str, merchant_name: str, categories: list[CategoryScore]
         overall_score=scoring.overall(categories),
         personalized_score=personalized,
         categories=categories,
-        # Template blurb only: a Gemini blurb here would be a paid call per page load.
-        verdict=build_verdict(merchant_name, categories, profile, personalized, use_ai=False),
+        # Never generates: a Gemini call here would be a paid call per page load. Prewarm writes
+        # stored blurbs; build_verdict serves one only if it still matches this profile.
+        verdict=build_verdict(merchant_name, categories, profile, personalized, stored_blurb, researched_at),
         data_source=data_source,  # type: ignore[arg-type]
         researched_at=researched_at,
     )
 
 
-def _from_cache(doc: dict, merchant_name: str, profile: UserProfile) -> EthicsReport:
+def _from_cache(doc: dict, merchant_name: str, profile: UserProfile, stored_blurb: dict | None = None) -> EthicsReport:
     categories = [CategoryScore(**c) for c in doc["categories"]]
     return _build(doc["_id"], merchant_name, categories, doc["data_source"],
-                  doc["researched_at"].isoformat(), profile)
+                  doc["researched_at"].isoformat(), profile, stored_blurb)
 
 
 def _from_mock(merchant_id: str, merchant_name: str, profile: UserProfile) -> EthicsReport | None:
@@ -355,13 +360,16 @@ def _from_mock(merchant_id: str, merchant_name: str, profile: UserProfile) -> Et
     return _build(merchant_id, merchant_name, categories, "mock", None, profile)
 
 
-def get_report(db: Database, merchant_id: str, merchant_name: str, profile: UserProfile) -> EthicsReport | None:
+def get_report(db: Database, merchant_id: str, merchant_name: str, profile: UserProfile,
+               customer_id: str | None = None) -> EthicsReport | None:
     """Cached research, else mock data. Never calls Gemini: this runs on public, unauthenticated
     requests, and a paid call per cache miss (retried on every failure) is a cost-abuse vector.
-    Research happens only in `python -m scripts.prewarm`."""
+    Research and Gemini blurbs happen only in `python -m scripts.prewarm`. `customer_id` is the
+    owner of `profile`; with it, a stored blurb for that customer can be served."""
     cached = repos.get_ethics_research(db, merchant_id)
     if cached:
-        return _from_cache(cached, merchant_name, profile)
+        stored = repos.get_verdict_blurb(db, customer_id, merchant_id) if customer_id else None
+        return _from_cache(cached, merchant_name, profile, stored)
     return _from_mock(merchant_id, merchant_name, profile)
 
 

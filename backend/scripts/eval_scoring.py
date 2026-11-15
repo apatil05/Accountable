@@ -36,8 +36,8 @@ def main() -> int:
     print("examples:")
     examples = {
         "1 major tier-1 recent negative": [claim("negative")],
-        "1 minor company pledge (tier 3 positive)": [claim("positive", "minor", 3)],
-        "company admits a major problem (tier 3 negative)": [claim("negative", "major", 3)],
+        "1 minor company pledge (tier 4 positive)": [claim("positive", "minor", 4)],
+        "company admits a major problem (tier 4 negative)": [claim("negative", "major", 4)],
         "3 major negatives + 3 minor positives": [claim("negative")] * 3 + [claim("positive", "minor", 2)] * 3,
         "6 notable tier-2 negatives": [claim("negative", "notable", 2)] * 6,
         "major tier-1 negative from 2010": [claim("negative", year=2010)],
@@ -65,9 +65,9 @@ def main() -> int:
     check("one major tier-1 recent negative can trigger a deal-breaker (< 40)",
           score(claim("negative")) < scoring.DEAL_BREAKER_BELOW)
     check("company self-praise moves the score less than self-admitted harm",
-          score(claim("positive", tier=3)) - 50 < 50 - score(claim("negative", tier=3)))
-    check("tier 1 moves the score more than tier 4",
-          score(claim("negative", tier=1)) < score(claim("negative", tier=4)))
+          score(claim("positive", tier=4)) - 50 < 50 - score(claim("negative", tier=4)))
+    check("tier 1 moves the score more than tier 3 (other sites)",
+          score(claim("negative", tier=1)) < score(claim("negative", tier=3)))
     check("major moves the score more than notable, notable more than minor",
           score(claim("negative", "major")) < score(claim("negative", "notable")) < score(claim("negative", "minor")))
     check("recent events move the score more than old ones",

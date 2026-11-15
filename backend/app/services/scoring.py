@@ -25,11 +25,11 @@ DEAL_BREAKER_BELOW = 40
 PRIOR = 2.0
 SEVERITY_W = {"major": 1.0, "notable": 0.6, "minor": 0.3}
 DEFAULT_SEVERITY = "notable"
-# Tier 3 is the company's own site: self-praise (pledges, sustainability reports) counts little,
+# Tier 4 is the company's own site: self-praise (pledges, sustainability reports) counts little,
 # a company admitting something bad about itself counts fully.
-TIER_W = {1: 1.0, 2: 0.9, 4: 0.6}
-TIER3_POSITIVE_W = 0.4
-TIER3_NEGATIVE_W = 1.0
+TIER_W = {1: 1.0, 2: 0.9, 3: 0.6}
+COMPANY_POSITIVE_W = 0.4
+COMPANY_NEGATIVE_W = 1.0
 UNKNOWN_TIER_W = 0.6
 RECENT_YEARS = 3  # events this recent count fully
 HALF_LIFE_YEARS = 5  # older events halve in weight every 5 years after that
@@ -41,8 +41,8 @@ def _this_year() -> int:
 
 
 def tier_weight(tier: int, direction: str) -> float:
-    if tier == 3:
-        return TIER3_POSITIVE_W if direction == "positive" else TIER3_NEGATIVE_W
+    if tier == 4:
+        return COMPANY_POSITIVE_W if direction == "positive" else COMPANY_NEGATIVE_W
     return TIER_W.get(tier, UNKNOWN_TIER_W)
 
 

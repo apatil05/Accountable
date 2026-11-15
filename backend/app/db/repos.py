@@ -150,6 +150,32 @@ def get_ethics_researches(db: Database, ids: Iterable[str]) -> list[dict]:
     return list(db[ETHICS_REPORTS].find({"_id": {"$in": list(ids)}}))
 
 
+# ---------- verdict blurbs ----------
+# Gemini-written verdict blurbs, one per (customer, brand), written only by prewarm. Each carries
+# a fingerprint of the profile + research it was written for; a mismatch on read means stale,
+# and the page falls back to the template blurb (services/verdict.py).
+VERDICT_BLURBS = "verdict_blurbs"
+
+
+def _blurb_id(customer_id: str, brand_id: str) -> str:
+    return f"{customer_id}:{brand_id}"
+
+
+def save_verdict_blurb(db: Database, customer_id: str, brand_id: str, blurb: str, fingerprint: str) -> None:
+    doc = {"customer_id": customer_id, "brand_id": brand_id, "blurb": blurb, "fingerprint": fingerprint,
+           "created_at": utcnow()}
+    db[VERDICT_BLURBS].replace_one({"_id": _blurb_id(customer_id, brand_id)}, doc, upsert=True)
+
+
+def get_verdict_blurb(db: Database, customer_id: str, brand_id: str) -> dict | None:
+    return db[VERDICT_BLURBS].find_one({"_id": _blurb_id(customer_id, brand_id)})
+
+
+def get_verdict_blurbs(db: Database, customer_id: str, brand_ids: Iterable[str]) -> dict[str, dict]:
+    ids = [_blurb_id(customer_id, b) for b in brand_ids]
+    return {d["brand_id"]: d for d in db[VERDICT_BLURBS].find({"_id": {"$in": ids}})}
+
+
 def save_supply_chain(db: Database, brand_id: str, product: str, stages: Sequence[Mapping[str, Any]],
                       data_source: str, researched_at: datetime | None = None) -> None:
     fields = {"product": product, "stages": list(stages), "data_source": data_source}

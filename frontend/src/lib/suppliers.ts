@@ -3,6 +3,12 @@ import type { Supplier, SupplierReport } from "../api/types";
 import type { GlobePoint, GlobeRoute } from "../components/Globe";
 
 export const supplierPointId = (merchantId: string, i: number) => `${merchantId}:${i}`;
+/** "company:index" / "company:importer" -> [company, part]. Splits on the last colon: looked-up companies have ids like "lookup:ikea". */
+export function splitPointId(id: string): [string, string] {
+  const at = id.lastIndexOf(":");
+  return [id.slice(0, at), id.slice(at + 1)];
+}
+export const isLookup = (merchantId: string) => merchantId.startsWith("lookup:");
 
 /** Lines from each supplier to the company's US importer, plus a marker for every supplier and importer. */
 export function toGlobe(reports: SupplierReport[], names: Record<string, string> = {}) {

@@ -158,6 +158,8 @@ export interface Claim {
   source_name: string | null;
   confidence: number;
   validated: boolean;
+  // 1 government/court, 2 news/ratings, 3 other, 4 the company itself; null = no source
+  source_tier: number | null;
 }
 
 export interface CategoryScore {
@@ -230,7 +232,8 @@ export interface Supplier {
   shipments: number | null;
   lat: number; // approximate: geocoded from the supplier's listed address
   lng: number;
-  place: NearbyPlace | null;
+  place: NearbyPlace | null; // the town/district it is in
+  nearby?: NearbyPlace[]; // other Wikipedia articles close to the geocoded point, nearest first
 }
 
 /** The company's own importing entity in US records: where its suppliers' shipments go. */
@@ -240,6 +243,7 @@ export interface Importer {
   lat: number | null;
   lng: number | null;
   place: NearbyPlace | null; // Wikipedia article about where the importer is
+  nearby?: NearbyPlace[]; // other Wikipedia articles close to the importer, nearest first
 }
 
 export interface SupplierReport {

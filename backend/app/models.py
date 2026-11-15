@@ -305,6 +305,9 @@ class Claim(BaseModel):
     source_name: Optional[str] = None
     confidence: float = 0.0  # 0-1, from the LLM
     validated: bool = False  # set by services/validation.py, never by the LLM
+    # 1 government/court, 2 news/ratings, 3 other, 4 the company itself (validation.domain_tier).
+    # Recomputed from source_url on every read; None = no source.
+    source_tier: Optional[int] = None
     # Internal only (not serialized), set by services/validation.py and used by scoring.category_score:
     _event_year: int = PrivateAttr(default=0)  # year of the event, 0 = unknown
     _direction: str = PrivateAttr(default="")  # "positive" / "negative" (neutral claims are dropped)
@@ -390,7 +393,8 @@ class Supplier(BaseModel):
     shipments: Optional[int] = None
     lat: float  # approximate: geocoded from the supplier's listed address
     lng: float
-    place: Optional[NearbyPlace] = None
+    place: Optional[NearbyPlace] = None  # the town/district it is in
+    nearby: list[NearbyPlace] = []  # other Wikipedia articles close to the geocoded point, nearest first
 
 
 class Importer(BaseModel):
@@ -401,6 +405,7 @@ class Importer(BaseModel):
     lat: Optional[float] = None
     lng: Optional[float] = None
     place: Optional[NearbyPlace] = None  # Wikipedia article about where the importer is
+    nearby: list[NearbyPlace] = []  # other Wikipedia articles close to the importer, nearest first
 
 
 class SupplierReport(BaseModel):

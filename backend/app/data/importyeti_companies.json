@@ -1,12 +1,909 @@
 {
-  "_comment": "Which ImportYeti importer record is each brand. Picked by hand from free /company/search results (2026-11-14), because name matching alone picks wrong records (e.g. 'Apple Tree International', 'Chipotle Publishing'). query = what to search, title = the exact record to use. A brand missing here has no import records we trust, so the app shows none rather than a wrong match.",
-  "amazon": { "query": "Amazon Logistics", "title": "Amazon Logistics" },
-  "walmart": { "query": "Wal Mart", "title": "Wal Mart" },
-  "traderjoes": { "query": "Trader Joe S", "title": "Trader Joe S" },
-  "apple": { "query": "Apple Inc", "title": "Apple" },
-  "shell": { "query": "Shell Oil", "title": "Shell Trade Us" },
-  "starbucks": { "query": "Starbucks", "title": "Starbucks Coffee Trade" },
-  "target": { "query": "Target", "title": "Target Stores Division Of Target C" },
-  "nike": { "query": "Nike Usa", "title": "Nike Usa" },
-  "hm": { "query": "H M Hennes", "title": "H&M Hennes & Mauritz L P" }
+ "_comment": "How each company appears in US import records (ImportYeti). Hand-picked on 2026-11-15 from real free /company/search results: the company's own US importer record, or its parent / legal name where that is who imports (e.g. Crate & Barrel = Euromarket Designs, Calvin Klein = PVH). Looked up by the merchant's name (case, spaces and punctuation ignored). If a merchant is not here, or its record no longer turns up, the app searches the merchant's name and uses the result with the most shipments.",
+ "companies": {
+  "Abercrombie & Fitch": {
+   "query": "Abercrombie",
+   "title": "Abercrombie & Fitch Trade"
+  },
+  "Academy Sports": {
+   "query": "Academy",
+   "title": "Academy"
+  },
+  "Ace Hardware": {
+   "query": "Ace Hardware",
+   "title": "Ace Hardware"
+  },
+  "Adidas": {
+   "query": "Adidas America",
+   "title": "Adidas America"
+  },
+  "Advance Auto Parts": {
+   "query": "Advance Auto",
+   "title": "Advance Stores"
+  },
+  "Albertsons": {
+   "query": "Albertsons",
+   "title": "Albertsons"
+  },
+  "Aldi": {
+   "query": "Aldi",
+   "title": "Aldi"
+  },
+  "Amazon": {
+   "query": "Amazon",
+   "title": "Amazon Logistics"
+  },
+  "American Eagle": {
+   "query": "American Eagle Outfitters",
+   "title": "American Eagle Outfitters Canada"
+  },
+  "Anheuser-Busch": {
+   "query": "Anheuser Busch",
+   "title": "Anheuser Busch"
+  },
+  "Anthropologie": {
+   "query": "Urban Outfitters",
+   "title": "Urban Outfitters"
+  },
+  "Apple": {
+   "query": "Apple Inc",
+   "title": "Apple"
+  },
+  "Ashley Furniture": {
+   "query": "Ashley Furniture",
+   "title": "Ashley Furniture Trade Ll"
+  },
+  "AutoZone": {
+   "query": "Autozone",
+   "title": "Autozone Parts"
+  },
+  "Banana Republic": {
+   "query": "Banana Republic",
+   "title": "Banana Republic"
+  },
+  "Barilla": {
+   "query": "Barilla",
+   "title": "Barilla America"
+  },
+  "Bass Pro Shops": {
+   "query": "Bass Pro",
+   "title": "Bass Pro"
+  },
+  "Bath & Body Works": {
+   "query": "Bath Body Works",
+   "title": "Bath Body Works Brand"
+  },
+  "Best Buy": {
+   "query": "Best Buy",
+   "title": "Best Buy Purchasing"
+  },
+  "Big Lots": {
+   "query": "Big Lots",
+   "title": "Big Lots Stores"
+  },
+  "BJ's": {
+   "query": "BJ S Wholesale",
+   "title": "Bj S Wholesale Club"
+  },
+  "BMW": {
+   "query": "BMW",
+   "title": "Bmw Of North America"
+  },
+  "Bose": {
+   "query": "Bose",
+   "title": "Bose Jeffersonville Dist Ctr"
+  },
+  "BP": {
+   "query": "BP Products",
+   "title": "Bp Lubricants Usa"
+  },
+  "Bridgestone": {
+   "query": "Bridgestone",
+   "title": "Bridgestone Americas Tire"
+  },
+  "Burlington": {
+   "query": "Burlington",
+   "title": "Burlington Coat Factory Warehouse"
+  },
+  "Calvin Klein": {
+   "query": "Calvin Klein",
+   "title": "Pvh"
+  },
+  "Canon": {
+   "query": "Canon",
+   "title": "Canon Usainc Chicago Office"
+  },
+  "Carter's": {
+   "query": "Carter S",
+   "title": "Carter S"
+  },
+  "Casper": {
+   "query": "Casper Sleep",
+   "title": "Casper Sleep"
+  },
+  "Champion": {
+   "query": "Hanesbrands",
+   "title": "Hanesbrands"
+  },
+  "Chanel": {
+   "query": "Chanel",
+   "title": "Chanel"
+  },
+  "Chevron": {
+   "query": "Chevron",
+   "title": "Chevron Products"
+  },
+  "Chewy": {
+   "query": "Chewy",
+   "title": "Chewy"
+  },
+  "Chiquita": {
+   "query": "Chiquita",
+   "title": "Chiquita Fresh North America L L C"
+  },
+  "Church & Dwight": {
+   "query": "Church Dwight",
+   "title": "Church & Dwight"
+  },
+  "Clorox": {
+   "query": "Clorox",
+   "title": "The Clorox International"
+  },
+  "Coach": {
+   "query": "Kate Spade",
+   "title": "Coach Services"
+  },
+  "Coca-Cola": {
+   "query": "Coca Cola",
+   "title": "The Coca Cola"
+  },
+  "Colgate-Palmolive": {
+   "query": "Colgate Palmolive",
+   "title": "Colgate Palmolive"
+  },
+  "Conair": {
+   "query": "Conair",
+   "title": "Conair"
+  },
+  "Converse": {
+   "query": "Converse",
+   "title": "Converse"
+  },
+  "Costco": {
+   "query": "Costco",
+   "title": "Costco Wholesale 999 La"
+  },
+  "Coty": {
+   "query": "Coty",
+   "title": "Coty Us"
+  },
+  "Crate & Barrel": {
+   "query": "Crate Barrel",
+   "title": "Euromarket Designs"
+  },
+  "Crayola": {
+   "query": "Crayola",
+   "title": "Crayola"
+  },
+  "Crocs": {
+   "query": "Crocs",
+   "title": "Crocs"
+  },
+  "CVS": {
+   "query": "CVS Pharmacy",
+   "title": "Cvs/Pharmacy"
+  },
+  "Danone": {
+   "query": "Danone",
+   "title": "Danone Waters Of America"
+  },
+  "Del Monte": {
+   "query": "Del Monte",
+   "title": "Del Monte Fresh Produce N A"
+  },
+  "Dell": {
+   "query": "Dell Products",
+   "title": "Dell Products"
+  },
+  "Diageo": {
+   "query": "Diageo",
+   "title": "Diageo North America"
+  },
+  "Dick's Sporting Goods": {
+   "query": "Dicks Sporting Goods",
+   "title": "Dick S Sporting Goods"
+  },
+  "Dickies": {
+   "query": "Williamson Dickie",
+   "title": "Williamson Dickie A Division Of"
+  },
+  "Dillard's": {
+   "query": "Dillard",
+   "title": "Dillard S"
+  },
+  "Disney": {
+   "query": "Disney",
+   "title": "Disney Theme Park Merchandise"
+  },
+  "Dole": {
+   "query": "Dole",
+   "title": "Dole Fresh Fruit"
+  },
+  "Dollar General": {
+   "query": "Dollar General",
+   "title": "Dollar General"
+  },
+  "Dollar Tree": {
+   "query": "Dollar Tree",
+   "title": "Dollar Tree Distribution"
+  },
+  "DSW": {
+   "query": "DSW",
+   "title": "Dsw"
+  },
+  "Dunkin'": {
+   "query": "Dunkin",
+   "title": "Dunkin Brands"
+  },
+  "Dyson": {
+   "query": "Dyson",
+   "title": "Dyson"
+  },
+  "e.l.f.": {
+   "query": "E L F Cosmetics",
+   "title": "E L F Cosmetics"
+  },
+  "Eddie Bauer": {
+   "query": "Eddie Bauer",
+   "title": "Eddie Bauer"
+  },
+  "Estee Lauder": {
+   "query": "Estee Lauder",
+   "title": "Estee Lauder Intl"
+  },
+  "ExxonMobil": {
+   "query": "Exxonmobil",
+   "title": "Exxonmobil Chemical"
+  },
+  "Family Dollar": {
+   "query": "Family Dollar",
+   "title": "Family Dollar Services"
+  },
+  "Fashion Nova": {
+   "query": "Fashion Nova",
+   "title": "Fashion Nova"
+  },
+  "Ferrero": {
+   "query": "Ferrero",
+   "title": "Ferrero Usa"
+  },
+  "Five Below": {
+   "query": "Five Below",
+   "title": "Five Below Merchandising"
+  },
+  "Foot Locker": {
+   "query": "Foot Locker",
+   "title": "Foot Locker Retail"
+  },
+  "Ford": {
+   "query": "Ford Motor",
+   "title": "Ford Motor"
+  },
+  "Forever 21": {
+   "query": "Forever 21",
+   "title": "Forever 21"
+  },
+  "Fossil": {
+   "query": "Fossil",
+   "title": "Fossil Partners"
+  },
+  "Funko": {
+   "query": "Funko",
+   "title": "Funko"
+  },
+  "GameStop": {
+   "query": "Gamestop",
+   "title": "Gamestop"
+  },
+  "Gap": {
+   "query": "Gap Inc",
+   "title": "The Gap"
+  },
+  "GE Appliances": {
+   "query": "GE Appliances",
+   "title": "Haier Us Appliance Solutions"
+  },
+  "General Mills": {
+   "query": "General Mills",
+   "title": "General Mills"
+  },
+  "General Motors": {
+   "query": "General Motors",
+   "title": "General Motors"
+  },
+  "Gildan": {
+   "query": "Gildan",
+   "title": "Gildan Activewear Eden"
+  },
+  "Goodyear": {
+   "query": "Goodyear",
+   "title": "Goodyear Tire & Rubber"
+  },
+  "GoPro": {
+   "query": "Gopro",
+   "title": "Gopro"
+  },
+  "Goya": {
+   "query": "Goya Foods",
+   "title": "Goya Foods"
+  },
+  "Gucci": {
+   "query": "Gucci",
+   "title": "Gucci America"
+  },
+  "H&M": {
+   "query": "H M Hennes",
+   "title": "H&M Hennes & Mauritz L P"
+  },
+  "H-E-B": {
+   "query": "Heb Grocery",
+   "title": "Heb Grocery"
+  },
+  "Hamilton Beach": {
+   "query": "Hamilton Beach",
+   "title": "Hamilton Beach Brands"
+  },
+  "Hanes": {
+   "query": "Hanesbrands",
+   "title": "Hanesbrands"
+  },
+  "Harbor Freight": {
+   "query": "Harbor Freight",
+   "title": "Harbor Freight Tools"
+  },
+  "Harley-Davidson": {
+   "query": "Harley Davidson",
+   "title": "Harley Davidson Motor"
+  },
+  "Hasbro": {
+   "query": "Hasbro",
+   "title": "Hasbro"
+  },
+  "Heineken": {
+   "query": "Heineken",
+   "title": "Heineken Usa"
+  },
+  "Helen of Troy": {
+   "query": "Helen Of Troy",
+   "title": "Helen Of Troy L P"
+  },
+  "Hermes": {
+   "query": "Hermes",
+   "title": "Hermes Of Paris"
+  },
+  "Hershey": {
+   "query": "Hershey",
+   "title": "The Hershey"
+  },
+  "Hobby Lobby": {
+   "query": "Hobby Lobby",
+   "title": "Hobby Lobby Stores"
+  },
+  "HomeGoods": {
+   "query": "TJX",
+   "title": "Tjx Companies"
+  },
+  "Honda": {
+   "query": "American Honda",
+   "title": "American Honda Motor"
+  },
+  "HP": {
+   "query": "HP Inc",
+   "title": "Hp"
+  },
+  "Hyundai": {
+   "query": "Hyundai Motor",
+   "title": "Hyundai Motor America"
+  },
+  "IKEA": {
+   "query": "Ikea",
+   "title": "Ikea Supply"
+  },
+  "iRobot": {
+   "query": "Irobot",
+   "title": "Irobot"
+  },
+  "J.Crew": {
+   "query": "J Crew",
+   "title": "J Crew Operating"
+  },
+  "JCPenney": {
+   "query": "J C Penney",
+   "title": "J C Penney Purchasing"
+  },
+  "Joann": {
+   "query": "Jo Ann Stores",
+   "title": "Jo Ann Stores"
+  },
+  "Johnson & Johnson": {
+   "query": "Johnson Johnson",
+   "title": "Johnson & Johnson Consumer"
+  },
+  "Kate Spade": {
+   "query": "Kate Spade",
+   "title": "Kate Spade"
+  },
+  "Kellogg's": {
+   "query": "Kellogg",
+   "title": "Kellogg"
+  },
+  "Keurig": {
+   "query": "Keurig",
+   "title": "Keurig Green Mountain"
+  },
+  "Keurig Dr Pepper": {
+   "query": "Keurig Dr Pepper",
+   "title": "Keurig Dr Pepper"
+  },
+  "Kia": {
+   "query": "Kia",
+   "title": "Kia Georgia"
+  },
+  "Kimberly-Clark": {
+   "query": "Kimberly Clark",
+   "title": "Kimberly Clark Global Sales"
+  },
+  "Kohl's": {
+   "query": "Kohls",
+   "title": "Kohl S Department Stores"
+  },
+  "Kraft Heinz": {
+   "query": "Kraft Heinz",
+   "title": "Kraft Heinz Foods"
+  },
+  "Kroger": {
+   "query": "Kroger",
+   "title": "The Kroger"
+  },
+  "L'Oreal": {
+   "query": "L Oreal",
+   "title": "Loreal Usa"
+  },
+  "L.L.Bean": {
+   "query": "L L Bean",
+   "title": "L L Bean"
+  },
+  "La-Z-Boy": {
+   "query": "La Z Boy",
+   "title": "La Z Boy Casegoods"
+  },
+  "Lands' End": {
+   "query": "Lands End",
+   "title": "Lands End"
+  },
+  "Lego": {
+   "query": "Lego",
+   "title": "Lego"
+  },
+  "Lenovo": {
+   "query": "Lenovo",
+   "title": "Lenovo Wc Dc Plant"
+  },
+  "Levi's": {
+   "query": "Levi Strauss",
+   "title": "Levi Strauss"
+  },
+  "LG": {
+   "query": "LG Electronics",
+   "title": "Lg Electronics U S A"
+  },
+  "Lindt": {
+   "query": "Lindt",
+   "title": "Lindt & Sprungli Usa"
+  },
+  "Logitech": {
+   "query": "Logitech",
+   "title": "Logitech"
+  },
+  "Louis Vuitton": {
+   "query": "Louis Vuitton",
+   "title": "Louis Vuitton Us Manufacturing"
+  },
+  "Lowe's": {
+   "query": "Lowe S Home Centers",
+   "title": "Lowe S Home Improvement"
+  },
+  "Lululemon": {
+   "query": "Lululemon",
+   "title": "Lululemon Usa"
+  },
+  "Macy's": {
+   "query": "Macys",
+   "title": "Macy S Merchandising Group"
+  },
+  "Mars": {
+   "query": "Mars Wrigley",
+   "title": "Mars Food Us"
+  },
+  "Marshalls": {
+   "query": "TJX",
+   "title": "Tjx Companies"
+  },
+  "Mattel": {
+   "query": "Mattel",
+   "title": "Mattel Import Services"
+  },
+  "Meijer": {
+   "query": "Meijer",
+   "title": "Meijer Distribution"
+  },
+  "Menards": {
+   "query": "Menard",
+   "title": "Menard Import Department"
+  },
+  "Mercedes-Benz": {
+   "query": "Mercedes Benz",
+   "title": "Mercedes Benz Usa"
+  },
+  "Michael Kors": {
+   "query": "Michael Kors",
+   "title": "Michael Kors Usa"
+  },
+  "Michaels": {
+   "query": "Michaels Stores",
+   "title": "Michaels Stores Procurement"
+  },
+  "Michelin": {
+   "query": "Michelin",
+   "title": "Michelin North America"
+  },
+  "Microsoft": {
+   "query": "Microsoft",
+   "title": "Microsoft"
+  },
+  "Mondelez": {
+   "query": "Mondelez",
+   "title": "Mondelez Global"
+  },
+  "Monster Energy": {
+   "query": "Monster Energy",
+   "title": "Monster Energy"
+  },
+  "Nespresso": {
+   "query": "Nespresso",
+   "title": "Nespresso Usa"
+  },
+  "Nestle": {
+   "query": "Nestle",
+   "title": "Nestle Usa"
+  },
+  "New Balance": {
+   "query": "New Balance",
+   "title": "New Balance Athletics"
+  },
+  "Nike": {
+   "query": "Nike Usa",
+   "title": "Nike Usa"
+  },
+  "Nintendo": {
+   "query": "Nintendo",
+   "title": "Nintendo Of America"
+  },
+  "Nissan": {
+   "query": "Nissan North America",
+   "title": "Nissan North America"
+  },
+  "Nordstrom": {
+   "query": "Nordstrom",
+   "title": "Nordstrom"
+  },
+  "O'Reilly": {
+   "query": "O Reilly Auto",
+   "title": "O Reilly National"
+  },
+  "Office Depot": {
+   "query": "Office Depot",
+   "title": "Officemax"
+  },
+  "Old Navy": {
+   "query": "Old Navy",
+   "title": "Old Navy"
+  },
+  "Pandora": {
+   "query": "Pandora Jewelry",
+   "title": "Pandora Jewelry"
+  },
+  "Patagonia": {
+   "query": "Patagonia",
+   "title": "Patagonia"
+  },
+  "Peet's Coffee": {
+   "query": "Peet S Coffee",
+   "title": "Peets Coffee & Tea"
+  },
+  "Peloton": {
+   "query": "Peloton",
+   "title": "Peloton Interactive"
+  },
+  "PepsiCo": {
+   "query": "Pepsico",
+   "title": "Pepsico"
+  },
+  "Petco": {
+   "query": "Petco",
+   "title": "Petco Animal Supplies Stores"
+  },
+  "PetSmart": {
+   "query": "Petsmart",
+   "title": "Petsmart"
+  },
+  "Pottery Barn": {
+   "query": "Williams Sonoma",
+   "title": "Williams Sonoma Singapore"
+  },
+  "Prada": {
+   "query": "Prada",
+   "title": "Prada Usa"
+  },
+  "Procter & Gamble": {
+   "query": "Procter Gamble",
+   "title": "Procter & Gamble"
+  },
+  "Publix": {
+   "query": "Publix",
+   "title": "Publix Super Markets"
+  },
+  "Puma": {
+   "query": "Puma North America",
+   "title": "Puma North America"
+  },
+  "Purple": {
+   "query": "Purple Innovation",
+   "title": "Purple Innovation"
+  },
+  "Ralph Lauren": {
+   "query": "Ralph Lauren",
+   "title": "Ralph Lauren"
+  },
+  "Red Bull": {
+   "query": "Red Bull",
+   "title": "Red Bull North America"
+  },
+  "REI": {
+   "query": "Recreational Equipment",
+   "title": "Recreational Equipment"
+  },
+  "Revlon": {
+   "query": "Revlon",
+   "title": "Revlon Consumer Products"
+  },
+  "RH": {
+   "query": "Restoration Hardware",
+   "title": "Restoration Hardware"
+  },
+  "Rolex": {
+   "query": "Rolex",
+   "title": "Rolex Watch Usa"
+  },
+  "Ross": {
+   "query": "Ross Stores",
+   "title": "Ross Dress For Less"
+  },
+  "Safeway": {
+   "query": "Safeway",
+   "title": "Safeway"
+  },
+  "Sam's Club": {
+   "query": "Sams Club",
+   "title": "Sams Club Walmart Stores"
+  },
+  "Samsung": {
+   "query": "Samsung Electronics America",
+   "title": "Samsung Electronics America"
+  },
+  "SC Johnson": {
+   "query": "S C Johnson",
+   "title": "S C Johnson & Son"
+  },
+  "Sephora": {
+   "query": "Sephora",
+   "title": "Sephora Usa"
+  },
+  "Shein": {
+   "query": "Shein",
+   "title": "Shein Distribution"
+  },
+  "Shell": {
+   "query": "Shell Oil",
+   "title": "Shell Trade Us"
+  },
+  "Skechers": {
+   "query": "Skechers",
+   "title": "Skechers Usa Ii"
+  },
+  "Sony": {
+   "query": "Sony",
+   "title": "Sony Electronics"
+  },
+  "Spin Master": {
+   "query": "Spin Master",
+   "title": "Spin Master"
+  },
+  "Sprouts": {
+   "query": "Sprouts Farmers",
+   "title": "Sprouts Farmers Market"
+  },
+  "Stanley": {
+   "query": "Pacific Market",
+   "title": "Pacific Market International"
+  },
+  "Stanley Black & Decker": {
+   "query": "Stanley Black",
+   "title": "Black & Decker"
+  },
+  "Staples": {
+   "query": "Staples",
+   "title": "Staples Brands Group"
+  },
+  "Starbucks": {
+   "query": "Starbucks",
+   "title": "Starbucks Coffee Trade"
+  },
+  "Steve Madden": {
+   "query": "Steven Madden",
+   "title": "Steve Madden"
+  },
+  "Subaru": {
+   "query": "Subaru",
+   "title": "Subaru Of America"
+  },
+  "Swarovski": {
+   "query": "Swarovski",
+   "title": "Swarovski"
+  },
+  "Target": {
+   "query": "Target",
+   "title": "Target Stores Division Of Target C"
+  },
+  "Tempur Sealy": {
+   "query": "Tempur",
+   "title": "Tempur Pedic North America Int"
+  },
+  "Tesla": {
+   "query": "Tesla",
+   "title": "Tesla"
+  },
+  "The Children's Place": {
+   "query": "Children S Place",
+   "title": "The Children S Place Services"
+  },
+  "The Home Depot": {
+   "query": "Home Depot",
+   "title": "Home Depot Usa"
+  },
+  "The North Face": {
+   "query": "The North Face",
+   "title": "The North Face A Division Of Vf"
+  },
+  "Tiffany": {
+   "query": "Tiffany",
+   "title": "Tiffany"
+  },
+  "Timberland": {
+   "query": "Timberland",
+   "title": "Timberland"
+  },
+  "TJ Maxx": {
+   "query": "TJX",
+   "title": "Tjx Companies"
+  },
+  "Tommy Hilfiger": {
+   "query": "Tommy Hilfiger",
+   "title": "Pvh"
+  },
+  "Torrid": {
+   "query": "Torrid",
+   "title": "Torrid Merchandising"
+  },
+  "Toyota": {
+   "query": "Toyota Motor",
+   "title": "Toyota Motor Manufacturing"
+  },
+  "Tractor Supply": {
+   "query": "Tractor Supply",
+   "title": "Tractor Supply Of Texas"
+  },
+  "Trader Joe's": {
+   "query": "Trader Joe S",
+   "title": "Trader Joe S"
+  },
+  "Tupperware": {
+   "query": "Tupperware",
+   "title": "Tupperware U S"
+  },
+  "Tyson": {
+   "query": "Tyson Foods",
+   "title": "Tyson Foods"
+  },
+  "UGG": {
+   "query": "Deckers Outdoor",
+   "title": "Deckers Outdoor"
+  },
+  "Ulta": {
+   "query": "Ulta",
+   "title": "Ulta"
+  },
+  "Under Armour": {
+   "query": "Under Armour",
+   "title": "Under Armour"
+  },
+  "Unilever": {
+   "query": "Unilever",
+   "title": "Unilever North America Supply Chain"
+  },
+  "Uniqlo": {
+   "query": "Uniqlo",
+   "title": "Uniqlo Usa"
+  },
+  "Urban Outfitters": {
+   "query": "Urban Outfitters",
+   "title": "Urban Outfitters"
+  },
+  "Vans": {
+   "query": "Vans",
+   "title": "Vans A Division Of Vf Outdoor"
+  },
+  "Victoria's Secret": {
+   "query": "Victoria S Secret",
+   "title": "Victoria S Secret Stores Brand"
+  },
+  "Volkswagen": {
+   "query": "Volkswagen",
+   "title": "Volkswagen Group Of America"
+  },
+  "Walgreens": {
+   "query": "Walgreen",
+   "title": "Walgreen"
+  },
+  "Walmart": {
+   "query": "Wal Mart",
+   "title": "Wal Mart"
+  },
+  "Wayfair": {
+   "query": "Wayfair",
+   "title": "Castlegate Logistics"
+  },
+  "Wegmans": {
+   "query": "Wegmans",
+   "title": "Wegmans Food Markets"
+  },
+  "West Elm": {
+   "query": "Williams Sonoma",
+   "title": "Williams Sonoma Singapore"
+  },
+  "Whirlpool": {
+   "query": "Whirlpool",
+   "title": "Whirlpool"
+  },
+  "Whole Foods": {
+   "query": "Whole Foods",
+   "title": "Whole Foods Market"
+  },
+  "Williams-Sonoma": {
+   "query": "Williams Sonoma",
+   "title": "Williams Sonoma Singapore"
+  },
+  "Wrangler": {
+   "query": "Kontoor",
+   "title": "Kontoor Us"
+  },
+  "Yeti": {
+   "query": "Yeti Coolers",
+   "title": "Yeti Coolers"
+  },
+  "Zara": {
+   "query": "Zara Usa",
+   "title": "Zara Usa"
+  }
+ }
 }

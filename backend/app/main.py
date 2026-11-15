@@ -4,7 +4,7 @@ import threading
 import time
 from contextlib import asynccontextmanager
 
-from fastapi import APIRouter, Depends, FastAPI, Header, HTTPException, Request, Response
+from fastapi import APIRouter, Depends, FastAPI, Header, HTTPException, Query, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pydantic import ValidationError
@@ -252,7 +252,7 @@ def merchant_ethics(merchant_id: str, cid: str = Depends(viewer_customer), db: D
     brand = _brand_or_404(db, merchant_id)
     if brand.get("is_junk"):
         raise HTTPException(404, "Test or placeholder records are not researched")
-    report = ethics.get_report(db, brand["_id"], brand["name"], store.load_profile(db, cid))
+    report = ethics.get_report(db, brand["_id"], brand["name"], store.load_profile(db, cid), cid)
     if not report:
         raise HTTPException(404, "No ethics data yet for this merchant")
     return report
@@ -301,6 +301,17 @@ def merchant_suppliers(merchant_id: str, db: Database = Depends(get_database)):
     _brand_or_404(db, merchant_id)
     try:
         return suppliers.get_report(db, merchant_id)
+    except suppliers.SuppliersNotConfigured:
+        raise HTTPException(503, "Supplier data isn't set up on this server (IMPORTYETI_API_KEY).")
+    except suppliers.SuppliersUnavailable as e:
+        raise HTTPException(502, f"Supplier lookup failed: {e}")
+
+
+@router.get("/suppliers/lookup", response_model=SupplierReport)
+def lookup_suppliers(name: str = Query(..., min_length=2, max_length=80), db: Database = Depends(get_database)):
+    """Look up any company by name on ImportYeti (for the Map's search bar). Not tied to the user's purchases."""
+    try:
+        return suppliers.lookup(db, name)
     except suppliers.SuppliersNotConfigured:
         raise HTTPException(503, "Supplier data isn't set up on this server (IMPORTYETI_API_KEY).")
     except suppliers.SuppliersUnavailable as e:

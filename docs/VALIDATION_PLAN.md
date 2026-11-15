@@ -40,7 +40,7 @@ A live run on Starbucks (2026-11-14) produced 18 claims and all 18 came back `va
 | Judge batching | One judge call per source URL, parallel, global cap of 8 concurrent calls |
 | Judge model | Same `GEMINI_MODEL` |
 | Judge failure (rate limit, outage, not a timeout) | Claims hidden, report NOT cached so the next request retries; research stays cached |
-| Category score | Computed by code (`scoring.category_score`), not Gemini. The judge labels each claim's direction (positive / negative) and severity (minor / notable / major); weight = severity x tier x recency; `score = (50*2 + sum(w*target)) / (2 + sum(w))`, target 100 positive / 0 negative. Tier 3 self-praise weighs 0.4, tier 3 self-admitted harm 1.0. See PIPELINE.md step 4 |
+| Category score | Computed by code (`scoring.category_score`), not Gemini. The judge labels each claim's direction (positive / negative) and severity (minor / notable / major); weight = severity x tier x recency; `score = (50*2 + sum(w*target)) / (2 + sum(w))`, target 100 positive / 0 negative. Tier 4 (company) self-praise weighs 0.4, tier 4 self-admitted harm 1.0. See PIPELINE.md step 4 |
 | Neutral claims | Judge direction `neutral` (context with no ethical weight) fails the claim, like category `none` |
 | Category summary | Written by one Gemini call (`summarize`) from validated claims only, marked (+)/(-), keeping the claims' attribution. It does not score |
 | Category with no validated claims | `score = None`, summary "Not enough verified evidence was found for this category.", skipped by overall/personalized/deal-breakers/verdict |
@@ -83,8 +83,8 @@ Profile-independent results (research, then validated + scored categories) are c
 - **Blocked:** reddit, x/twitter, facebook, instagram, tiktok, quora, medium, youtube, glassdoor, indeed, pinterest, linkedin, threads, wikipedia
 - **Tier 1, government/court:** `.gov`, `.mil`, `.gov.uk`, `.europa.eu`, `.gc.ca`, `.gov.au`, `europa.eu`, `uscourts.gov`, `un.org`, `oecd.org`, `ilo.org`
 - **Tier 2, established news / trade press / ratings:** ~90 domains (US, international, Industry Dive trade press, security press, ratings orgs). See `TIER2` in `validation.py`
-- **Tier 3, company self-report:** the domain contains the merchant's name or an alias (e.g. `about.starbucks.com`)
-- **Tier 4, everything else** (advocacy, law firms, blogs, unknown)
+- **Tier 3, everything else** (advocacy, law firms, blogs, unknown)
+- **Tier 4, company self-report:** the domain contains the merchant's name or an alias (e.g. `about.starbucks.com`)
 
 ## API contract change
 
@@ -92,7 +92,7 @@ Profile-independent results (research, then validated + scored categories) are c
 - `frontend/src/api/types.ts`: `score: number | null`
 - `frontend/src/pages/MerchantDetail.tsx`: renders a null score as "—" with a "Not enough verified evidence" tooltip; hides the claim list when empty. (Person C: heads-up, minimal change in your file.)
 
-`Claim.confidence` is now set by code from tier and verdict (supported > partial; tier 1 > tier 4), not by the LLM.
+`Claim.confidence` is now set by code from tier and verdict (supported > partial; tier 1 > tier 3), not by the LLM.
 
 ## Measured (Starbucks, single merchant)
 

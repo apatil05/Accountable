@@ -15,8 +15,8 @@ import { supplierCountry, reportPoints, sphericalCenter, toGlobe, topSupplier } 
 const usd = (n: number) => n.toLocaleString("en-US", { style: "currency", currency: "USD" });
 const usd0 = (n: number) => n.toLocaleString("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 });
 const pct = (x: number) => `${Math.round(x * 100)}%`;
-// Explicit tints of the route accent for ranked shares (opacity fades go muddy on the dark field).
-const TINTS = ["#f2b04a", "#f4bf6a", "#f5cb88", "#f6d49e", "#f7dbb0"];
+// Ranked shares: lime for the lead (the one signal), then explicit steel steps (opacity fades go muddy on the dark field).
+const TINTS = ["#c5f05a", "#8fa6b6", "#6f8597", "#566b7c", "#455766"];
 
 // Nessie dates are "YYYY-MM-DD"; parse as a local date (new Date(iso) would read UTC and slip a day).
 function localDate(iso: string) {
@@ -188,7 +188,7 @@ export default function Dashboard() {
                       </span>
                       <span className="split" aria-hidden="true">
                         <span style={{ flexGrow: model.lead.footprintShare, background: TINTS[0] }} />
-                        <span style={{ flexGrow: 1 - model.lead.footprintShare, background: "rgba(255, 255, 255, 0.12)" }} />
+                        <span style={{ flexGrow: 1 - model.lead.footprintShare, background: "rgba(160, 185, 205, 0.16)" }} />
                       </span>
                       <span className="split-key"><span>Estimates from US industry averages, not company data</span></span>
                     </button>
