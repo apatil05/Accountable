@@ -16,6 +16,7 @@ import Footprint from "../components/Footprint";
 import Globe from "../components/Globe";
 import MockBanner from "../components/MockBanner";
 import SupplierCard, { ImporterCard } from "../components/SupplierCard";
+import { useOnDemandResearch } from "../lib/useResearch";
 import { possessive, supplierCountry, reportPoints, sphericalCenter, supplierPointId, toGlobe } from "../lib/suppliers";
 
 const usd = (n: number) => n.toLocaleString("en-US", { style: "currency", currency: "USD" });
@@ -62,6 +63,10 @@ export default function MerchantDetail() {
 
   const real = sup && sup !== "missing" ? sup : null;
   const research = report && report !== "missing" ? report : null;
+  // No real research yet (placeholder data): ask the server to research this company and wait for it.
+  const progress = useOnDemandResearch(id, research?.data_source === "mock", () => {
+    api.ethics(id).then(setReport).catch(() => undefined);
+  });
   const name = research?.merchant_name ?? me?.name ?? "This company";
   const topics = useMemo(
     () => (research?.categories ?? []).filter((c) => !HIDDEN_TOPICS.has(c.category)),
@@ -206,7 +211,18 @@ export default function MerchantDetail() {
             Compare them against <Link to="/values">your values</Link> to see what matters most to you.
           </p>
         </div>
-        {research?.data_source === "mock" && <MockBanner />}
+        {research?.data_source === "mock" &&
+          (progress === "working" ? (
+            <p className="co-muted" role="status">
+              Researching {name} from live sources. This takes a few minutes, and this page updates by itself.
+            </p>
+          ) : (
+            <>
+              {progress === "capped" && <p className="co-muted" role="status">Today's research limit has been reached. Try again tomorrow.</p>}
+              {progress === "failed" && <p className="co-muted" role="status">Research for {name} couldn't finish. It will be retried later.</p>}
+              <MockBanner />
+            </>
+          ))}
         {report === null ? (
           <p className="co-muted" role="status">Researching {name}… this can take a few seconds.</p>
         ) : !research || topics.length === 0 ? (

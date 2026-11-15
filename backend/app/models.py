@@ -69,6 +69,11 @@ class SpendingSummary(BaseModel):
     data_source: Optional[str] = None  # where this customer's purchases came from: "mock" or "nessie"
 
 
+class ResearchStatus(BaseModel):
+    """Progress of on-demand research for one company (POST /api/merchants/{id}/research)."""
+    status: Literal["ready", "started", "running", "busy", "capped", "failed", "unavailable"]
+
+
 # ---------- Accounts ----------
 class LoginRequest(BaseModel):
     email: str = Field(min_length=3, max_length=254)
