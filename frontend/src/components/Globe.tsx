@@ -552,7 +552,7 @@ export default function Globe({
         aria-roledescription={interactive ? "interactive globe" : undefined}
         aria-label={
           ariaLabel ??
-          `Globe showing ${routes.length} real supplier routes from US import records.${interactive ? " Drag, or use the arrow keys, to spin it." : ""}`
+          `Globe showing ${routes.length} supplier routes.${interactive ? " Drag, or use the arrow keys, to spin it." : ""}`
         }
         {...(interactive
           ? { onPointerDown, onPointerMove, onPointerUp: endPointer, onPointerCancel: endPointer, onKeyDown, onDoubleClick }
