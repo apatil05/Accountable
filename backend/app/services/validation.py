@@ -6,7 +6,7 @@ Rule: the LLM proposes claims, this module decides whether they're validated.
 Claims with no source are never validated.
 
 Per claim:
-  1. domain check: blocked domains fail; others get a tier (1 = regulator .. 4 = advocacy/unknown)
+  1. domain check: blocked domains fail; others get a tier (1 = regulator .. 3 = advocacy/unknown, 4 = the company itself)
   2. claims are grouped by source URL; each page is fetched once (HTML or PDF)
   3. one Gemini "judge" call per page returns, per claim: supported / partial /
      unsupported, a verbatim quote, a rewritten claim, the event year, the category, and
@@ -79,7 +79,7 @@ TIER2 = {
 }
 DIRECTIONS = ("positive", "negative")  # anything else (e.g. "neutral") fails the claim
 SEVERITIES = tuple(SEVERITY_W)
-TIER_LABEL = {1:"government or court", 2: "established news or ratings", 3: "the company itself", 4: "advocacy group, law firm, or other"}
+TIER_LABEL = {1:"government or court", 2: "established news or ratings", 3: "advocacy group, law firm, or other", 4: "the company itself"}
 
 # Extra names a page may use for a merchant (legal name, parent company).
 ALIASES: dict[str, list[str]] = {
@@ -110,7 +110,7 @@ def _slug(s: str) -> str:
 
 
 def domain_tier(url: str, merchant: str) -> int | None:
-    """None = blocked. 1 regulator/court, 2 news/ratings, 3 company, 4 other."""
+    """None = blocked. 1 regulator/court, 2 news/ratings, 3 other, 4 the company itself."""
     host = _host(url)
     if not host or _matches(host, BLOCKED):
         return None
@@ -119,8 +119,8 @@ def domain_tier(url: str, merchant: str) -> int | None:
     if _matches(host, TIER2):
         return 2
     if any(_slug(n) and _slug(n) in host.replace(".", "").replace("-", "") for n in [merchant, *ALIASES.get(merchant, [])]):
-        return 3
-    return 4
+        return 4
+    return 3
 
 
 # ---------- text normalization ----------
@@ -500,7 +500,7 @@ def _validate_source(merchant: str, url: str, items: list[_Item]) -> bool:
                 it.claim.text = j.rewritten_text.strip()
             it.claim.source_url = page.url
             it.claim._event_year = j.event_year
-            it.claim.confidence = round((1.0 if j.verdict == "supported" else 0.7) * (1.0, 0.95, 0.85, 0.7)[tier - 1], 2)
+            it.claim.confidence = round((1.0 if j.verdict == "supported" else 0.7) * (1.0, 0.95, 0.7, 0.85)[tier - 1], 2)
         else:
             it.claim.confidence = 0.0
         it.claim.validated = ok

@@ -24,6 +24,13 @@ function localDate(iso: string) {
   const [y, m, d] = iso.slice(0, 10).split("-").map(Number);
   return new Date(y, m - 1, d);
 }
+const VERDICT_LABELS = { aligns: "Aligns", mixed: "Mixed", against: "Does not align" } as const;
+const MAX_SOURCES = 2; // keep each topic tile scannable; best source tier first (company's own site is tier 4), then most confident
+// Stored summaries can run 2+ sentences; show only the first. Skips periods in abbreviations like "Inc." or "U.S.".
+function firstSentence(text: string) {
+  const m = text.match(/^.*?(?<!\b(?:Inc|Co|Corp|Ltd|St|Mr|Ms|Dr|vs|U\.S|[A-Z]))[.!?](?=\s+["A-Z]|$)/s);
+  return m ? m[0] : text;
+}
 const shortDate = (iso: string) => localDate(iso).toLocaleDateString("en-US", { month: "short", day: "numeric" });
 
 export default function MerchantDetail() {
@@ -96,12 +103,14 @@ export default function MerchantDetail() {
             {me?.category.map((c) => <span key={c} className="tag">{c}</span>)}
             {countries.map((c) => <span key={c} className="tag">Supplier in {c}</span>)}
           </div>
-          {real && real.suppliers.length > 0 && (
-            <p className="co-lede">
-              US import records show {real.suppliers.length} top supplier{real.suppliers.length === 1 ? "" : "s"} shipping to{" "}
-              {real.importer?.name ?? name}. Click one to see where it is and learn about the place.
-            </p>
-          )}
+          {research?.verdict ? (
+            <div className={`co-verdict is-${research.verdict.label}`}>
+              <p className="co-verdict-label">{VERDICT_LABELS[research.verdict.label]}</p>
+              <p className="co-lede">{research.verdict.blurb}</p>
+            </div>
+          ) : report === null ? (
+            <p className="co-lede" role="status">Checking {name} against your values…</p>
+          ) : null}
         </div>
 
         <div className="co-globe">
@@ -193,8 +202,8 @@ export default function MerchantDetail() {
         <div className="co-section-head">
           <h2 id="facts-title">What we found</h2>
           <p>
-            Facts and sources, grouped by topic. Each claim says whether a source was checked. We don't rate companies;
-            weigh these against <Link to="/values">your values</Link>.
+            The key facts and verified sources behind the verdict above, grouped by topic.
+            Compare them against <Link to="/values">your values</Link> to see what matters most to you.
           </p>
         </div>
         {research?.data_source === "mock" && <MockBanner />}
@@ -207,20 +216,27 @@ export default function MerchantDetail() {
             {topics.map((t) => (
               <article key={t.category} className="co-topic">
                 <h3>{CATEGORY_LABELS[t.category as keyof typeof CATEGORY_LABELS] ?? t.category}</h3>
-                <p className="co-topic-summary">{t.summary}</p>
-                <ul className="co-claims">
-                  {t.claims.map((c, i) => (
-                    <li key={i}>
-                      <span className={`status ${c.validated ? "is-verified" : ""}`}>{c.validated ? "Verified" : "Unverified"}</span>
-                      <span className="co-claim-text">{c.text}</span>
-                      {c.source_url ? (
-                        <a href={c.source_url} target="_blank" rel="noreferrer" className="co-source">{c.source_name ?? new URL(c.source_url).hostname}</a>
-                      ) : (
-                        <span className="co-source is-missing">No source yet</span>
-                      )}
-                    </li>
-                  ))}
-                </ul>
+                <p className="co-topic-summary">{firstSentence(t.summary)}</p>
+                {(() => {
+                  const sources = t.claims
+                    .filter((c) => c.validated && c.source_url)
+                    .sort((a, b) => (a.source_tier ?? 9) - (b.source_tier ?? 9) || b.confidence - a.confidence)
+                    .slice(0, MAX_SOURCES);
+                  return sources.length === 0 ? (
+                    <p className="co-source is-missing">No verified sources yet</p>
+                  ) : (
+                    <ul className="co-claims">
+                      {sources.map((c, i) => (
+                        <li key={i}>
+                          <span className="status is-verified">Verified</span>
+                          <a href={c.source_url!} target="_blank" rel="noreferrer" className="co-source" title={c.text}>
+                            {c.source_name ?? new URL(c.source_url!).hostname}
+                          </a>
+                        </li>
+                      ))}
+                    </ul>
+                  );
+                })()}
               </article>
             ))}
           </div>

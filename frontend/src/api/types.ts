@@ -144,6 +144,8 @@ export interface Claim {
   source_name: string | null;
   confidence: number;
   validated: boolean;
+  // 1 government/court, 2 news/ratings, 3 other, 4 the company itself; null = no source
+  source_tier: number | null;
 }
 
 export interface CategoryScore {

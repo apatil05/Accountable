@@ -50,12 +50,15 @@ def stale_targets(db: Database, targets: Sequence[tuple[str, str]], collection: 
 
 def prewarm(db: Database, targets: Sequence[tuple[str, str]], collection: str, refresh: Refresher, *,
             max_age: timedelta, force: bool, delay: float, now: datetime,
-            sleep: Callable[[float], None] = time.sleep) -> list[Result]:
+            sleep: Callable[[float], None] = time.sleep, stale: set[str] | None = None) -> list[Result]:
     """Research every stale target, pausing `delay` seconds between live calls.
 
+    `stale` overrides the age-based check for kinds that go stale another way (verdict
+    blurbs go stale when the profile changes, not with age).
     One brand failing does not stop the others. ResearchUnavailable does stop the run:
     it means no brand can be researched here, so the rest are marked unavailable."""
-    stale = stale_targets(db, targets, collection, max_age=max_age, force=force, now=now)
+    if stale is None:
+        stale = stale_targets(db, targets, collection, max_age=max_age, force=force, now=now)
     results: list[Result] = []
     unavailable: str | None = None
     called = False
@@ -86,6 +89,7 @@ def _research_one(db: Database, brand_id: str, name: str, refresh: Refresher) ->
 
 
 def dry_run(db: Database, targets: Sequence[tuple[str, str]], collection: str, *,
-            max_age: timedelta, force: bool, now: datetime) -> list[Result]:
-    stale = stale_targets(db, targets, collection, max_age=max_age, force=force, now=now)
+            max_age: timedelta, force: bool, now: datetime, stale: set[str] | None = None) -> list[Result]:
+    if stale is None:
+        stale = stale_targets(db, targets, collection, max_age=max_age, force=force, now=now)
     return [Result(bid, name, "would research" if bid in stale else "fresh") for bid, name in targets]
