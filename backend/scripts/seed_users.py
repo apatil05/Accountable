@@ -171,6 +171,9 @@ def _marcus(u: "DemoUser") -> tuple:
         every(m("target"), 12, 20, _basket(55, 0.4, 15, 180, TX_TAX / 2), _fixed("TARGET 00011408 HOUSTON TX")),
         once(m("nike"), date(2026, 8, 8), _taxed(139.97, TX_TAX), "NIKE FACTORY STORE 0294 HOUSTON TX"),
         once(m("nike"), date(2026, 11, 1), _taxed(59.99, TX_TAX), "NIKE.COM BEAVERTON OR"),
+        # last in the tuple so it does not shift the random draws of the patterns above
+        by_weekday(m("starbucks"), (0.3, 0.35, 0.3, 0.35, 0.3, 0.2, 0.1), _coffee(TX_TAX),
+                   lambda rng: rng.choice(("STARBUCKS STORE 08841 HOUSTON TX", "STARBUCKS STORE 14502 HOUSTON TX"))),
     )
 
 
