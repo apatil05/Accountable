@@ -9,6 +9,8 @@ export function splitPointId(id: string): [string, string] {
   return [id.slice(0, at), id.slice(at + 1)];
 }
 export const isLookup = (merchantId: string) => merchantId.startsWith("lookup:");
+/** A supplier the records let us place on the map (some are listed without a usable address). */
+export const isPlaced = (s: Supplier): s is Supplier & { lat: number; lng: number } => s.lat != null && s.lng != null;
 
 /** Lines from each supplier to the company's US importer, plus a marker for every supplier and importer. */
 export function toGlobe(reports: SupplierReport[], names: Record<string, string> = {}) {
@@ -17,10 +19,11 @@ export function toGlobe(reports: SupplierReport[], names: Record<string, string>
   for (const r of reports) {
     const imp = r.importer && r.importer.lat != null && r.importer.lng != null ? r.importer : null;
     r.suppliers.forEach((s, i) => {
+      if (!isPlaced(s)) return; // listed in the panels, but no pin without a placeable address
       points.push({ id: supplierPointId(r.merchant_id, i), group: r.merchant_id, lat: s.lat, lng: s.lng, kind: "supplier", label: s.name });
       if (imp) routes.push({ group: r.merchant_id, from: [s.lng, s.lat], to: [imp.lng!, imp.lat!] });
     });
-    if (imp && r.suppliers.length) {
+    if (imp && r.suppliers.some(isPlaced)) {
       points.push({
         id: `${r.merchant_id}:importer`, group: r.merchant_id, lat: imp.lat!, lng: imp.lng!, kind: "importer",
         label: `${names[r.merchant_id] ?? imp.name} · US importer`,
@@ -46,7 +49,7 @@ export function sphericalCenter(pts: { lat: number; lng: number }[]): [number, n
 /** Everything one company's import records cover: its suppliers and its importer. */
 export function reportPoints(r?: SupplierReport | null): { lat: number; lng: number }[] {
   if (!r) return [];
-  const pts: { lat: number; lng: number }[] = r.suppliers.map((s) => ({ lat: s.lat, lng: s.lng }));
+  const pts: { lat: number; lng: number }[] = r.suppliers.filter(isPlaced).map((s) => ({ lat: s.lat, lng: s.lng }));
   if (r.importer?.lat != null && r.importer.lng != null) pts.push({ lat: r.importer.lat, lng: r.importer.lng });
   return pts;
 }

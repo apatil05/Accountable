@@ -1,6 +1,7 @@
 // Dashboard insights, computed only from real data the API returns
 // (/spending/summary + /suppliers import records). Facts only, never scores. Owner: Person C.
 import type { MerchantSummary, SupplierReport } from "../api/types";
+import { isPlaced } from "./suppliers";
 
 export type Continent = "Asia" | "South America" | "North America" | "Africa" | "Europe" | "Oceania";
 
@@ -44,7 +45,7 @@ export function whereItStarts(merchants: MerchantSummary[], reports: SupplierRep
   let coveredTotal = 0;
 
   for (const m of merchants) {
-    const sups = byId.get(m.merchant_id)?.suppliers ?? [];
+    const sups = (byId.get(m.merchant_id)?.suppliers ?? []).filter(isPlaced); // continents need a location
     if (!sups.length) continue;
     coveredTotal += m.total_spent;
     const weights = sups.map((s) => (s.shipments && s.shipments > 0 ? s.shipments : 1));

@@ -5,7 +5,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { Supplier } from "../api/types";
 import { mapLinkFor } from "../lib/places";
-import { supplierCountry, supplierPointId } from "../lib/suppliers";
+import { isPlaced, supplierCountry, supplierPointId } from "../lib/suppliers";
 import { NearbyList } from "./SupplierCard";
 
 const SETTLE_MS = 120;
@@ -130,7 +130,9 @@ export default function SupplierCarousel({
                   {s.place?.thumbnail_url ? <img src={s.place.thumbnail_url} alt="" /> : <span className="co-supplier-mark" aria-hidden="true" />}
                 </span>
                 <div className="co-slide-main">
-                  <span className="co-slide-where">{[s.place?.title, supplierCountry(s)].filter(Boolean).join(" · ")}</span>
+                  <span className="co-slide-where">
+                    {isPlaced(s) ? [s.place?.title, supplierCountry(s)].filter(Boolean).join(" · ") : "Not on the map"}
+                  </span>
                   <h3 className="co-slide-name">{s.name}</h3>
                   {s.address && <p className="co-slide-address">{s.address}</p>}
                   {s.shipments != null && (
@@ -138,7 +140,7 @@ export default function SupplierCarousel({
                       {s.shipments.toLocaleString("en-US")} <span>shipments to the US</span>
                     </p>
                   )}
-                  <button
+                  {isPlaced(s) && <button
                     type="button"
                     className="co-slide-cta"
                     onClick={(e) => {
@@ -149,14 +151,17 @@ export default function SupplierCarousel({
                     aria-pressed={selected === i}
                   >
                     {selected === i ? "Shown on the globe" : "Show on the globe"}
-                  </button>
+                  </button>}
                 </div>
                 <div className="co-slide-more" onClick={(e) => e.stopPropagation()}>
                   {s.place?.summary && <p className="co-slide-summary">{s.place.summary}</p>}
                   <p className="co-slide-links">
                     {s.place && <a href={s.place.url} target="_blank" rel="noreferrer">About {s.place.title}</a>}
-                    <a href={mapLinkFor(s)} target="_blank" rel="noreferrer">Approximate location on OpenStreetMap</a>
+                    {isPlaced(s) && <a href={mapLinkFor(s)} target="_blank" rel="noreferrer">Approximate location on OpenStreetMap</a>}
                   </p>
+                  {s.approximate && (
+                    <p className="co-slide-summary">Approximate pin: this address couldn’t be confirmed, so it’s the geocoder’s best guess and may be off.</p>
+                  )}
                   <NearbyList nearby={s.nearby} max={3} />
                 </div>
               </div>

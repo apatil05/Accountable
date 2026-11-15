@@ -235,8 +235,9 @@ export interface Supplier {
   country: string | null; // from geocoding the supplier's listed address
   country_code: string | null; // ISO alpha-3 of that country, e.g. "CHN"
   shipments: number | null;
-  lat: number; // approximate: geocoded from the supplier's listed address
-  lng: number;
+  lat: number | null; // approximate, geocoded from the listed address; null = listed but not placed on the map
+  lng: number | null;
+  approximate?: boolean; // the address could not be confirmed; the pin is the geocoder's best guess
   place: NearbyPlace | null; // the town/district it is in
   nearby?: NearbyPlace[]; // other Wikipedia articles close to the geocoded point, nearest first
 }
