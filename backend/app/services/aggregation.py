@@ -100,4 +100,5 @@ def spending_summary(db: Database, customer_id: str, profile: UserProfile) -> Sp
         merchant_count=len(merchants),
         merchants=merchants,
         estimated_kg_co2e=round(sum(f.kg_co2e for f in footprints.values()), carbon.KG_DECIMALS) if footprints else None,
+        data_source=repos.customer_source(db, customer_id),
     )

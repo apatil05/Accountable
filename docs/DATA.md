@@ -41,6 +41,18 @@ supply chain stage countries, Open Supply Hub factories.
 | `GET /api/merchants/{id}/emissions` | `CompanyEmissions[]`, newest year first, every source |
 | `GET /api/merchants/{id}/labor` | `LaborSummary` (`loaded: false` = never fetched, which is not "zero cases") |
 
+## Accounts (demo users)
+
+- `python -m scripts.seed_users` creates three accounts, each its own customer with six months of generated
+  purchases loaded through the normal sync pipeline: Maya Chen (Austin), Marcus Johnson (Houston), Lena Park
+  (Seattle). They buy only from the 10 brands with cached research. Passwords are printed once (never stored in
+  plain text); `--reset-passwords` issues new ones and logs out old sessions. Re-running keeps passwords and any
+  values a user edited.
+- `POST /api/auth/login` returns a bearer token; `GET /api/auth/me`; `POST /api/auth/logout`. Logged-in requests
+  show only that user's customer (a mismatched `customer_id` is 403); anonymous visitors see the demo customer.
+- Storage: `users` (`_id` = email, scrypt `password_hash`, `customer_id`) and `sessions` (`_id` = SHA-256 of the
+  token, 7-day TTL index). No public sign-ups during the demo.
+
 ## Labor data: storage, freshness, refresh
 
 - **Source files:** [labordata](https://github.com/labordata) rebuilds SQLite copies of DOL Wage and Hour, OSHA,

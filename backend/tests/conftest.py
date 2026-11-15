@@ -48,6 +48,19 @@ def mock_mode(monkeypatch):
 
 
 @pytest.fixture(autouse=True)
+def no_real_gemini(monkeypatch):
+    """Tests never reach the paid Gemini API, even when a real key is in backend/.env.
+    A test that needs research fakes the pipeline functions itself."""
+    from app.services import gemini
+
+    def blocked():
+        raise RuntimeError("Gemini is blocked in tests")
+
+    monkeypatch.setattr(config, "GEMINI_API_KEY", "")
+    monkeypatch.setattr(gemini, "client", blocked)
+
+
+@pytest.fixture(autouse=True)
 def isolated_labordata_cache(tmp_path, monkeypatch):
     """Loaders delete the cache after a run; tests must never touch the real multi-GB downloads."""
     from app.services import labordata

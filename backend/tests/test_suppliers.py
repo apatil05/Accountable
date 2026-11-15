@@ -70,15 +70,53 @@ def test_brand_without_trusted_record_gets_no_suppliers(client, monkeypatch):
     assert calls["company"] == 0  # never guesses a match
 
 
-def test_places_nearby_validates_and_degrades_gracefully(client, monkeypatch):
-    assert client.get("/api/places/nearby?lat=95&lng=0").status_code == 422
+def test_places_nearby_is_not_a_public_endpoint(client):
+    """Unused by the UI, and every new coordinate cost a Wikipedia + ArcGIS call: an open abuse vector."""
+    assert client.get("/api/places/nearby?lat=2.5&lng=-75.5").status_code == 404
 
-    def boom(_db, _lat, _lng):
-        raise RuntimeError("wikipedia down")
 
-    monkeypatch.setattr(suppliers, "nearby_place", boom)
-    r = client.get("/api/places/nearby?lat=2.5&lng=-75.5")
-    assert r.status_code == 200 and r.json() is None
+def test_unmapped_brand_needs_no_key_and_is_stored(client, db, monkeypatch):
+    monkeypatch.delenv("IMPORTYETI_API_KEY", raising=False)
+    body = client.get("/api/merchants/chipotle/suppliers")
+    assert body.status_code == 200 and body.json()["suppliers"] == []
+    assert db.supplier_reports.find_one({"_id": "chipotle"}) is not None
+
+
+def test_one_failing_brand_does_not_blank_the_globe(client, db, monkeypatch):
+    db.supplier_reports.insert_one({"_id": "nike", "merchant_id": "nike", "suppliers": [], "fetched_at": "2026-11-14"})
+
+    def down(_db, merchant_id):
+        if merchant_id == "nike":
+            return suppliers.SupplierReport(merchant_id="nike", suppliers=[], fetched_at="2026-11-14")
+        raise suppliers.SuppliersUnavailable("ImportYeti down")
+
+    monkeypatch.setattr(suppliers, "get_report", down)
+    assert [r.merchant_id for r in suppliers.get_reports(db, ["nike", "starbucks"])] == ["nike"]
+
+
+def test_importyeti_error_page_is_unavailable_not_a_crash():
+    class R:
+        status_code = 502
+        def json(self): raise ValueError("not json")
+
+    class C:
+        def get(self, *_a, **_k): return R()
+
+    with pytest.raises(suppliers.SuppliersUnavailable):
+        suppliers._iy(C(), "/company/search", name="x")
+
+
+def test_importer_place_lookup_failure_still_returns_the_report(client, monkeypatch):
+    import httpx
+    calls = {"company": 0}
+    _fake_network(monkeypatch, calls)
+
+    def timeout(*_a, **_k):
+        raise httpx.ReadTimeout("arcgis slow")
+
+    monkeypatch.setattr(suppliers, "_geocode", timeout)
+    body = client.get("/api/merchants/starbucks/suppliers").json()
+    assert body["company_name"] == "Starbucks Coffee Trade" and body["importer"]["lat"] is None
 
 
 def test_address_must_name_the_country_it_lands_in(monkeypatch):

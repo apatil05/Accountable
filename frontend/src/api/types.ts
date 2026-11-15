@@ -44,6 +44,20 @@ export interface SpendingSummary {
   merchant_count: number;
   merchants: MerchantSummary[];
   estimated_kg_co2e: number | null;
+  /** Where this customer's purchases came from: "mock" (sample data) or "nessie" (live Capital One API). */
+  data_source: string | null;
+}
+
+/** A logged-in account. Each account is linked to one customer's purchases. */
+export interface AuthUser {
+  email: string;
+  name: string;
+  customer_id: string;
+}
+
+export interface LoginResponse {
+  token: string;
+  user: AuthUser;
 }
 
 /** Where a fact came from. Show source_name, locator and data_year next to every number. */

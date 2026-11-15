@@ -7,14 +7,18 @@ nested weights and lists live inside that single document.
 from pymongo.database import Database
 
 from .db import repos
-from .models import UserProfile
+from .models import CATEGORIES, UserProfile
 
 
 def load_profile(db: Database, customer_id: str) -> UserProfile:
     doc = repos.get_profile(db, customer_id)
     if not doc:
         return UserProfile()
-    return UserProfile(**{k: v for k, v in doc.items() if k in UserProfile.model_fields})
+    fields = {k: v for k, v in doc.items() if k in UserProfile.model_fields}
+    if isinstance(fields.get("weights"), dict):
+        # Categories get retired (e.g. "political"); a profile saved before that must still load.
+        fields = {**fields, "weights": {c: w for c, w in fields["weights"].items() if c in CATEGORIES}}
+    return UserProfile(**fields)
 
 
 def save_profile(db: Database, customer_id: str, profile: UserProfile) -> UserProfile:

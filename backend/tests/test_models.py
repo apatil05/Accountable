@@ -35,3 +35,17 @@ def test_text_fields_are_length_limited():
     with pytest.raises(ValidationError):
         UserProfile(stances="s" * 2001)
     assert UserProfile(name="n" * 100, stances="s" * 2000)
+
+
+def test_a_stored_profile_with_a_retired_category_still_loads(db):
+    """Profiles saved before a category was removed must not break every page that reads them."""
+    from app import store
+    from app.db import repos
+
+    repos.save_profile(db, "cust-1", {"name": "Ana", "weights": {"labor": 5, "political": 4}, "stances": "",
+                                      "prefer_local": False})
+
+    profile = store.load_profile(db, "cust-1")
+
+    assert profile.weights == {"labor": 5}
+    assert profile.name == "Ana" and profile.prefer_local is False

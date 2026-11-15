@@ -34,6 +34,29 @@ def test_sync_is_idempotent(db):
     assert db.sync_runs.count_documents({}) == 2  # the log grows, the data does not
 
 
+def test_sync_removes_purchases_the_source_no_longer_has(db):
+    """Regenerated demo data must replace the old purchases, not pile on top of them."""
+    db.purchases.insert_one({"_id": "old-purchase", "customer_id": "cust_demo", "account_id": "acct_demo", "amount_cents": 9999})
+    db.purchases.insert_one({"_id": "other-customer", "customer_id": "someone-else", "account_id": "acct_x", "amount_cents": 1})
+
+    result = ingest.sync_customer(db, "cust_demo")
+
+    assert db.purchases.find_one({"_id": "old-purchase"}) is None
+    assert db.purchases.find_one({"_id": "other-customer"}) is not None
+    assert db.purchases.count_documents({"customer_id": "cust_demo"}) == result["purchases"]
+    assert result["purchases_removed"] == 1
+
+
+def test_an_account_that_came_back_empty_keeps_its_purchases(db):
+    """A partial Nessie answer (one account's purchases missing) must not delete that account's history."""
+    db.purchases.insert_one({"_id": "card-2-purchase", "customer_id": "cust_demo", "account_id": "acct_second",
+                             "amount_cents": 500})
+
+    ingest.sync_customer(db, "cust_demo")
+
+    assert db.purchases.find_one({"_id": "card-2-purchase"}) is not None
+
+
 def test_merchants_resolve_to_curated_brands(db):
     ingest.sync_customer(db, "cust_demo")
     assert db.merchants.find_one({"_id": "m_amazon"})["brand_id"] == "amazon"

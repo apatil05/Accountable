@@ -26,8 +26,8 @@ export default function Landing() {
       <header className="public-bar">
         <Link to="/" className="brand"><span className="brand-mark" /> Accountable</Link>
         <nav className="public-actions">
-          <Link to="/login" className="button-ghost">Log in</Link>
-          <Link to="/register" className="button-light">Register</Link>
+          <Link to="/dashboard" className="button-ghost">Try the demo</Link>
+          <Link to="/login" className="button-light">Log in</Link>
         </nav>
       </header>
 
@@ -38,8 +38,8 @@ export default function Landing() {
           from. Facts with sources, never ratings, so you can decide what matters.
         </p>
         <div className="landing-ctas">
-          <Link to="/register" className="button-light button-lg">Create an account</Link>
-          <Link to="/login" className="button-ghost button-lg">Log in</Link>
+          <Link to="/login" className="button-light button-lg">Log in</Link>
+          <Link to="/dashboard" className="button-ghost button-lg">Try the demo</Link>
         </div>
         <p className="landing-note">Demo build: runs on sample Capital One (Nessie) transactions.</p>
       </section>
