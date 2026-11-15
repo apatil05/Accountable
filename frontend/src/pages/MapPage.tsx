@@ -5,24 +5,27 @@
 //  - "Suppliers" lists a company's suppliers; click one (or a diamond on the globe) to learn about where it is
 //  - "Look up a company" searches ImportYeti for any company and plots it on the globe until removed (not saved)
 import { useEffect, useMemo, useState, type FormEvent } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { api } from "../api/client";
 import type { SpendingSummary, SupplierReport } from "../api/types";
 import Globe from "../components/Globe";
 import SupplierCard, { ImporterCard } from "../components/SupplierCard";
-import { isLookup, isPlaced, possessive, supplierCountry, reportPoints, sphericalCenter, splitPointId, supplierPointId, toGlobe } from "../lib/suppliers";
+import { handoff, isLookup, isPlaced, possessive, supplierCountry, reportPoints, sphericalCenter, splitPointId, supplierPointId, toGlobe } from "../lib/suppliers";
 
 const usd = (n: number) => n.toLocaleString("en-US", { style: "currency", currency: "USD" });
 const num = (n: number) => n.toLocaleString("en-US");
 
 export default function MapPage() {
-  const [reports, setReports] = useState<SupplierReport[] | null>(null);
+  // Arriving from the Spending globe: it hands over its data (so this globe draws on the transition's first frame)
+  // and what you clicked: a company you were pointing at, or one supplier.
+  const arrival = (useLocation().state ?? {}) as { company?: string; select?: string };
+  const [reports, setReports] = useState<SupplierReport[] | null>(handoff.reports);
   const [failed, setFailed] = useState<string | null>(null);
-  const [summary, setSummary] = useState<SpendingSummary | null>(null);
+  const [summary, setSummary] = useState<SpendingSummary | null>(handoff.summary);
   const [preview, setPreview] = useState<string | null>(null);
-  const [pinned, setPinned] = useState<string | null>(null);
-  const [selected, setSelected] = useState<string | null>(null); // point id: "company:index" or "company:importer"
-  const [zoom, setZoom] = useState(1);
+  const [pinned, setPinned] = useState<string | null>(arrival.select ? splitPointId(arrival.select)[0] : arrival.company ?? null);
+  const [selected, setSelected] = useState<string | null>(arrival.select ?? null); // "company:index" or "company:importer"
+  const [zoom, setZoom] = useState(arrival.select ? 3 : arrival.company ? 1.2 : 1);
   const [query, setQuery] = useState("");
   // Companies looked up from the search bar: shown on the globe for this visit only.
   const [lookups, setLookups] = useState<{ report: SupplierReport; name: string }[]>([]);
@@ -34,8 +37,9 @@ export default function MapPage() {
   useEffect(() => {
     api
       .allSuppliers()
-      .then(setReports)
+      .then((r) => { handoff.reports = r; setReports(r); })
       .catch((e) => {
+        if (handoff.reports) return; // keep what the Spending page handed over
         setReports([]);
         setFailed(
           String(e).includes("503")
@@ -43,7 +47,7 @@ export default function MapPage() {
             : "We couldn't load supplier data right now.",
         );
       });
-    api.summary().then(setSummary).catch(() => setSummary(null));
+    api.summary().then((d) => { handoff.summary = d; setSummary(d); }).catch(() => setSummary((cur) => cur));
   }, []);
 
   const names = useMemo(
@@ -311,6 +315,7 @@ export default function MapPage() {
             selectedPointId={selected}
             onPointClick={onPointClick}
             tweenMs={900}
+            cameraKey="atlas"
             ariaLabel={`Globe of ${globe.routes.length} supplier routes. Drag to spin, scroll or use plus and minus to zoom, click a supplier for details.`}
           />
         )}

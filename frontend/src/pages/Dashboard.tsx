@@ -4,13 +4,13 @@
 // over it. Hovering a company (or an insight) turns the globe to its real suppliers and lights their routes.
 // Routes come only from US import records (ImportYeti): each line runs from a supplier to the company's US importer.
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { api } from "../api/client";
 import type { MerchantSummary, SpendingSummary, SupplierReport } from "../api/types";
 import Globe, { type GlobeLayout } from "../components/Globe";
 import { footprintLead, formatKg } from "../lib/footprint";
 import { habits, whereItStarts } from "../lib/insights";
-import { isPlaced, supplierCountry, reportPoints, sphericalCenter, toGlobe, topSupplier } from "../lib/suppliers";
+import { handoff, isPlaced, supplierCountry, reportPoints, sphericalCenter, toGlobe, topSupplier } from "../lib/suppliers";
 
 const usd = (n: number) => n.toLocaleString("en-US", { style: "currency", currency: "USD" });
 const usd0 = (n: number) => n.toLocaleString("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 });
@@ -44,14 +44,16 @@ export default function Dashboard() {
   const [reports, setReports] = useState<SupplierReport[] | null>(null);
   const [spot, setSpot] = useState<Spotlight | null>(null);
   const layout = useRef<GlobeLayout>({ ...LAYOUTS.wide.entry });
+  const hint = useRef<HTMLSpanElement>(null);
+  const navigate = useNavigate();
   const dashRef = useRef<HTMLDivElement>(null);
 
   const load = useCallback(() => {
     setErr(null);
     setData(null);
     setReports(null);
-    api.summary().then(setData).catch((e) => setErr(String(e)));
-    api.allSuppliers().then(setReports).catch(() => setReports([]));
+    api.summary().then((d) => { handoff.summary = d; setData(d); }).catch((e) => setErr(String(e)));
+    api.allSuppliers().then((r) => { handoff.reports = r; setReports(r); }).catch(() => setReports([]));
   }, []);
   useEffect(load, [load]);
 
@@ -83,6 +85,19 @@ export default function Dashboard() {
       cancelAnimationFrame(raf);
     };
   }, []);
+
+  // Coming back from the map: return to where the page was, once the content is there to scroll to.
+  useEffect(() => {
+    if (!data || reports === null) return;
+    let y: string | null = null;
+    try {
+      y = sessionStorage.getItem("dash-scroll");
+      sessionStorage.removeItem("dash-scroll");
+    } catch {
+      return;
+    }
+    if (y) requestAnimationFrame(() => window.scrollTo(0, Number(y)));
+  }, [data, reports]);
 
   const model = useMemo(() => {
     if (!data) return null;
@@ -120,10 +135,31 @@ export default function Dashboard() {
   const hasRoutes = !!model?.globe.routes.length;
   const lightUp = (ids: string[]) => () => setSpot(model?.spotFor(ids) ?? null);
   const clear = () => setSpot(null);
+  // The globe is a doorway: a click hands the map what you were looking at, and the globe itself flies there.
+  const openMap = (state: { company?: string; select?: string }) => {
+    try {
+      sessionStorage.setItem("dash-scroll", String(window.scrollY));
+    } catch {
+      // Storage can be unavailable (private mode); coming back just starts at the top.
+    }
+    navigate("/map", { state, viewTransition: true });
+  };
 
   return (
     <div className="dash" ref={dashRef}>
-      <div className="globe-backdrop">
+      <div
+        className="globe-backdrop"
+        onPointerMove={(e) => {
+          // The hint rides along with the pointer while it hovers the globe (not while dragging it).
+          const el = hint.current;
+          if (!el || e.pointerType !== "mouse") return;
+          const w = el.offsetWidth;
+          const x = e.clientX + 16 + w > window.innerWidth - 12 ? e.clientX - 16 - w : e.clientX + 16; // flip near the edge
+          el.style.transform = `translate(${x}px, ${e.clientY + 18}px)`;
+          el.classList.toggle("is-on", e.buttons === 0 && (e.target as HTMLElement).tagName === "CANVAS");
+        }}
+        onPointerLeave={() => hint.current?.classList.remove("is-on")}
+      >
         {hasRoutes && (
           <Globe
             routes={model!.globe.routes}
@@ -131,11 +167,17 @@ export default function Dashboard() {
             highlight={spot?.ids ?? null}
             focus={spot?.focus ?? null}
             layoutRef={layout}
-            zoomable
-            touchZoom={false}
             tweenMs={1100}
+            cameraKey="atlas"
+            className="globe-doorway"
+            onBackgroundClick={() => openMap(spot?.ids.length === 1 ? { company: spot.ids[0] } : {})}
+            onPointClick={(id) => openMap({ select: id })}
+            ariaLabel="Globe of your companies' real supplier routes. Drag to spin it; click it, or press Enter, to open the map."
           />
         )}
+        <span className="globe-open-hint" ref={hint} aria-hidden="true">
+          {spot?.ids.length === 1 && model?.names[spot.ids[0]] ? `Open ${model.names[spot.ids[0]]} on the map` : "Open the map"}
+        </span>
       </div>
 
       {/* 1. Entry: the globe is the page; the money sits quietly in front of it. */}
@@ -160,7 +202,7 @@ export default function Dashboard() {
             </dl>
             {hasRoutes && (
               <p className="dash-hero-caption">
-                Drag the globe to spin it; pinch or Ctrl + scroll to zoom.
+                Drag the globe to spin it, or click it to explore on the map.
               </p>
             )}
           </div>
