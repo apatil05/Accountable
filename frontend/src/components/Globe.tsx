@@ -113,6 +113,10 @@ interface Props {
   interactive?: boolean;
   selectedPointId?: string | null;
   onPointClick?: (id: string) => void;
+  /** A click (not a drag) anywhere on the globe that isn't a marker. */
+  onBackgroundClick?: () => void;
+  /** Globes with the same key share their rotation (see `cameras`). */
+  cameraKey?: string;
   spin?: number;
   tweenMs?: number;
   className?: string;
@@ -122,6 +126,10 @@ interface Props {
 }
 
 const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v));
+
+/** Where shared globes are pointing, by key: a globe that leaves the page hands its rotation to the next one,
+ * so moving from the Spending globe to the Map globe (and back) is one continuous camera. */
+const cameras = new Map<string, [number, number]>();
 const easeOutExpo = (t: number) => (t >= 1 ? 1 : 1 - Math.pow(2, -10 * t));
 const DEFAULT_LAYOUT: GlobeLayout = { cx: 0.5, cy: 0.5, r: 0.94 };
 
@@ -158,6 +166,8 @@ export default function Globe({
   interactive = true,
   selectedPointId = null,
   onPointClick,
+  onBackgroundClick,
+  cameraKey,
   spin = 0.05,
   tweenMs = 1500,
   className,
@@ -173,7 +183,7 @@ export default function Globe({
 
   // Mutable render state lives in a ref so the animation loop never re-renders React.
   const s = useRef({
-    rot: [75, -18] as [number, number],
+    rot: (cameraKey && cameras.get(cameraKey)) || ([75, -18] as [number, number]),
     tween: null as null | { from: [number, number]; to: [number, number]; start: number; dur: number },
     drag: null as null | { x: number; y: number; moved: number },
     resumeAt: 0,
@@ -261,6 +271,7 @@ export default function Globe({
       } else if (!st.drag && !focus && !reduced && now > st.resumeAt) {
         st.rot = [st.rot[0] + spin, st.rot[1]];
       }
+      if (cameraKey) cameras.set(cameraKey, [st.rot[0], st.rot[1]]); // hand the view to the next shared globe
 
       const r = (Math.min(w, h) / 2) * st.layout.r * st.zoom;
       const cx = w * st.layout.cx;
@@ -524,11 +535,15 @@ export default function Globe({
         if (d < 14 && (!best || d < best.d)) best = { d, id: hp.id };
       }
       if (best) onPointClick(best.id);
+      else onBackgroundClick?.();
+    } else if (click && onBackgroundClick) {
+      onBackgroundClick();
     }
   };
   const onDoubleClick = (e: React.MouseEvent) => zoomAt(e.clientX, e.clientY, e.shiftKey ? 1 / 1.8 : 1.8);
   const onKeyDown = (e: React.KeyboardEvent) => {
     const st = s.current;
+    if (e.key === "Enter" && onBackgroundClick) return onBackgroundClick(); // keyboard twin of a click
     const rect = canvasRef.current!.getBoundingClientRect();
     const mid: [number, number] = [rect.left + rect.width / 2, rect.top + rect.height / 2];
     if (zoomable && (e.key === "+" || e.key === "=")) return zoomAt(mid[0], mid[1], 1.4);

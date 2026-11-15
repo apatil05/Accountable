@@ -62,3 +62,10 @@ export const supplierCountry = (s?: Pick<Supplier, "country"> | null) => s?.coun
 
 /** "Nike" -> "Nike's", "Trader Joe's" -> "Trader Joe's" (no doubled possessive). */
 export const possessive = (name: string) => (/'s$/i.test(name) ? name : `${name}'s`);
+
+/** What the Spending page already loaded, handed to the Map so its globe can draw on the first frame of the
+ * page transition (it still refreshes in the background). In memory only, for this visit. */
+export const handoff: { reports: SupplierReport[] | null; summary: import("../api/types").SpendingSummary | null } = {
+  reports: null,
+  summary: null,
+};

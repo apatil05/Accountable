@@ -72,9 +72,9 @@ export default function App() {
           </NavLink>
           <div className="topbar-right">
             <nav>
-              <NavLink to="/dashboard">Spending</NavLink>
-              <NavLink to="/map">Map</NavLink>
-              <NavLink to="/values">My values</NavLink>
+              <NavLink viewTransition to="/dashboard">Spending</NavLink>
+              <NavLink viewTransition to="/map">Map</NavLink>
+              <NavLink viewTransition to="/values">My values</NavLink>
             </nav>
             <Account />
           </div>

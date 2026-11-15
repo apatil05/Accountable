@@ -862,3 +862,36 @@ textarea, .inline-input input { width: 100%; font: inherit; padding: 10px 12px; 
   .co-tab { flex: 0 0 auto; }
   .co-tabpanel { grid-column: 1; padding: 22px 20px; }
 }
+
+/* ---------- Spending globe -> Map: one globe, one camera ----------
+   The dashboard globe is a doorway. Clicking it navigates with a view transition: the globe's box flies from the
+   full-bleed backdrop to the Map stage while both globes share their rotation (Globe cameraKey), the top bar holds
+   still, the Map panel slides in and the rest crossfades. Browsers without view transitions just switch pages. */
+.topbar { view-transition-name: topbar; }
+.globe-backdrop, .mapx-stage { view-transition-name: atlas-globe; }
+.mapx-panel { view-transition-name: map-panel; }
+::view-transition-group(atlas-globe) { animation-duration: 640ms; animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1); }
+::view-transition-old(atlas-globe), ::view-transition-new(atlas-globe) { height: 100%; object-fit: cover; animation-duration: 640ms; }
+::view-transition-new(map-panel) { animation: vt-panel-in 520ms cubic-bezier(0.16, 1, 0.3, 1) both; }
+::view-transition-old(map-panel) { animation: vt-fade-out 200ms ease-out both; }
+::view-transition-old(root) { animation: vt-fade-out 220ms ease-out both; }
+::view-transition-new(root) { animation: vt-fade-in 380ms 100ms cubic-bezier(0.16, 1, 0.3, 1) both; }
+@keyframes vt-panel-in { from { opacity: 0; transform: translateX(-28px); } }
+@keyframes vt-fade-out { to { opacity: 0; } }
+@keyframes vt-fade-in { from { opacity: 0; } }
+
+.globe-doorway canvas { cursor: pointer; }
+.globe-doorway canvas:active { cursor: grabbing; }
+/* Rides along with the pointer while it hovers the Spending globe; mouse only. */
+.globe-open-hint {
+  position: fixed; left: 0; top: 0; z-index: 30; pointer-events: none; white-space: nowrap;
+  padding: 7px 14px; border-radius: 999px; font: 400 13px/1 var(--sans);
+  color: var(--accent-ink); background: var(--route); box-shadow: 0 6px 18px -6px rgba(var(--shadow), 0.6);
+  opacity: 0; transition: opacity 0.15s ease-out;
+}
+.globe-open-hint.is-on { opacity: 1; }
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) { animation: none !important; }
+  .globe-open-hint { transition: none; }
+}
