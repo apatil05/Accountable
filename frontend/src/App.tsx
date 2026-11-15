@@ -32,7 +32,6 @@ function Account() {
   if (!session) {
     return (
       <div className="account">
-        <span className="account-name">Sample data</span>
         <Link to="/login" className="account-button">Log in</Link>
       </div>
     );
