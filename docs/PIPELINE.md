@@ -16,10 +16,10 @@ Gemini researches a merchant and lists claims about it. Because an AI can state 
 3. Cleanup       code   delete claims that failed
 4. Score         code+AI  code scores each category from surviving claims; Gemini rewrites the summaries
 5. Your values   code   combine category scores with your weights, decide aligns / mixed / against
-6. Blurb         code   a template explains the verdict that code already decided (no AI on page loads)
+6. Blurb         AI|code  a stored Gemini blurb (written by prewarm) explains the decided verdict; template fallback
 ```
 
-Steps 1-4 run ahead of time in `python -m scripts.prewarm` and are saved in MongoDB. Steps 5-6 run on every page load, from the saved result and the user's weights, with no AI.
+Steps 1-4 run ahead of time in `python -m scripts.prewarm` and are saved in MongoDB. Steps 5-6 run on every page load, from the saved result and the user's weights, with no AI. The Gemini blurb for step 6 is also written by prewarm; a page load only reads it.
 
 ## Flowchart
 
@@ -48,7 +48,7 @@ flowchart TD
     T --> RS["4b. Rewrite summaries<br/>from surviving claims only"]
     RS --> DB[("Saved in MongoDB<br/>ethics_reports (prewarm)")]
     DB --> S["5. Apply user weights<br/>overall + personalized score, verdict label"]
-    S --> B["6. Template blurb<br/>label already decided"]
+    S --> B["6. Stored Gemini blurb if still current,<br/>else template; label already decided"]
     B --> O([Shown in UI])
 
     classDef ai fill:#dbeafe,stroke:#2563eb,color:#111;
@@ -73,18 +73,18 @@ The environment score is then recomputed from the claims that survived, combined
 
 ## Who decides what
 
-| Decision | Made by |
-| --- | --- |
-| What claims to propose, and which source supports each | AI (research) |
-| Whether a source page supports a claim | **AI** (the judge) |
-| Whether the judge's quote really appears on the page, and the page names the merchant | Code |
-| Whether a source domain is blocked, and how trustworthy it looks | Code |
-| The final `validated` flag | Code, using the judge's verdict plus its own checks |
-| Whether a claim is good or bad for the company, and how serious | AI (the judge) |
-| The score of each category | Code, from those labels plus source tier and event year |
-| The category summary text | AI (from surviving claims only) |
-| The aligns / mixed / against label | Code |
-| The wording of the explanation paragraph | Code (template) |
+| Decision                                                                              | Made by                                                 |
+| ------------------------------------------------------------------------------------- | ------------------------------------------------------- |
+| What claims to propose, and which source supports each                                | AI (research)                                           |
+| Whether a source page supports a claim                                                | **AI** (the judge)                                      |
+| Whether the judge's quote really appears on the page, and the page names the merchant | Code                                                    |
+| Whether a source domain is blocked, and how trustworthy it looks                      | Code                                                    |
+| The final `validated` flag                                                            | Code, using the judge's verdict plus its own checks     |
+| Whether a claim is good or bad for the company, and how serious                       | AI (the judge)                                          |
+| The score of each category                                                            | Code, from those labels plus source tier and event year |
+| The category summary text                                                             | AI (from surviving claims only)                         |
+| The aligns / mixed / against label                                                    | Code                                                    |
+| The wording of the explanation paragraph                                              | Code (template)                                         |
 
 ## The honest limit
 
@@ -105,6 +105,7 @@ Code: `research_with_gemini()` in `ethics.py`.
 **Call 2, structuring (AI).** A second call (no search) converts that text to JSON: per category a 0-100 score, a 2-sentence summary, and 4-6 claims. Each claim has `text`, a `source` number chosen from the sources Google reported for that statement, and a `confidence`. The source choice and confidence are Gemini's opinion and are not trusted.
 
 **Then code takes over:**
+
 - Source numbers are mapped to URLs from Google's metadata. URLs never come from text the model wrote, so it cannot invent a link.
 - Google's redirect links are resolved to the real page with a plain HTTP request.
 
@@ -123,8 +124,8 @@ We download the page ourselves: HTML is stripped to text, PDFs are read with `py
 - **Blocked:** reddit, X/Twitter, Facebook, Instagram, TikTok, Quora, Medium, YouTube, Glassdoor, Indeed, Pinterest, LinkedIn, Threads, Wikipedia. Claims from these fail.
 - **Tier 1:** government and courts (`.gov`, `.europa.eu`, `uscourts.gov`, and similar).
 - **Tier 2:** established news, trade press and ratings groups (about 90 domains).
-- **Tier 3:** the company's own site (the domain contains the merchant's name or an alias).
-- **Tier 4:** everything else: advocacy groups, law firms, blogs, unknown sites.
+- **Tier 3:** everything else: advocacy groups, law firms, blogs, unknown sites.
+- **Tier 4:** the company's own site (the domain contains the merchant's name or an alias).
 
 The tier controls how the claim is worded (step 2d), its confidence number, and how much it counts in the category score (step 4).
 
@@ -151,7 +152,7 @@ Gemini never sets `validated`. Code does, with these rules:
 - **Category `none`:** the claim fails. **A different category:** the claim moves there.
 - **Direction `neutral`** (or missing): the claim fails, since it can't affect a score. A missing or unknown severity counts as `notable`.
 - **Partial claims and tier 3-4 sources:** the claim text is replaced with the judge's rewrite.
-- **Confidence:** set by code from the verdict and tier (supported beats partial, tier 1 beats tier 4), replacing Gemini's number.
+- **Confidence:** set by code from the verdict and tier (supported beats partial, tier 1 beats tier 3), replacing Gemini's number.
 - **Blocked domain, unreadable page, or judge timeout:** the claim is not validated. A timeout still counts as a complete result.
 - **Any other judge error** (rate limit, outage): the claim is not validated and the whole run is marked incomplete: `refresh()` raises and saves nothing, so prewarm reports the brand as failed and the next prewarm run retries it.
 
@@ -167,12 +168,12 @@ Code: `score_categories()` and `summarize()` in `ethics.py`, formula in `scoring
 
 **4a. Score (code).** Gemini's research scores were based on everything it found, including claims that just failed, so they are thrown away. Code computes each category's score from its surviving claims. Each claim gets a weight from four factors:
 
-| Factor | From | Values |
-| --- | --- | --- |
-| Severity | judge | major 1.0, notable 0.6, minor 0.3 |
-| Source tier | code (2b) | tier 1: 1.0, tier 2: 0.9, tier 4: 0.6. Tier 3 (the company's own site): 0.4 when it praises itself, 1.0 when it admits something bad |
-| Recency | judge's event year | full weight for events up to 3 years old, then halved every 5 years (8 years old: 0.5). Unknown year: 0.7 |
-| Direction | judge | decides which way the claim pulls: positive toward 100, negative toward 0 |
+| Factor      | From               | Values                                                                                                                               |
+| ----------- | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------ |
+| Severity    | judge              | major 1.0, notable 0.6, minor 0.3                                                                                                    |
+| Source tier | code (2b)          | tier 1: 1.0, tier 2: 0.9, tier 3: 0.6. Tier 4 (the company's own site): 0.4 when it praises itself, 1.0 when it admits something bad |
+| Recency     | judge's event year | full weight for events up to 3 years old, then halved every 5 years (8 years old: 0.5). Unknown year: 0.7                            |
+| Direction   | judge              | decides which way the claim pulls: positive toward 100, negative toward 0                                                            |
 
 ```text
 weight = severity x tier x recency
@@ -199,31 +200,39 @@ No AI is involved in any of these numbers or in the label.
 
 Code: `verdict.py`.
 
-A template writes 2-3 sentences explaining the verdict from category names and scores only. `verdict.py` can also have Gemini write it (told the label is already decided, to use only the facts provided, and not to take a political side), but the API always uses the template: the blurb depends on the user's weights, so it is built on each page load, and a Gemini call per page load is a cost-abuse risk on a public site.
+2-3 sentences explaining the biggest reasons for the verdict. It never mentions scores.
+
+- **Gemini blurb (preferred):** `python -m scripts.prewarm --only blurbs` has Gemini write one per brand the customer bought from. Gemini is told the label is already decided, sees only verified claims plus each area's standing (strong / middling / weak, no numbers), and is told not to take a political side. Code rejects a blurb that mentions a score or runs past 3 sentences, retries once, and otherwise stores nothing. Stored in `verdict_blurbs`, one document per customer + brand, with a fingerprint of the user's weights and stances, the verdict label and deal-breakers, the research date, and `PROMPT_VERSION`.
+- **Template (fallback):** built on each page load from category names and the best verified claim per area. Shown when there is no stored blurb or its fingerprint no longer matches (the user changed their values, the brand was re-researched, or the prompt changed). Page loads never call Gemini: that would be a paid call per request on a public site.
+
+After changing your values, re-run `python -m scripts.prewarm --only blurbs` to replace the template blurbs. `verdict.source` in the API says which one is shown.
 
 ## Caching and prewarm
 
-| Where | Holds | Written by | Refreshed |
-| --- | --- | --- | --- |
+| Where                                                 | Holds                                                               | Written by                                         | Refreshed                                           |
+| ----------------------------------------------------- | ------------------------------------------------------------------- | -------------------------------------------------- | --------------------------------------------------- |
 | MongoDB `ethics_reports`, one document per brand slug | Validated, cleaned and scored categories with summaries (steps 1-4) | `ethics.refresh()` via `python -m scripts.prewarm` | When older than `--max-age-days`, or with `--force` |
+| MongoDB `verdict_blurbs`, one document per customer + brand | Gemini verdict blurb (step 6) and its fingerprint | `verdict.refresh_blurb()` via `python -m scripts.prewarm` | When the fingerprint no longer matches, or with `--force` |
 
 Research doesn't depend on the user, so one saved document serves every user. Steps 5-6 are cheap code and run on each page load, so changing weights needs no invalidation. A brand is only saved if every judge call and the summary call completed. A brand with no saved research shows its mock data if `mock_ethics.json` has it, and otherwise has no report (the page shows "No research yet"). Mock data is never written to the database.
 
 ```bash
 python -m scripts.prewarm --only ethics --dry-run   # list which brands would be researched
 python -m scripts.prewarm --only ethics             # research them (about 3 minutes each)
+python -m scripts.prewarm --only blurbs             # write verdict blurbs (1-2 calls per brand)
 ```
 
 ## Gemini calls per merchant
 
-| Step | Calls | Tool |
-| --- | --- | --- |
-| 1. Research, grounded | 1 | Google Search |
-| 1. Research, structuring | 1 | JSON schema |
-| 2. Judge | 1 per distinct source page (17-26 for Starbucks) | JSON schema, or URL context if the page could not be fetched |
-| 4. Summary | 1 | JSON schema |
+| Step                     | Calls                                            | Tool                                                         |
+| ------------------------ | ------------------------------------------------ | ------------------------------------------------------------ |
+| 1. Research, grounded    | 1                                                | Google Search                                                |
+| 1. Research, structuring | 1                                                | JSON schema                                                  |
+| 2. Judge                 | 1 per distinct source page (17-26 for Starbucks) | JSON schema, or URL context if the page could not be fetched |
+| 4. Summary               | 1                                                | JSON schema                                                  |
+| 6. Verdict blurb         | 1 (2 if the first breaks the rules), per customer | JSON schema                                                  |
 
-All use the same model (`GEMINI_MODEL`), and all run in prewarm, never on a page load. Steps 3, 5 and 6, the fetching, tiering, quote checks, `validated` flag, shrinking, scoring and the verdict label use no AI.
+All use the same model (`GEMINI_MODEL`), and all run in prewarm, never on a page load. Steps 3 and 5, the fetching, tiering, quote checks, `validated` flag, shrinking, scoring and the verdict label use no AI.
 
 ## Mock mode
 

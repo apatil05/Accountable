@@ -178,7 +178,8 @@ def merchant_ethics(merchant_id: str, db: Database = Depends(get_database)):
     brand = _brand_or_404(db, merchant_id)
     if brand.get("is_junk"):
         raise HTTPException(404, "Test or placeholder records are not researched")
-    report = ethics.get_report(db, brand["_id"], brand["name"], store.load_profile(db, _customer_id(None)))
+    owner = _customer_id(None)
+    report = ethics.get_report(db, brand["_id"], brand["name"], store.load_profile(db, owner), owner)
     if not report:
         raise HTTPException(404, "No ethics data yet for this merchant")
     return report
