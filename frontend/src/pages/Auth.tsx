@@ -98,8 +98,7 @@ export default function Auth({ mode }: { mode: "login" | "register" }) {
         <div className="auth-card">
           <h1>Create your account</h1>
           <p className="auth-demo">
-            Sign-ups aren't open during the demo. Log in with an account the team gave you, or look around with
-            the sample data.
+            Sign-ups aren't open yet. Log in with an existing account, or try the demo.
           </p>
           <Link to="/login" className="button-light button-lg button-block">Log in</Link>
           <p className="auth-switch">

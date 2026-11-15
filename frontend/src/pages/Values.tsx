@@ -6,7 +6,7 @@ import { useEffect, useMemo, useState } from "react";
 import { api } from "../api/client";
 import { CATEGORIES, CATEGORY_LABELS, type SpendingSummary, type UserProfile } from "../api/types";
 
-const LEVELS = ["Not at all", "A little", "Somewhat", "Matters", "A lot", "Most of all"];
+const LEVELS = ["Not at all", "A little", "Somewhat", "Matters", "A lot", "Deal breaker"];
 const TOPIC_HINTS: Record<string, string> = {
   labor: "Wages, working conditions and how workers are treated in the supply chain.",
   environment: "Emissions, waste, water and land use.",
@@ -49,7 +49,7 @@ export default function Values() {
       <div className="vp">
         <div className="state-panel on-dark" role="alert">
           <h1>We couldn't load your profile</h1>
-          <p>The Accountable server didn't respond. Check that it's running, then try again.</p>
+          <p>Something went wrong on our end. Try again in a moment.</p>
           <button className="button-light" onClick={() => window.location.reload()}>Try again</button>
         </div>
       </div>
@@ -97,9 +97,8 @@ export default function Values() {
             <h2>Connected data</h2>
             <p>
               <span className="vp-dot" aria-hidden="true" />
-              {summary?.data_source === "nessie" ? "Capital One Nessie API" : "Sample Capital One (Nessie) data"}
+              Capital One
             </p>
-            {summary && <p className="vp-mono">Customer ID {summary.customer_id}</p>}
           </div>
         </aside>
 
@@ -137,25 +136,13 @@ export default function Values() {
             })}
           </ul>
 
-          <label className="vp-words" htmlFor="stances">
-            <span>In your own words</span>
-            <textarea
-              id="stances"
-              rows={4}
-              maxLength={2000}
-              placeholder="For example: I care most about fair wages and want to know where my clothes are made."
-              value={p.stances}
-              onChange={(e) => update({ stances: e.target.value })}
-            />
-          </label>
-
           <div className="vp-actions">
             <button className="button-light button-lg" onClick={save} disabled={status === "saving"}>
               {status === "saving" ? "Saving…" : "Save my values"}
             </button>
             <span className="vp-status" role="status">
               {status === "saved" && "Saved."}
-              {status === "error" && "Couldn't save. Check the server and try again."}
+              {status === "error" && "Couldn't save. Try again."}
             </span>
           </div>
         </section>

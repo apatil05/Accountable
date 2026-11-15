@@ -107,7 +107,7 @@ export default function Dashboard() {
     return (
       <div className="state-panel" role="alert">
         <h1>We couldn't load your spending</h1>
-        <p>The Accountable server didn't respond. Check that it's running, then try again.</p>
+        <p>Something went wrong on our end. Try again in a moment.</p>
         <button className="primary" onClick={load}>Try again</button>
         <details>
           <summary>Technical details</summary>
@@ -153,14 +153,13 @@ export default function Dashboard() {
               <div><dt>companies</dt><dd>{data.merchant_count}</dd></div>
               <div><dt>purchases</dt><dd>{model.hab.purchases}</dd></div>
               {hasRoutes && <div><dt>supplier countries</dt><dd>{model.where.countries.length}</dd></div>}
-              {hasRoutes && <div><dt>real suppliers found</dt><dd>{model.globe.points.filter((p) => p.kind === "supplier").length}</dd></div>}
+              {hasRoutes && <div><dt>suppliers found</dt><dd>{model.globe.points.filter((p) => p.kind === "supplier").length}</dd></div>}
               {data.estimated_kg_co2e != null && (
                 <div><dt>CO₂e, estimated</dt><dd>≈ {formatKg(data.estimated_kg_co2e)}</dd></div>
               )}
             </dl>
             {hasRoutes && (
               <p className="dash-hero-caption">
-                Each line runs from a company's real supplier to its US importer, from US import records (ImportYeti).
                 Drag the globe to spin it; pinch or Ctrl + scroll to zoom.
               </p>
             )}
@@ -233,7 +232,7 @@ export default function Dashboard() {
           <section aria-labelledby="companies-title" className="sheet-section">
             <div className="sheet-head">
               <h2 id="companies-title" className="sheet-title">Companies you buy from</h2>
-              <p>Most spent first. Point at one (or tap it once) to see its real suppliers on the globe.</p>
+              <p>Most spent first. Point at one (or tap it once) to see its suppliers on the globe.</p>
             </div>
             {data.merchants.length === 0 ? (
               <p className="sheet-empty">

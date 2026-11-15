@@ -14,7 +14,6 @@ import {
 } from "../api/types";
 import Footprint from "../components/Footprint";
 import Globe from "../components/Globe";
-import MockBanner from "../components/MockBanner";
 import SupplierCard, { ImporterCard } from "../components/SupplierCard";
 import { useOnDemandResearch } from "../lib/useResearch";
 import { possessive, supplierCountry, reportPoints, sphericalCenter, supplierPointId, toGlobe } from "../lib/suppliers";
@@ -132,7 +131,7 @@ export default function MerchantDetail() {
                 selectedPointId={selected === "importer" ? `${id}:importer` : selected != null ? supplierPointId(id, selected) : null}
                 onPointClick={(pid) => (pid.endsWith(":importer") ? pick("importer") : pick(Number(pid.split(":")[1])))}
                 tweenMs={900}
-                ariaLabel={`Globe showing ${possessive(name)} real suppliers from US import records. Drag to spin, scroll to zoom, click a supplier for details.`}
+                ariaLabel={`Globe showing ${possessive(name)} suppliers. Drag to spin, scroll to zoom, click a supplier for details.`}
               />
               {supplier && <SupplierCard supplier={supplier} company={name} onClose={() => pick(null)} />}
               {importer && <ImporterCard importer={importer} company={name} onClose={() => pick(null)} />}
@@ -160,8 +159,7 @@ export default function MerchantDetail() {
           <div className="co-section-head">
             <h2 id="sup-title">Suppliers</h2>
             <p>
-              From US import records (ImportYeti){real.company_name && <> for "{real.company_name}"</>}. Locations are approximate,
-              from each supplier's listed address; place articles from Wikipedia.
+              Locations are approximate, based on each supplier's listed address.
             </p>
           </div>
           <ul className="co-suppliers">
@@ -220,7 +218,6 @@ export default function MerchantDetail() {
             <>
               {progress === "capped" && <p className="co-muted" role="status">Today's research limit has been reached. Try again tomorrow.</p>}
               {progress === "failed" && <p className="co-muted" role="status">Research for {name} couldn't finish. It will be retried later.</p>}
-              <MockBanner />
             </>
           ))}
         {report === null ? (

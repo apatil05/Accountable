@@ -41,7 +41,6 @@ export default function Landing() {
           <Link to="/login" className="button-light button-lg">Log in</Link>
           <Link to="/dashboard" className="button-ghost button-lg">Try the demo</Link>
         </div>
-        <p className="landing-note">Demo build: runs on sample Capital One (Nessie) transactions.</p>
       </section>
     </div>
   );

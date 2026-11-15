@@ -118,11 +118,6 @@ body.on-field { background: var(--field); }
 .visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 .bleed { width: 100vw; margin-left: calc(50% - 50vw); }
 
-.mock-banner {
-  font-size: 12px; line-height: 1.45; color: var(--on-field-dim); background: rgba(var(--hi), 0.05); border: 1px solid var(--glass-line);
-  padding: 7px 12px; border-radius: var(--radius); margin-bottom: 20px;
-}
-
 /* ---------- Globe (shared by Landing, Auth, Dashboard, Map) ---------- */
 .globe { position: relative; width: 100%; height: 100%; }
 .globe canvas { display: block; width: 100%; height: 100%; cursor: grab; touch-action: pan-y; }
@@ -161,7 +156,6 @@ body.on-field { background: var(--field); }
 .landing-copy h1 { font-size: clamp(52px, 6.6vw, 96px); font-weight: 300; font-variation-settings: "SHRP" 100; line-height: 0.98; letter-spacing: -0.045em; }
 .landing-copy > p:first-of-type { margin: 26px 0 0; max-width: 46ch; font-size: 19px; line-height: 1.5; color: var(--on-field-dim); }
 .landing-ctas { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 36px; }
-.landing-note { margin: 28px 0 0; font-size: 13px; color: var(--on-field-dim); }
 
 .auth-card {
   position: relative; z-index: 1; width: min(420px, calc(100% - 36px)); margin: 7vh auto 64px; padding: 32px 30px;
@@ -230,7 +224,6 @@ body.on-field { background: var(--field); }
   -webkit-backdrop-filter: blur(22px) saturate(140%); backdrop-filter: blur(22px) saturate(140%);
   box-shadow: 0 40px 80px -40px rgba(var(--shadow), 0.28);
 }
-.dash-sheet .mock-banner, .co .mock-banner { color: var(--on-field-dim); background: rgba(var(--hi), 0.05); border-color: var(--glass-line); }
 .sheet-title { font-size: 22px; margin-bottom: 6px; }
 .sheet-section { margin-top: 40px; }
 .sheet-head p { margin: 0 0 12px; font-size: 13px; color: var(--on-field-dim); }
@@ -339,7 +332,6 @@ body.on-field { background: var(--field); }
 .mapx-sup-btn:hover, .mapx-sup-btn:focus-visible { color: var(--on-field); border-color: rgba(var(--hi), 0.4); background: rgba(var(--hi), 0.06); }
 .mapx-sup-btn svg { width: 11px; height: 11px; fill: currentColor; }
 .mapx-supplier .tag { color: var(--on-field-dim); background: rgba(var(--hi), 0.08); }
-.mapx-credit { margin: 18px 0 0; font-size: 12px; color: var(--on-field-dim); }
 .place-summary { display: -webkit-box; -webkit-line-clamp: 5; -webkit-box-orient: vertical; overflow: hidden; }
 .mapx-item:hover, .mapx-item:focus-visible, .mapx-item.is-active { background: rgba(var(--hi), 0.06); }
 .mapx-item-top { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
@@ -436,7 +428,6 @@ body.on-field { background: var(--field); }
 .co-section-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 8px 32px; margin-bottom: 20px; }
 .co-section-head p { margin: 0; max-width: 60ch; font-size: 14px; color: var(--on-field-dim); }
 .co-section-head a, .co-topic a { color: var(--on-field); }
-.co-section .mock-banner { margin-bottom: 18px; }
 .co-muted { color: var(--on-field-dim); }
 
 /* Route: stops in a row, numbered, joined by a hairline; click turns the globe there */
@@ -589,14 +580,6 @@ body.on-field { background: var(--field); }
 }
 .vp-topic input[type="range"]::-moz-range-thumb { width: 20px; height: 20px; border: 0; border-radius: 50%; background: var(--on-field); box-shadow: 0 0 0 4px rgba(var(--route-rgb), 0.28); }
 .vp-topic input[type="range"]:active::-webkit-slider-thumb { transform: scale(1.12); }
-.vp-words { display: grid; gap: 10px; margin-top: 18px; padding-top: 22px; border-top: 1px solid rgba(var(--hi), 0.08); }
-.vp-words span { font-size: 17px; font-weight: 400; color: var(--on-field); }
-.vp-words textarea {
-  width: 100%; font: 400 15px/1.5 var(--sans); color: var(--on-field); background: rgba(var(--hi), 0.06);
-  border: 1px solid rgba(var(--hi), 0.16); border-radius: var(--radius); padding: 14px 16px; resize: vertical;
-}
-.vp-words textarea::placeholder { color: rgba(var(--on-field-rgb), 0.66); }
-.vp-words textarea:focus { border-color: var(--route); outline: none; }
 .vp-actions { display: flex; align-items: center; gap: 16px; margin-top: 24px; }
 .vp-actions .button-light:disabled { opacity: 0.6; cursor: progress; }
 .vp-status { font-size: 14px; color: var(--on-field-dim); }

@@ -38,13 +38,13 @@ function Card({ label, title, address, at, place, nearby, onClose }: {
                 {place.distance_km != null && ` (${place.distance_km} km away)`}
               </p>
               {place.summary && <p className="place-summary">{place.summary}</p>}
-              <a href={place.url} target="_blank" rel="noreferrer">Read on Wikipedia</a>
+              <a href={place.url} target="_blank" rel="noreferrer">Read more</a>
             </div>
           </div>
         )}
         {nearby && nearby.length > 0 && (
           <div className="nearby">
-            <p className="nearby-title">Nearby on Wikipedia</p>
+            <p className="nearby-title">Nearby</p>
             <ul>
               {nearby.map((n) => (
                 <li key={n.title}>
