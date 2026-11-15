@@ -17,7 +17,7 @@ const LAND = feature(topo, topo.objects.land) as unknown as GeoPermissibleObject
 const BORDERS = mesh(topo, topo.objects.countries as never, (a, b) => a !== b) as unknown as GeoPermissibleObjects;
 const GRATICULE = geoGraticule10();
 const SPHERE = { type: "Sphere" } as GeoPermissibleObjects;
-const FONT = `"Hanken Grotesk", ui-sans-serif, system-ui, sans-serif`;
+const FONT = `"Geologica", ui-sans-serif, system-ui, sans-serif`;
 const MAX_ZOOM = 12;
 const DETAIL_AT = 2.2; // zoom level where finer coastlines take over
 
@@ -36,16 +36,42 @@ function loadDetail() {
   }).catch(() => (detailRequested = false));
 }
 
-// Deep atlas palette (see DESIGN.md). Land is a step lighter than the field so continents read on a projector.
+// Vantage palette (see styles.css): the globe as a scan. Blue-black sea, land as a dot screen of steel points,
+// routes in steel, and lime for what is found or lit (suppliers, importers, the company you point at).
 const C = {
-  ocean: ["#152c40", "#10222f", "#0b1822"],
-  land: "#243f57",
-  border: "rgba(255,255,255,0.07)",
-  grid: "rgba(255,255,255,0.045)",
-  route: "242,176,74",
-  selected: "255,255,255",
-  plate: "rgba(15,31,43,0.96)",
+  ocean: ["#101a22", "#0d161d", "#0a1217"],
+  land: "#8fa6b6",
+  border: "rgba(0,0,0,0)",
+  grid: "rgba(160,185,205,0.07)",
+  route: "160,185,205",
+  selected: "197,240,90",
+  ink: "#eef2f5",
+  plate: "rgba(11,18,24,0.94)",
+  plateText: "#eef2f5",
+  point: "197,240,90", // supplier / importer marks at rest
+  litPoint: "#d9f78a", // marks of the lit company
+  halo: "160,185,205,0.10" as string | null, // a faint rim of atmosphere; null = none
+  rim: "rgba(160,185,205,0.26)",
+  landDots: 3, // > 0 draws land as a dot screen at this spacing (px) instead of a solid fill
 };
+export type GlobePalette = typeof C;
+
+const tiles = new Map<string, HTMLCanvasElement>();
+function dotTile(color: string, step: number) {
+  const key = `${color}|${step}`;
+  let tile = tiles.get(key);
+  if (!tile) {
+    tile = document.createElement("canvas");
+    tile.width = tile.height = step;
+    const tc = tile.getContext("2d")!;
+    tc.fillStyle = color;
+    tc.beginPath();
+    tc.arc(step / 2, step / 2, Math.max(0.6, step * 0.22), 0, Math.PI * 2);
+    tc.fill();
+    tiles.set(key, tile);
+  }
+  return tile;
+}
 
 /** Where the globe sits in its canvas: center as fractions of width/height, radius as a fraction of min(w,h)/2. */
 export interface GlobeLayout {
@@ -91,6 +117,8 @@ interface Props {
   tweenMs?: number;
   className?: string;
   ariaLabel?: string;
+  /** Override any of the default colours (a page look). */
+  palette?: Partial<GlobePalette>;
 }
 
 const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v));
@@ -134,7 +162,10 @@ export default function Globe({
   tweenMs = 1500,
   className,
   ariaLabel,
+  palette,
 }: Props) {
+  const pal = useRef<GlobePalette>(C);
+  pal.current = palette ? { ...C, ...palette } : C;
   const wrapRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const reduced =
@@ -242,25 +273,18 @@ export default function Globe({
 
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       ctx.clearRect(0, 0, w, h);
+      const C = pal.current;
 
-      // Night sky: a quiet starfield that drifts slowly with the spin.
-      const drift = ((st.rot[0] * 0.8) % w + w) % w;
-      for (const sr of st.stars) {
-        ctx.globalAlpha = sr.a * (reduced ? 1 : 0.78 + 0.22 * Math.sin(now / 1400 + sr.tw));
-        ctx.fillStyle = "#e8eef6";
+      if (C.halo) {
+        const rgb = C.halo.split(",").slice(0, 3).join(",");
+        const halo = ctx.createRadialGradient(cx, cy, r * 0.98, cx, cy, r * 1.12);
+        halo.addColorStop(0, `rgba(${C.halo})`);
+        halo.addColorStop(1, `rgba(${rgb},0)`);
+        ctx.fillStyle = halo;
         ctx.beginPath();
-        ctx.arc((sr.x + drift) % w, sr.y, sr.r, 0, Math.PI * 2);
+        ctx.arc(cx, cy, r * 1.12, 0, Math.PI * 2);
         ctx.fill();
       }
-      ctx.globalAlpha = 1;
-
-      const halo = ctx.createRadialGradient(cx, cy, r * 0.98, cx, cy, r * 1.12);
-      halo.addColorStop(0, "rgba(140,190,235,0.16)");
-      halo.addColorStop(1, "rgba(140,190,235,0)");
-      ctx.fillStyle = halo;
-      ctx.beginPath();
-      ctx.arc(cx, cy, r * 1.12, 0, Math.PI * 2);
-      ctx.fill();
 
       const sea = ctx.createRadialGradient(cx - r * 0.35, cy - r * 0.4, r * 0.1, cx, cy, r);
       sea.addColorStop(0, C.ocean[0]);
@@ -277,7 +301,12 @@ export default function Globe({
       ctx.stroke();
       ctx.beginPath();
       path(fine ? DETAIL!.land : LAND);
-      ctx.fillStyle = C.land;
+      if (C.landDots > 0) {
+        // A dot screen: the land reads as measured points, like a scan.
+        ctx.fillStyle = ctx.createPattern(dotTile(C.land, C.landDots), "repeat")!;
+      } else {
+        ctx.fillStyle = C.land;
+      }
       ctx.fill();
       ctx.beginPath();
       path(fine ? DETAIL!.borders : BORDERS);
@@ -326,7 +355,7 @@ export default function Globe({
           ctx.lineTo(x, y + d);
           ctx.lineTo(x - d, y);
           ctx.closePath();
-          ctx.fillStyle = lit && on ? "#fff" : `rgba(${C.route},1)`;
+          ctx.fillStyle = lit && on ? C.litPoint : `rgba(${C.point},1)`;
           ctx.fill();
           if (lit && on) {
             ctx.strokeStyle = C.plate;
@@ -338,7 +367,7 @@ export default function Globe({
           ctx.arc(x, y, lit && on ? 4.5 : 3, 0, Math.PI * 2);
           ctx.fillStyle = C.plate;
           ctx.fill();
-          ctx.strokeStyle = lit && on ? "#fff" : `rgba(${C.route},1)`;
+          ctx.strokeStyle = lit && on ? C.litPoint : `rgba(${C.point},1)`;
           ctx.lineWidth = 1.6;
           ctx.stroke();
         }
@@ -380,14 +409,14 @@ export default function Globe({
         ctx.fillStyle = C.plate;
         ctx.fill();
         ctx.textAlign = fit.t.align;
-        ctx.fillStyle = "rgba(255,255,255,0.96)";
+        ctx.fillStyle = C.plateText;
         ctx.fillText(l.text, fit.t.x, fit.t.y);
       }
       ctx.textAlign = "left";
 
       ctx.beginPath();
       path(SPHERE);
-      ctx.strokeStyle = "rgba(255,255,255,0.10)";
+      ctx.strokeStyle = C.rim;
       ctx.lineWidth = 1;
       ctx.stroke();
     };

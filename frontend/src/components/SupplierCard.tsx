@@ -6,12 +6,13 @@ import { possessive } from "../lib/suppliers";
 
 const num = (n: number) => n.toLocaleString("en-US");
 
-function Card({ label, title, address, at, place, onClose }: {
+function Card({ label, title, address, at, place, nearby, onClose }: {
   label: string;
   title: string;
   address?: string | null;
   at?: { lat: number; lng: number } | null;
   place?: NearbyPlace | null;
+  nearby?: NearbyPlace[];
   onClose: () => void;
 }) {
   return (
@@ -41,6 +42,27 @@ function Card({ label, title, address, at, place, onClose }: {
             </div>
           </div>
         )}
+        {nearby && nearby.length > 0 && (
+          <div className="nearby">
+            <p className="nearby-title">Nearby on Wikipedia</p>
+            <ul>
+              {nearby.map((n) => (
+                <li key={n.title}>
+                  <a href={n.url} target="_blank" rel="noreferrer" className="nearby-link">
+                    {n.thumbnail_url ? <img src={n.thumbnail_url} alt="" loading="lazy" /> : <span className="nearby-blank" aria-hidden="true" />}
+                    <span className="nearby-text">
+                      <span className="nearby-name">{n.title}</span>
+                      <span className="nearby-meta">
+                        {n.summary && <span>{n.summary}</span>}
+                        {n.distance_km != null && <span className="num">{n.distance_km} km</span>}
+                      </span>
+                    </span>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -52,7 +74,7 @@ export default function SupplierCard({ supplier, company, onClose }: { supplier:
     supplier.country,
     supplier.shipments != null ? `${num(supplier.shipments)} shipments` : null,
   ].filter(Boolean).join(" · ");
-  return <Card label={label} title={supplier.name} address={supplier.address} at={supplier} place={supplier.place} onClose={onClose} />;
+  return <Card label={label} title={supplier.name} address={supplier.address} at={supplier} place={supplier.place} nearby={supplier.nearby} onClose={onClose} />;
 }
 
 /** The company's own importing office in US records, where its suppliers' shipments go. */
@@ -65,6 +87,7 @@ export function ImporterCard({ importer, company, onClose }: { importer: Importe
       address={importer.address}
       at={at}
       place={importer.place}
+      nearby={importer.nearby}
       onClose={onClose}
     />
   );

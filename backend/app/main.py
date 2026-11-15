@@ -5,7 +5,7 @@ import threading
 import time
 from contextlib import asynccontextmanager
 
-from fastapi import APIRouter, Depends, FastAPI, Header, HTTPException, Request
+from fastapi import APIRouter, Depends, FastAPI, Header, HTTPException, Query, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pydantic import ValidationError
@@ -228,6 +228,17 @@ def merchant_suppliers(merchant_id: str, db: Database = Depends(get_database)):
     _brand_or_404(db, merchant_id)
     try:
         return suppliers.get_report(db, merchant_id)
+    except suppliers.SuppliersNotConfigured:
+        raise HTTPException(503, "Supplier data isn't set up on this server (IMPORTYETI_API_KEY).")
+    except suppliers.SuppliersUnavailable as e:
+        raise HTTPException(502, f"Supplier lookup failed: {e}")
+
+
+@router.get("/suppliers/lookup", response_model=SupplierReport)
+def lookup_suppliers(name: str = Query(..., min_length=2, max_length=80), db: Database = Depends(get_database)):
+    """Look up any company by name on ImportYeti (for the Map's search bar). Not tied to the user's purchases."""
+    try:
+        return suppliers.lookup(db, name)
     except suppliers.SuppliersNotConfigured:
         raise HTTPException(503, "Supplier data isn't set up on this server (IMPORTYETI_API_KEY).")
     except suppliers.SuppliersUnavailable as e:

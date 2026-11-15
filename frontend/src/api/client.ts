@@ -30,6 +30,8 @@ export const api = {
   allSupplyChains: () => req<SupplyChain[]>("/supply-chains"),
   suppliers: (id: string) => req<SupplierReport>(`/merchants/${id}/suppliers`),
   allSuppliers: () => req<SupplierReport[]>("/suppliers"),
+  /** Any company by name, looked up on ImportYeti (the Map's search bar). */
+  lookupSuppliers: (name: string) => req<SupplierReport>(`/suppliers/lookup?name=${encodeURIComponent(name)}`),
   nearbyPlace: (lat: number, lng: number) => req<NearbyPlace | null>(`/places/nearby?lat=${lat}&lng=${lng}`),
   emissions: (id: string) => req<CompanyEmissions[]>(`/merchants/${id}/emissions`),
   labor: (id: string) => req<LaborSummary>(`/merchants/${id}/labor`),
