@@ -39,7 +39,7 @@ export default function MapPage() {
         setReports([]);
         setFailed(
           String(e).includes("503")
-            ? "Supplier data isn't set up on this server yet (it needs an ImportYeti key)."
+            ? "Supplier data isn't available right now."
             : "We couldn't load supplier data right now.",
         );
       });
@@ -117,9 +117,9 @@ export default function MapPage() {
       .catch((err) =>
         setLookupMsg(
           String(err).includes("search limit")
-            ? "ImportYeti’s search limit has been reached for now. Try again later."
+            ? "Too many lookups right now. Try again later."
             : String(err).includes("503")
-              ? "Company lookups aren’t set up on this server yet (it needs an ImportYeti key)."
+              ? "Company lookups aren’t available right now."
               : "We couldn’t look that company up right now.",
         ),
       )
@@ -139,7 +139,7 @@ export default function MapPage() {
             <div className="mapx-head">
               <h1>Where it comes from</h1>
               <p>
-                Real suppliers behind the companies you pay, from US import records. Point at a company to see its
+                The suppliers behind the companies you pay. Point at a company to see its
                 supplier routes, click it to open its page, or list its suppliers.
               </p>
             </div>
@@ -288,7 +288,6 @@ export default function MapPage() {
                 </span>
               </button>
             )}
-            <p className="mapx-credit">Supplier data: ImportYeti (US bill-of-lading records). Places: Wikipedia.</p>
             {isLookup(pinned) ? (
               <button type="button" className="mapx-report mapx-remove" onClick={() => removeLookup(pinned)}>Remove {names[pinned] ?? "it"} from the globe</button>
             ) : (
@@ -312,7 +311,7 @@ export default function MapPage() {
             selectedPointId={selected}
             onPointClick={onPointClick}
             tweenMs={900}
-            ariaLabel={`Globe of ${globe.routes.length} real supplier routes from US import records. Drag to spin, scroll or use plus and minus to zoom, click a supplier for details.`}
+            ariaLabel={`Globe of ${globe.routes.length} supplier routes. Drag to spin, scroll or use plus and minus to zoom, click a supplier for details.`}
           />
         )}
         {supplier && <SupplierCard supplier={supplier} company={names[selCompany!]} onClose={() => { setSelected(null); setZoom(1.2); }} />}

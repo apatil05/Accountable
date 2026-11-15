@@ -23,7 +23,6 @@ export default function Footprint({ name, me, emissions, labor }: Props) {
     <section className="co-section" aria-labelledby="footprint-title">
       <div className="co-section-head">
         <h2 id="footprint-title">Footprint and record</h2>
-        <p>Numbers with their source and year. Estimates are marked as estimates; nothing missing is shown as zero.</p>
       </div>
       <div className="facts">
         <YourCarbon name={name} me={me} />
