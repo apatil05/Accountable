@@ -48,6 +48,11 @@ export interface SpendingSummary {
   data_source: string | null;
 }
 
+/** Progress of on-demand research for one company. */
+export interface ResearchStatus {
+  status: "ready" | "started" | "running" | "busy" | "capped" | "failed" | "unavailable";
+}
+
 /** A logged-in account. Each account is linked to one customer's purchases. */
 export interface AuthUser {
   email: string;
