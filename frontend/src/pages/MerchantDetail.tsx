@@ -1,10 +1,9 @@
 // Company page: what you spent, its real suppliers (US import records), what research found, and alternatives.
 // Owner: Person C. Facts, not ratings: the backend's scores are never shown, and political topics are left out.
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { api } from "../api/client";
 import {
-  CATEGORY_LABELS,
   type Alternative,
   type CompanyEmissions,
   type EthicsReport,
@@ -13,8 +12,10 @@ import {
   type SupplierReport,
 } from "../api/types";
 import Footprint from "../components/Footprint";
-import Globe from "../components/Globe";
-import SupplierCard, { ImporterCard } from "../components/SupplierCard";
+import Globe, { type GlobeLayout } from "../components/Globe";
+import { ImporterCard } from "../components/SupplierCard";
+import SupplierCarousel from "../components/SupplierCarousel";
+import TopicTabs from "../components/TopicTabs";
 import { useOnDemandResearch } from "../lib/useResearch";
 import { possessive, supplierCountry, reportPoints, sphericalCenter, supplierPointId, toGlobe } from "../lib/suppliers";
 
@@ -24,13 +25,11 @@ function localDate(iso: string) {
   const [y, m, d] = iso.slice(0, 10).split("-").map(Number);
   return new Date(y, m - 1, d);
 }
+// Where the globe sits in its box. With the importer card open, the globe moves into the space the card leaves
+// free (beside it on wide screens, above it on phones) so the selected place is never hidden behind the card.
+const GLOBE_FULL: GlobeLayout = { cx: 0.5, cy: 0.5, r: 0.94 };
+const CARD_SPACE = 324; // .stop-card on this page: 300px wide + 24px inset (see .co-globe .stop-card)
 const VERDICT_LABELS = { aligns: "Aligns", mixed: "Mixed", against: "Does not align" } as const;
-const MAX_SOURCES = 2; // keep each topic tile scannable; best source tier first (company's own site is tier 4), then most confident
-// Stored summaries can run 2+ sentences; show only the first. Skips periods in abbreviations like "Inc." or "U.S.".
-function firstSentence(text: string) {
-  const m = text.match(/^.*?(?<!\b(?:Inc|Co|Corp|Ltd|St|Mr|Ms|Dr|vs|U\.S|[A-Z]))[.!?](?=\s+["A-Z]|$)/s);
-  return m ? m[0] : text;
-}
 const shortDate = (iso: string) => localDate(iso).toLocaleDateString("en-US", { month: "short", day: "numeric" });
 
 export default function MerchantDetail() {
@@ -43,6 +42,8 @@ export default function MerchantDetail() {
   const [labor, setLabor] = useState<LaborSummary | null | "missing">(null);
   const [selected, setSelected] = useState<number | "importer" | null>(null);
   const [zoom, setZoom] = useState(1);
+  const globeBox = useRef<HTMLDivElement>(null);
+  const layout = useRef<GlobeLayout>({ ...GLOBE_FULL });
 
   useEffect(() => {
     setReport(null);
@@ -80,6 +81,27 @@ export default function MerchantDetail() {
       ? [importer.lng, importer.lat]
       : sphericalCenter(reportPoints(real));
   const countries = [...new Set((real?.suppliers ?? []).map((s) => supplierCountry(s)).filter(Boolean))];
+
+  const cardOpen = selected === "importer"; // supplier details live in the carousel; only the importer pops up
+  useEffect(() => {
+    const place = () => {
+      const box = globeBox.current;
+      if (!box || !cardOpen) {
+        layout.current = { ...GLOBE_FULL };
+        return;
+      }
+      const { clientWidth: w, clientHeight: h } = box;
+      if (window.matchMedia("(max-width: 900px)").matches) {
+        layout.current = { cx: 0.5, cy: 0.21, r: 0.42 };
+      } else {
+        const free = Math.max(w - CARD_SPACE, 0);
+        layout.current = { cx: (CARD_SPACE + free / 2) / w, cy: 0.5, r: Math.min(GLOBE_FULL.r, Math.max(0.4, free / Math.min(w, h))) };
+      }
+    };
+    place();
+    window.addEventListener("resize", place);
+    return () => window.removeEventListener("resize", place);
+  }, [cardOpen]);
 
   const pick = (i: number | "importer" | null) => {
     setSelected(i);
@@ -129,7 +151,7 @@ export default function MerchantDetail() {
           ) : null}
         </div>
 
-        <div className="co-globe">
+        <div className={`co-globe ${cardOpen ? "has-card" : ""}`} ref={globeBox}>
           {real && real.suppliers.length > 0 ? (
             <>
               <Globe
@@ -137,6 +159,7 @@ export default function MerchantDetail() {
                 points={globe.points}
                 highlight={[id]}
                 focus={focus}
+                layoutRef={layout}
                 zoom={zoom}
                 onZoomChange={setZoom}
                 zoomable
@@ -145,7 +168,6 @@ export default function MerchantDetail() {
                 tweenMs={900}
                 ariaLabel={`Globe showing ${possessive(name)} suppliers. Drag to spin, scroll to zoom, click a supplier for details.`}
               />
-              {supplier && <SupplierCard supplier={supplier} company={name} onClose={() => pick(null)} />}
               {importer && <ImporterCard importer={importer} company={name} onClose={() => pick(null)} />}
               <div className="mapx-controls co-zoom" role="group" aria-label="Zoom">
                 <button type="button" onClick={() => setZoom((z) => Math.min(12, z * 1.5))} aria-label="Zoom in">
@@ -174,22 +196,18 @@ export default function MerchantDetail() {
               Locations are approximate, based on each supplier's listed address.
             </p>
           </div>
-          <ul className="co-suppliers">
-            {real.suppliers.map((s, i) => (
-              <li key={supplierPointId(id, i)}>
-                <button type="button" className={`co-supplier ${selected === i ? "is-active" : ""}`} onClick={() => pick(i)} aria-pressed={selected === i}>
-                  {s.place?.thumbnail_url ? <img src={s.place.thumbnail_url} alt="" /> : <span className="co-supplier-mark" aria-hidden="true" />}
-                  <span className="co-supplier-text">
-                    <span className="co-supplier-name">{s.name}</span>
-                    <span className="co-supplier-where">
-                      {[s.place?.title, supplierCountry(s)].filter(Boolean).join(" · ")}
-                      {s.shipments != null && ` · ${s.shipments.toLocaleString("en-US")} shipments`}
-                    </span>
-                  </span>
-                </button>
-              </li>
-            ))}
-          </ul>
+          <SupplierCarousel
+            companyId={id}
+            suppliers={real.suppliers}
+            selected={typeof selected === "number" ? selected : null}
+            onSelect={pick}
+            onShowGlobe={() =>
+              globeBox.current?.scrollIntoView({
+                behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
+                block: "center",
+              })
+            }
+          />
         </section>
       )}
 
@@ -217,34 +235,7 @@ export default function MerchantDetail() {
         ) : !research || topics.length === 0 ? (
           <p className="co-muted">No research yet for {name}.</p>
         ) : (
-          <div className="co-topics">
-            {topics.map((t) => (
-              <article key={t.category} className="co-topic">
-                <h3>{CATEGORY_LABELS[t.category as keyof typeof CATEGORY_LABELS] ?? t.category}</h3>
-                <p className="co-topic-summary">{firstSentence(t.summary)}</p>
-                {(() => {
-                  const sources = t.claims
-                    .filter((c) => c.validated && c.source_url)
-                    .sort((a, b) => (a.source_tier ?? 9) - (b.source_tier ?? 9) || b.confidence - a.confidence)
-                    .slice(0, MAX_SOURCES);
-                  return sources.length === 0 ? (
-                    <p className="co-source is-missing">No verified sources yet</p>
-                  ) : (
-                    <ul className="co-claims">
-                      {sources.map((c, i) => (
-                        <li key={i}>
-                          <span className="status is-verified">Verified</span>
-                          <a href={c.source_url!} target="_blank" rel="noreferrer" className="co-source" title={c.text}>
-                            {c.source_name ?? new URL(c.source_url!).hostname}
-                          </a>
-                        </li>
-                      ))}
-                    </ul>
-                  );
-                })()}
-              </article>
-            ))}
-          </div>
+          <TopicTabs key={id} topics={topics} initial={topics[0]?.category ?? null} />
         )}
       </section>
 

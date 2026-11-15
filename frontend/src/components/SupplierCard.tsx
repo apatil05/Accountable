@@ -42,28 +42,35 @@ function Card({ label, title, address, at, place, nearby, onClose }: {
             </div>
           </div>
         )}
-        {nearby && nearby.length > 0 && (
-          <div className="nearby">
-            <p className="nearby-title">Nearby</p>
-            <ul>
-              {nearby.map((n) => (
-                <li key={n.title}>
-                  <a href={n.url} target="_blank" rel="noreferrer" className="nearby-link">
-                    {n.thumbnail_url ? <img src={n.thumbnail_url} alt="" loading="lazy" /> : <span className="nearby-blank" aria-hidden="true" />}
-                    <span className="nearby-text">
-                      <span className="nearby-name">{n.title}</span>
-                      <span className="nearby-meta">
-                        {n.summary && <span>{n.summary}</span>}
-                        {n.distance_km != null && <span className="num">{n.distance_km} km</span>}
-                      </span>
-                    </span>
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
+        <NearbyList nearby={nearby} />
       </div>
+    </div>
+  );
+}
+
+/** Wikipedia articles near a place, nearest first. Used in these cards and the company page's supplier carousel. */
+export function NearbyList({ nearby, max }: { nearby?: NearbyPlace[]; max?: number }) {
+  const shown = (nearby ?? []).slice(0, max);
+  if (shown.length === 0) return null;
+  return (
+    <div className="nearby">
+      <p className="nearby-title">Nearby</p>
+      <ul>
+        {shown.map((n) => (
+          <li key={n.title}>
+            <a href={n.url} target="_blank" rel="noreferrer" className="nearby-link">
+              {n.thumbnail_url ? <img src={n.thumbnail_url} alt="" loading="lazy" /> : <span className="nearby-blank" aria-hidden="true" />}
+              <span className="nearby-text">
+                <span className="nearby-name">{n.title}</span>
+                <span className="nearby-meta">
+                  {n.summary && <span>{n.summary}</span>}
+                  {n.distance_km != null && <span className="num">{n.distance_km} km</span>}
+                </span>
+              </span>
+            </a>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }
