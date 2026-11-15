@@ -24,14 +24,12 @@ const shortDate = (iso: string) => {
 export default function Values() {
   const [p, setP] = useState<UserProfile | null>(null);
   const [summary, setSummary] = useState<SpendingSummary | null>(null);
-  const [mock, setMock] = useState<boolean | null>(null);
   const [status, setStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
   const [err, setErr] = useState<string | null>(null);
 
   useEffect(() => {
     api.profile().then(setP).catch((e) => setErr(String(e)));
     api.summary().then(setSummary).catch(() => setSummary(null));
-    api.health().then((h) => setMock(h.mock_data)).catch(() => setMock(null));
   }, []);
 
   const facts = useMemo(() => {
@@ -99,7 +97,7 @@ export default function Values() {
             <h2>Connected data</h2>
             <p>
               <span className="vp-dot" aria-hidden="true" />
-              {mock === null ? "Capital One (Nessie)" : mock ? "Sample Capital One (Nessie) data" : "Capital One Nessie sandbox"}
+              {summary?.data_source === "nessie" ? "Capital One Nessie API" : "Sample Capital One (Nessie) data"}
             </p>
             {summary && <p className="vp-mono">Customer ID {summary.customer_id}</p>}
           </div>

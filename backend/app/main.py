@@ -1,11 +1,10 @@
-from typing import Optional
 import logging
 import secrets
 import threading
 import time
 from contextlib import asynccontextmanager
 
-from fastapi import APIRouter, Depends, FastAPI, Header, HTTPException, Query, Request
+from fastapi import APIRouter, Depends, FastAPI, Header, HTTPException, Query, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pydantic import ValidationError
@@ -18,17 +17,19 @@ from .db.client import get_db, ping
 from .db.indexes import ensure_indexes
 from .models import (
     Alternative,
+    AuthUser,
+    LoginRequest,
+    LoginResponse,
     CompanyEmissions,
     EthicsReport,
     LaborSummary,
-    NearbyPlace,
     Purchase,
     SpendingSummary,
     SupplierReport,
     SupplyChain,
     UserProfile,
 )
-from .services import aggregation, ethics, ingest, labor, nessie, suppliers, supply_chain
+from .services import aggregation, auth, ethics, ingest, labor, nessie, suppliers, supply_chain
 
 logger = logging.getLogger(__name__)
 
@@ -60,6 +61,7 @@ class SyncGuard:
 
 
 sync_guard = SyncGuard(SYNC_COOLDOWN_SECONDS)
+login_throttle = auth.LoginThrottle()
 
 
 def get_database() -> Database:
@@ -78,6 +80,50 @@ def _customer_id(customer_id: str | None) -> str:
     if customer_id is not None and not config.ALLOW_CUSTOMER_OVERRIDE:
         raise HTTPException(403, "Choosing a customer is disabled on this server")
     return nessie.validate_id(customer_id or nessie.default_customer_id(), "customer id")
+
+
+def _bearer_token(authorization: str | None) -> str | None:
+    """None when no Authorization header was sent; 401 when one was sent but isn't a bearer token."""
+    if authorization is None:
+        return None
+    scheme, _, token = authorization.partition(" ")
+    if scheme.lower() != "bearer" or not token.strip():
+        raise HTTPException(401, "Log in again")
+    return token.strip()
+
+
+def current_user(authorization: str | None = Header(default=None), db: Database = Depends(get_database)) -> dict | None:
+    """The logged-in user, or None for an anonymous visitor. A token that was sent but is invalid or
+    expired is a 401, never a silent fall back to the demo customer."""
+    token = _bearer_token(authorization)
+    if token is None:
+        return None
+    user = auth.user_for_token(db, token)
+    if user is None:
+        raise HTTPException(401, "Your session has ended. Log in again.")
+    return user
+
+
+def viewer_customer(customer_id: str | None = None, user: dict | None = Depends(current_user),
+                    db: Database = Depends(get_database)) -> str:
+    """Whose data a request shows: the logged-in user's own customer, else the demo customer.
+    The dev-only ?customer_id= override (ALLOW_CUSTOMER_OVERRIDE) never reaches a customer that has an account."""
+    if user is not None:
+        if customer_id is not None and customer_id != user["customer_id"]:
+            raise HTTPException(403, "You can only see your own purchases")
+        return user["customer_id"]
+    cid = _customer_id(customer_id)
+    if customer_id is not None and auth.customer_has_account(db, cid):
+        raise HTTPException(403, "Log in to see this account")
+    return cid
+
+
+def owner_customer(customer_id: str | None = None, user: dict | None = Depends(current_user)) -> str:
+    """Whose data a request may CHANGE: your own when logged in, the demo customer otherwise. Never overridable."""
+    own = user["customer_id"] if user is not None else nessie.default_customer_id()
+    if customer_id is not None and customer_id != own:
+        raise HTTPException(403, "You can only change your own profile")
+    return own
 
 
 def _brand_or_404(db: Database, brand_id: str) -> dict:
@@ -124,6 +170,35 @@ def health(db: Database = Depends(get_database)):
     }
 
 
+@router.post("/auth/login", response_model=LoginResponse)
+def login(body: LoginRequest, db: Database = Depends(get_database)):
+    if not login_throttle.allowed(body.email):
+        raise HTTPException(429, "Too many failed attempts. Wait a few minutes and try again.")
+    try:
+        user = auth.authenticate(db, body.email, body.password)
+    except auth.Busy:
+        raise HTTPException(503, "Accountable is busy. Try again in a moment.") from None
+    if user is None:
+        login_throttle.failed(body.email)
+        raise HTTPException(401, "Wrong email or password")
+    return LoginResponse(token=auth.create_session(db, user["email"]), user=AuthUser(**user))
+
+
+@router.post("/auth/logout", status_code=204)
+def logout(authorization: str | None = Header(default=None), db: Database = Depends(get_database)):
+    token = _bearer_token(authorization)
+    if token:
+        auth.end_session(db, token)
+    return Response(status_code=204)
+
+
+@router.get("/auth/me", response_model=AuthUser)
+def me(user: dict | None = Depends(current_user)):
+    if user is None:
+        raise HTTPException(401, "Not logged in")
+    return AuthUser(**user)
+
+
 @router.get("/customers")
 def customers():
     if not config.ALLOW_CUSTOMER_OVERRIDE:
@@ -144,13 +219,12 @@ def sync(customer_id: str | None = None, db: Database = Depends(get_database)):
 
 
 @router.get("/spending/summary", response_model=SpendingSummary)
-def spending_summary(customer_id: str | None = None, db: Database = Depends(get_database)):
-    cid = _customer_id(customer_id)
-    return aggregation.spending_summary(db, cid, store.load_profile(db, _customer_id(None)))
+def spending_summary(cid: str = Depends(viewer_customer), db: Database = Depends(get_database)):
+    return aggregation.spending_summary(db, cid, store.load_profile(db, cid))
 
 
 @router.get("/spending/transactions", response_model=list[Purchase])
-def transactions(customer_id: str | None = None, db: Database = Depends(get_database)):
+def transactions(cid: str = Depends(viewer_customer), db: Database = Depends(get_database)):
     return [
         Purchase(
             id=p["_id"],
@@ -159,27 +233,26 @@ def transactions(customer_id: str | None = None, db: Database = Depends(get_data
             purchase_date=p["purchase_date"].date().isoformat(),
             description=p.get("description", ""),
         )
-        for p in repos.list_purchases(db, _customer_id(customer_id))
+        for p in repos.list_purchases(db, cid)
     ]
 
 
 @router.get("/profile", response_model=UserProfile)
-def get_profile(db: Database = Depends(get_database)):
-    return store.load_profile(db, _customer_id(None))
+def get_profile(cid: str = Depends(viewer_customer), db: Database = Depends(get_database)):
+    return store.load_profile(db, cid)
 
 
 @router.put("/profile", response_model=UserProfile)
-def put_profile(profile: UserProfile, db: Database = Depends(get_database)):
-    return store.save_profile(db, _customer_id(None), profile)
+def put_profile(profile: UserProfile, cid: str = Depends(owner_customer), db: Database = Depends(get_database)):
+    return store.save_profile(db, cid, profile)
 
 
 @router.get("/merchants/{merchant_id}/ethics", response_model=EthicsReport)
-def merchant_ethics(merchant_id: str, db: Database = Depends(get_database)):
+def merchant_ethics(merchant_id: str, cid: str = Depends(viewer_customer), db: Database = Depends(get_database)):
     brand = _brand_or_404(db, merchant_id)
     if brand.get("is_junk"):
         raise HTTPException(404, "Test or placeholder records are not researched")
-    owner = _customer_id(None)
-    report = ethics.get_report(db, brand["_id"], brand["name"], store.load_profile(db, owner), owner)
+    report = ethics.get_report(db, brand["_id"], brand["name"], store.load_profile(db, cid), cid)
     if not report:
         raise HTTPException(404, "No ethics data yet for this merchant")
     return report
@@ -195,9 +268,9 @@ def merchant_supply_chain(merchant_id: str, db: Database = Depends(get_database)
 
 
 @router.get("/merchants/{merchant_id}/alternatives", response_model=list[Alternative])
-def merchant_alternatives(merchant_id: str, db: Database = Depends(get_database)):
+def merchant_alternatives(merchant_id: str, cid: str = Depends(viewer_customer), db: Database = Depends(get_database)):
     brand = _brand_or_404(db, merchant_id)
-    prefer_local = store.load_profile(db, _customer_id(None)).prefer_local
+    prefer_local = store.load_profile(db, cid).prefer_local
     return supply_chain.get_alternatives(brand.get("categories", []), prefer_local)
 
 
@@ -246,9 +319,9 @@ def lookup_suppliers(name: str = Query(..., min_length=2, max_length=80), db: Da
 
 
 @router.get("/suppliers", response_model=list[SupplierReport])
-def all_suppliers(customer_id: str | None = None, db: Database = Depends(get_database)):
+def all_suppliers(cid: str = Depends(viewer_customer), db: Database = Depends(get_database)):
     """Real supplier reports for every company the user buys from (for the globes)."""
-    ids = sorted(repos.distinct_brand_ids(db, _customer_id(customer_id)))
+    ids = sorted(repos.distinct_brand_ids(db, cid))
     try:
         return suppliers.get_reports(db, ids)
     except suppliers.SuppliersNotConfigured:
@@ -257,22 +330,10 @@ def all_suppliers(customer_id: str | None = None, db: Database = Depends(get_dat
         raise HTTPException(502, f"Supplier lookup failed: {e}")
 
 
-@router.get("/places/nearby", response_model=Optional[NearbyPlace])
-def places_nearby(lat: float, lng: float, db: Database = Depends(get_database)):
-    """A Wikipedia place near a coordinate. Null when nothing is close or Wikipedia is unreachable."""
-    if not (-90 <= lat <= 90 and -180 <= lng <= 180):
-        raise HTTPException(422, "lat/lng out of range")
-    try:
-        return suppliers.nearby_place(db, lat, lng)
-    except Exception:  # Wikipedia down or offline: the UI simply shows no place
-        logger.warning("nearby place lookup failed", exc_info=True)
-        return None
-
-
 @router.get("/supply-chains", response_model=list[SupplyChain])
-def all_supply_chains(customer_id: str | None = None, db: Database = Depends(get_database)):
+def all_supply_chains(cid: str = Depends(viewer_customer), db: Database = Depends(get_database)):
     """Everything the user buys, for the big 'where your money goes' map."""
-    ids = repos.distinct_brand_ids(db, _customer_id(customer_id))
+    ids = repos.distinct_brand_ids(db, cid)
     return supply_chain.get_supply_chains(db, ids)
 
 

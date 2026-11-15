@@ -8,7 +8,6 @@ import { Link } from "react-router-dom";
 import { api } from "../api/client";
 import type { MerchantSummary, SpendingSummary, SupplierReport } from "../api/types";
 import Globe, { type GlobeLayout } from "../components/Globe";
-import MockBanner from "../components/MockBanner";
 import { footprintLead, formatKg } from "../lib/footprint";
 import { habits, whereItStarts } from "../lib/insights";
 import { supplierCountry, reportPoints, sphericalCenter, toGlobe, topSupplier } from "../lib/suppliers";
@@ -173,7 +172,6 @@ export default function Dashboard() {
       {/* 2. The sheet slides up over the globe. */}
       {data && model && (
         <div className="dash-sheet">
-          <MockBanner />
 
           {(hasRoutes || model.lead) && (
             <section aria-labelledby="glance-title">

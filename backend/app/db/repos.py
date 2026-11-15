@@ -29,6 +29,13 @@ def bulk_upsert(db: Database, collection: str, docs: Sequence[Mapping[str, Any]]
     return len(ops)
 
 
+def delete_purchases_except(db: Database, customer_id: str, account_ids: Iterable[str], keep_ids: Iterable[str]) -> int:
+    """Remove purchases the source no longer has (e.g. regenerated demo data), but only on accounts the
+    source just returned purchases for: an account that came back empty may be a partial answer."""
+    stale = {"customer_id": customer_id, "account_id": {"$in": list(account_ids)}, "_id": {"$nin": list(keep_ids)}}
+    return db.purchases.delete_many(stale).deleted_count
+
+
 # ---------- brands ----------
 def seed_brands(db: Database, curated: Sequence[Mapping[str, Any]]) -> int:
     """Curated brands (data/brands.json) are the source of truth for their own fields,
@@ -102,6 +109,11 @@ def distinct_brand_ids(db: Database, customer_id: str) -> list[str]:
 
 
 # ---------- profiles ----------
+def customer_source(db: Database, customer_id: str) -> str | None:
+    doc = db.customers.find_one({"_id": customer_id}, {"source": 1})
+    return doc.get("source") if doc else None
+
+
 def get_profile(db: Database, customer_id: str) -> dict | None:
     return db.profiles.find_one({"_id": customer_id})
 

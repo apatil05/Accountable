@@ -264,6 +264,15 @@ _PASSAGE_CHARS = 9_000  # judge input budget; the quote check still uses the ful
 _JUDGE_TIMEOUT_MS = 30_000
 # Global cap across merchants (several may be validated at once) to stay under rate limits.
 _judge_slots = threading.BoundedSemaphore(8)
+# A judge call that errors (no JSON, 429, 5xx) is retried; one flaky answer used to discard a whole
+# brand's research. Timeouts are not retried: they already cost the 30s cap and just drop the claims.
+_JUDGE_ATTEMPTS = 3
+_RETRY_BACKOFF_S = (3.0, 8.0)
+_sleep = time.sleep  # patched in tests
+
+
+class JudgeNoJSON(ValueError):
+    """The judge answered, but not with the JSON we asked for (seen when Gemini can't open a URL)."""
 
 _JUDGE_PROMPT = """You are checking claims about the company "{merchant}" against one source.
 The source is a {tier_label} ({url}).
@@ -421,7 +430,7 @@ def judge(merchant: str, url: str, tier: int, claims: list[tuple[str, str]], pag
         raw = resp.text or ""
         m = re.search(r"\{.*\}", raw, re.S)
         if not m:
-            raise ValueError(f"judge returned no JSON for {url}")
+            raise JudgeNoJSON(f"judge returned no JSON for {url}")
         out = _JudgeOut.model_validate(json.loads(m.group(0)))
     return {j.index - 1: j for j in out.claims if 1 <= j.index <= len(claims)}
 
@@ -440,6 +449,19 @@ class _Item:
         return self.cat.category
 
 
+def _judge_with_retries(merchant: str, url: str, tier: int, claims: list[tuple[str, str]],
+                        page_text: str | None) -> dict[int, _Judged]:
+    for attempt in range(_JUDGE_ATTEMPTS):
+        try:
+            return judge(merchant, url, tier, claims, page_text)
+        except Exception as e:
+            if _is_timeout(e) or attempt == _JUDGE_ATTEMPTS - 1:
+                raise
+            log.info("judge retry merchant=%r attempt=%d url=%s error=%s", merchant, attempt + 1, url, e)
+            _sleep(_RETRY_BACKOFF_S[attempt])
+    raise AssertionError("unreachable")
+
+
 def _validate_source(merchant: str, url: str, items: list[_Item]) -> bool:
     """Validate every claim that cites `url`, in place. Returns False if the judge call failed
     (claims are then left unvalidated and the caller must not cache the report)."""
@@ -453,8 +475,15 @@ def _validate_source(merchant: str, url: str, items: list[_Item]) -> bool:
         return True
 
     try:
-        judged = judge(merchant, page.url, tier, [(it.category, it.claim.text) for it in items], page.text)
+        judged = _judge_with_retries(merchant, page.url, tier, [(it.category, it.claim.text) for it in items], page.text)
     except Exception as e:
+        if isinstance(e, JudgeNoJSON) and page.text is None:
+            # Gemini couldn't read the page on any attempt: the prompt's own rule is "if you cannot open
+            # it, every claim is unsupported". Drop these claims; the rest of the report is still complete.
+            log.info("unreadable source merchant=%r claims=%d url=%s", merchant, len(items), page.url)
+            for it in items:
+                _log(merchant, it, page.url, tier, "url_context_unreadable", None, False)
+            return True
         if _is_timeout(e):
             # Hit the judge cap: drop these claims, but the report is still complete (and cached).
             method = "fetched" if page.text is not None else "url_context"

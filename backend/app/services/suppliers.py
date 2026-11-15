@@ -81,7 +81,10 @@ def _iy(client: httpx.Client, path: str, **params) -> list[dict]:
     if path not in FREE_PATHS:
         raise PaidEndpointBlocked(f"ImportYeti {path} is not one of the free endpoints {sorted(FREE_PATHS)}")
     r = client.get(f"{IY_BASE}{path}", params=params, headers={"IYApiKey": _key(), "Accept": "application/json"})
-    body = r.json()
+    try:
+        body = r.json()
+    except ValueError:  # an HTML error page instead of JSON
+        raise SuppliersUnavailable(f"ImportYeti {path} returned an unreadable response ({r.status_code})") from None
     if r.status_code == 403 and "limit" in str(body.get("message", "")).lower():
         raise SuppliersUnavailable("ImportYeti's search limit has been reached for now; try again later")
     if r.status_code != 200 or body.get("statusCode", 200) != 200:
@@ -300,11 +303,15 @@ def _build(merchant_id: str, merchant_name: str) -> SupplierReport:
         # team's script) -> coordinates -> a Wikipedia article about that place, like the suppliers get.
         importer = Importer(name=company["title"], address=company.get("address"))
         if importer.address:
-            ll = _geocode(client, importer.address, "US")  # US import records: the importer is always in the US
-            if ll:
-                importer.lat, importer.lng = ll
-                importer.place = _nearby_place(client, *ll)
-                importer.nearby = _nearby_articles(client, *ll, skip=importer.place.title if importer.place else None)
+            try:
+                ll = _geocode(client, importer.address, "US")  # US import records: the importer is always in the US
+                if ll:
+                    importer.lat, importer.lng = ll
+                    importer.place = _nearby_place(client, *ll)
+                    importer.nearby = _nearby_articles(client, *ll, skip=importer.place.title if importer.place else None)
+            except (httpx.HTTPError, ValueError, KeyError) as e:
+                # The importer's pin is a nice-to-have; a geocoder or Wikipedia hiccup must not lose the suppliers.
+                log.warning("importer place lookup failed for %s: %s", merchant_id, e)
 
     names = [n for n in company.get("topSuppliers") or [] if n and n.strip().lower() not in JUNK_SUPPLIERS]
     with ThreadPoolExecutor(max_workers=max(1, len(names))) as pool:
@@ -322,20 +329,28 @@ def get_report(db: Database, merchant_id: str, refresh: bool = False) -> Supplie
     if doc:
         doc.pop("_id", None)
         return SupplierReport(**doc)
-    if not _key():
-        raise SuppliersNotConfigured("IMPORTYETI_API_KEY is not set")
     brand = repos.get_brand(db, merchant_id) or {}
     if not brand.get("name") or brand.get("is_junk"):  # not a real brand (e.g. a cash withdrawal): nothing to search
         return SupplierReport(merchant_id=merchant_id, suppliers=[], fetched_at=_now())
+    if not _key():  # checked after the brand, so a non-brand never needs a key
+        raise SuppliersNotConfigured("IMPORTYETI_API_KEY is not set")
     report = _build(merchant_id, brand["name"])
     db.supplier_reports.replace_one({"_id": merchant_id}, {"_id": merchant_id, **report.model_dump()}, upsert=True)
     return report
 
 
 def get_reports(db: Database, merchant_ids: list[str], refresh: bool = False) -> list[SupplierReport]:
-    """Reports for many brands; stored ones return instantly, missing ones are looked up in parallel."""
+    """Reports for many brands; stored ones return instantly, missing ones are looked up in parallel.
+    A brand whose lookup fails is left out (and logged) so one outage doesn't blank the whole globe."""
+    def one(mid: str) -> SupplierReport | None:
+        try:
+            return get_report(db, mid, refresh)
+        except (SuppliersNotConfigured, SuppliersUnavailable, httpx.HTTPError, ValueError) as e:
+            log.warning("supplier report unavailable for %s: %s", mid, e)
+            return None
+
     with ThreadPoolExecutor(max_workers=4) as pool:
-        return list(pool.map(lambda mid: get_report(db, mid, refresh), merchant_ids))
+        return [r for r in pool.map(one, merchant_ids) if r is not None]
 
 
 def lookup(db: Database, name: str) -> SupplierReport:

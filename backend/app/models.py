@@ -66,6 +66,24 @@ class SpendingSummary(BaseModel):
     merchant_count: int
     merchants: list[MerchantSummary]
     estimated_kg_co2e: Optional[float] = None  # sum over merchants that have an estimate
+    data_source: Optional[str] = None  # where this customer's purchases came from: "mock" or "nessie"
+
+
+# ---------- Accounts ----------
+class LoginRequest(BaseModel):
+    email: str = Field(min_length=3, max_length=254)
+    password: str = Field(min_length=1, max_length=200)
+
+
+class AuthUser(BaseModel):
+    email: str
+    name: str
+    customer_id: str
+
+
+class LoginResponse(BaseModel):
+    token: str
+    user: AuthUser
 
 
 # ---------- Provenance: where every fact came from ----------

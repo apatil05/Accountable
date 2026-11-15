@@ -159,8 +159,12 @@ def _resolve(
     return matches
 
 
-def _run_sync(db: Database, customer_id: str, source: str) -> tuple[dict[str, int], list[str]]:
-    customer, accounts, raw_purchases, raw_merchants = _fetch(customer_id)
+Fetched = tuple[dict, list[dict], list[tuple[str, dict]], dict[str, dict]]
+
+
+def _run_sync(db: Database, customer_id: str, source: str,
+              fetched: Fetched | None = None) -> tuple[dict[str, int], list[str]]:
+    customer, accounts, raw_purchases, raw_merchants = fetched or _fetch(customer_id)
     seed_brands(db)
     errors: list[str] = []
     matches = _resolve(raw_purchases, raw_merchants, errors)
@@ -184,10 +188,14 @@ def _run_sync(db: Database, customer_id: str, source: str) -> tuple[dict[str, in
     repos.bulk_upsert(db, "customers", [customer_doc])
     repos.bulk_upsert(db, "merchants", merchant_docs)
     repos.bulk_upsert(db, "purchases", purchase_docs)
+    # Prune only accounts that returned purchases: an empty answer is more likely a hiccup than an empty card.
+    removed = repos.delete_purchases_except(
+        db, customer_id, {p["account_id"] for p in purchase_docs}, [p["_id"] for p in purchase_docs])
 
     counts = {
         "merchants": len(merchant_docs),
         "purchases": len(purchase_docs),
+        "purchases_removed": removed,
         "brands_created": len(new_brands) - len(already_there),
     }
     return counts, errors[:MAX_LOGGED_ERRORS]
@@ -206,12 +214,17 @@ def _log_run(db: Database, customer_id: str, source: str, started_at: datetime, 
         logger.warning("could not record sync run: %s", type(exc).__name__)
 
 
-def sync_customer(db: Database, customer_id: str) -> dict:
-    """Pull one customer's accounts, purchases and merchants, normalize, and upsert."""
+def sync_customer(db: Database, customer_id: str, *, fetched: Fetched | None = None,
+                  source: str | None = None) -> dict:
+    """Pull one customer's accounts, purchases and merchants, normalize, and upsert.
+
+    `fetched` = (customer, accounts, [(account_id, purchase)], {merchant_id: merchant}) in Nessie's
+    shape, for data that doesn't come from Nessie or the mock file (the demo accounts in
+    scripts/seed_users.py); it goes through exactly the same matching and validation."""
     started_at = repos.utcnow()
-    source = "mock" if config.USE_MOCK_DATA else "nessie"
+    source = source or ("mock" if config.USE_MOCK_DATA else "nessie")
     try:
-        counts, errors = _run_sync(db, customer_id, source)
+        counts, errors = _run_sync(db, customer_id, source, fetched)
     except (KeyError, TypeError, AttributeError):
         _log_run(db, customer_id, source, started_at, ok=False, errors=["unexpected data shape"])
         raise nessie.NessieError("Nessie returned unexpected data") from None
