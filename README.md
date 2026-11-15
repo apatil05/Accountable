@@ -20,9 +20,7 @@ We used Nessie from Capital One to mock our financial data, which includes custo
 Company manufacturer data was sourced from ImportYeti API which provides us supplier sources through public freight shipment info. The Company's manufacturer's precise address is then converted into coordinates and plugged into Wikipedia's free Geosearch API, which provides nearby wikipedia articles on any given coordinate.
 
 
-**How to install**
-
-## Run it locally
+## How to install
 
 Runs on mock Nessie data. You need a **MongoDB Atlas** connection string
 
