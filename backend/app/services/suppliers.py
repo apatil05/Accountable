@@ -20,7 +20,11 @@ from __future__ import annotations
 
 import json
 import logging
+import math
 import os
+import re
+import threading
+import unicodedata
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone
 from functools import lru_cache
@@ -41,7 +45,26 @@ WIKI_API = "https://en.wikipedia.org/w/api.php"
 WIKI_SUMMARY = "https://en.wikipedia.org/api/rest_v1/page/summary/"
 # Wikimedia asks for an identifying User-Agent with a way to reach the project.
 UA = {"User-Agent": "Accountable/0.1 (hackathon project; https://github.com/apatil05/Accountable)"}
-JUNK_SUPPLIERS = {"missing in source document", "not available", "n/a", "unknown", "to order"}
+# Placeholder names ImportYeti uses when a shipment's supplier was not recorded ("Missing in source document").
+# They name no supplier, so they are left out of the list and never searched.
+PLACEHOLDER_SUPPLIERS = {"missing in source document", "not available", "n/a", "unknown", "to order"}
+# Hard cap on ImportYeti requests per company (company search included), so lookups never trip the search limit.
+MAX_IY_REQUESTS = 5
+
+
+class _Budget:
+    """Counts ImportYeti requests for one company; refuses (without calling) once the cap is reached."""
+
+    def __init__(self, limit: int = MAX_IY_REQUESTS):
+        self.left = limit
+        self._lock = threading.Lock()
+
+    def take(self) -> bool:
+        with self._lock:
+            if self.left <= 0:
+                return False
+            self.left -= 1
+            return True
 
 # Only the two ImportYeti search endpoints from the team's script are allowed. They are free; anything else
 # (detail or shipment endpoints) may spend the team's limited credits, so it is blocked here on purpose.
@@ -117,27 +140,132 @@ def _country_names() -> dict[str, list[str]]:
     return {k: v for k, v in data.items() if not k.startswith("_")}
 
 
+@lru_cache(maxsize=1)
+def _country_hints() -> dict:
+    return json.loads((config.DATA_DIR / "country_hints.json").read_text())
+
+
+def _words(text: str) -> str:
+    """' hong kong 999077 h ' style: lowercase, accents dropped, letters and digits only, padded for whole-word matching."""
+    plain = unicodedata.normalize("NFKD", text).encode("ascii", "ignore").decode().lower()
+    return " " + " ".join(re.findall(r"[a-z0-9]+", plain)) + " "
+
+
+def _has(text: str, phrase: str) -> bool:
+    return _words(phrase) in text
+
+
+# Region names that are also everyday address words ("Laurels Industrial Centre" is not Cameroon's Centre region).
+GENERIC_REGIONS = {"centre", "center", "central", "north", "south", "east", "west", "capital", "coast", "littoral", "island", "islands"}
+
+
+def _named_countries(address: str) -> tuple[list[str], dict[str, str]]:
+    """Countries an address names, in the order found: by country name (whole words), by a trailing ISO-2 code
+    ('... Kyoto Jp'), or by a big trade city ('Jebel Ali' -> UAE). Also returns the city that named each country."""
+    text, hints = _words(address), _country_hints()
+    found: list[str] = []
+    cities: dict[str, str] = {}
+    for iso3, names in _country_names().items():
+        if any(_has(text, n) for n in names):
+            found.append(iso3)
+    last = text.split()[-1] if text.strip() else ""
+    for iso3, code in hints["iso2"].items():
+        if last == code.lower() and iso3 not in found:
+            found.append(iso3)
+    for iso3, names in hints["cities"].items():
+        for city in names:
+            if _has(text, city):
+                cities.setdefault(iso3, city)
+                if iso3 not in found:
+                    found.append(iso3)
+    return found, cities
+
+
+def _km(a: dict, b: dict) -> float:
+    """Great-circle distance between two ArcGIS locations ({"x": lng, "y": lat})."""
+    la1, lo1, la2, lo2 = map(math.radians, (a["y"], a["x"], b["y"], b["x"]))
+    h = math.sin((la2 - la1) / 2) ** 2 + math.cos(la1) * math.cos(la2) * math.sin((lo2 - lo1) / 2) ** 2
+    return 2 * 6371 * math.asin(math.sqrt(h))
+
+
+def _geocode_one(client: httpx.Client, text: str, country: str | None = None) -> dict | None:
+    params = {"SingleLine": text, "f": "json", "maxLocations": 1, "outFields": "Country,CntryName,Region", "langCode": "EN"}
+    if country:
+        params["sourceCountry"] = country
+    cands = client.get(ARCGIS, params=params).json().get("candidates") or []
+    return cands[0] if cands and cands[0].get("score", 0) >= 60 else None
+
+
+def _best_guess(client: httpx.Client, address: str) -> tuple[float, float, str, str] | None:
+    """When the address can't be confirmed: the geocoder's best guess for it (any score), else the country the
+    address names, else the last few words of the address ("... Hunan 417700"). Always marked approximate."""
+    def raw(text: str, country: str | None = None) -> dict | None:
+        params = {"SingleLine": text, "f": "json", "maxLocations": 1, "outFields": "Country,CntryName,Region", "langCode": "EN"}
+        if country:
+            params["sourceCountry"] = country
+        cands = client.get(ARCGIS, params=params).json().get("candidates") or []
+        return cands[0] if cands else None
+
+    named, _ = _named_countries(address)
+    words = address.split()
+    tries = [(address, None)] + [(_country_names()[iso3][0], iso3) for iso3 in named[:1] if iso3 in _country_names()] \
+        + [(" ".join(words[-k:]), None) for k in (4, 3, 2) if len(words) > k]
+    for text, country in tries:
+        c = raw(text, country)
+        if c:
+            iso3 = (c.get("attributes") or {}).get("Country") or ""
+            english = _country_names().get(iso3, [])
+            return float(c["location"]["y"]), float(c["location"]["x"]), (english[0] if english else (c.get("attributes") or {}).get("CntryName") or ""), iso3
+    return None
+
+
 def _locate_address(client: httpx.Client, address: str) -> tuple[float, float, str, str] | None:
     """Place a supplier using ONLY its listed address (never its name or the record's country label).
-    The match is kept only if the country or region it lands in is actually written in the address, so a
-    vague address (e.g. "Junction City Towersuite") is dropped instead of being pinned to a look-alike place."""
-    r = client.get(ARCGIS, params={
-        "SingleLine": address, "f": "json", "maxLocations": 1, "outFields": "Country,CntryName,Region", "langCode": "EN",
-    })
-    cands = r.json().get("candidates") or []
-    if not cands or cands[0].get("score", 0) < 60:
+
+    If the address names a country (by name, a trailing ISO-2 code or a big trade city), the pin must land in
+    that country: a match elsewhere is retried inside it, then at the named city. If it names no country, the
+    match is kept only when the country or a specific region it lands in is written in the address. Anything
+    else gets no pin, so a vague address is never pinned to a look-alike place."""
+    named, cities = _named_countries(address)
+
+    def result(c: dict) -> tuple[float, float, str, str]:
+        iso3 = (c.get("attributes") or {}).get("Country") or ""
+        english = _country_names().get(iso3, [])
+        return float(c["location"]["y"]), float(c["location"]["x"]), (english[0] if english else (c.get("attributes") or {}).get("CntryName") or ""), iso3
+
+    def near_named_city(c: dict) -> dict:
+        """Generic phrases ("Organized Industrial Zone") can match the wrong town of the right country. When the
+        address names a trade city and the match is more than 40 km from it, the city itself is the better pin."""
+        iso3 = (c.get("attributes") or {}).get("Country")
+        if iso3 not in cities:
+            return c
+        city = _geocode_one(client, cities[iso3], iso3)
+        if city and _km(c["location"], city["location"]) > 40:
+            return city
+        return c
+
+    first = _geocode_one(client, address)
+    if named:
+        if first and (first.get("attributes") or {}).get("Country") in named:
+            return result(near_named_city(first))
+        for iso3 in named[:2]:  # retry inside the country the address names (wrong-country or no match the first time)
+            c = _geocode_one(client, address, iso3)
+            if c and (c.get("attributes") or {}).get("Country") == iso3:
+                return result(near_named_city(c))
+            if iso3 in cities:  # the full address would not place; the named trade city will (approximate)
+                c = _geocode_one(client, cities[iso3], iso3)
+                if c and (c.get("attributes") or {}).get("Country") == iso3:
+                    return result(c)
         return None
-    at = cands[0].get("attributes") or {}
-    iso3 = at.get("Country") or ""
-    english = _country_names().get(iso3, [])
-    # The geocoder names countries in their own language ("Deutschland", "Việt Nam"); compare English
-    # spellings too, plus the region (state/province), against the address text.
-    candidates = [*english, at.get("CntryName") or "", at.get("Region") or ""]
-    text = _compact(address)
-    if not any(len(n) >= 4 and n in text for n in map(_compact, candidates)):
+    if not first:
         return None
-    loc = cands[0]["location"]
-    return float(loc["y"]), float(loc["x"]), (english[0] if english else at.get("CntryName") or ""), iso3
+    at = first.get("attributes") or {}
+    text = _words(address)
+    region = (at.get("Region") or "").strip()
+    region_ok = bool(region) and len(region) >= 5 and region.lower() not in GENERIC_REGIONS and _has(text, region)
+    if region_ok or (at.get("CntryName") and _has(text, at["CntryName"])):
+        return result(first)
+    return None
 
 
 # ---------- Wikipedia ----------
@@ -242,34 +370,36 @@ def nearby_place(db: Database, lat: float, lng: float) -> NearbyPlace | None:
 
 
 # ---------- report ----------
-def _one_supplier(name: str) -> Supplier | None:
+def _one_supplier(name: str, search: bool = True) -> Supplier:
+    """A supplier exactly as named in the company's ImportYeti record. Its address comes from one supplier search
+    (the hit with the same name, else the first); it gets a pin only if that address can be placed. It is listed
+    either way: nothing is dropped."""
+    sup = Supplier(name=name)
+    if not search:
+        return sup
     try:
         with httpx.Client(timeout=15) as client:
             hits = _iy(client, "/supplier/search", page_size=3, name=name)
-            if not hits or not hits[0].get("address"):
-                return None
-            s = hits[0]
-            found = _locate_address(client, s["address"])
+            hit = next((h for h in hits if _norm(h.get("title") or "") == _norm(name)), hits[0] if hits else None)
+            if not hit:
+                return sup
+            sup.address = hit.get("address") or None
+            sup.shipments = hit.get("totalShipments")
+            found = _locate_address(client, sup.address) if sup.address else None
+            if not found and sup.address:  # unconfirmed address: still pinned, at the geocoder's best guess
+                found = _best_guess(client, sup.address)
+                sup.approximate = bool(found)
             if not found:
-                return None
-            lat, lng, country, iso3 = found
-            place = _nearby_place(client, lat, lng)
-            return Supplier(
-                name=s.get("title") or name,
-                address=s.get("address"),
-                country=country or None,
-                country_code=iso3 or None,
-                shipments=s.get("totalShipments"),
-                lat=lat,
-                lng=lng,
-                place=place,
-                nearby=_nearby_articles(client, lat, lng, skip=place.title if place else None),
-            )
+                return sup
+            sup.lat, sup.lng, country, iso3 = found
+            sup.country, sup.country_code = country or None, iso3 or None
+            sup.place = _nearby_place(client, sup.lat, sup.lng)
+            sup.nearby = _nearby_articles(client, sup.lat, sup.lng, skip=sup.place.title if sup.place else None)
     except PaidEndpointBlocked:
         raise
     except (httpx.HTTPError, SuppliersUnavailable, ValueError, KeyError) as e:
         log.warning("supplier lookup failed for %s: %s", name, e)
-        return None
+    return sup
 
 
 def _now() -> str:
@@ -281,22 +411,26 @@ def _pick_company(hits: list[dict]) -> dict | None:
     return max(hits, key=lambda c: c.get("totalShipments") or 0, default=None)
 
 
-def _find_company(client: httpx.Client, merchant_name: str) -> dict | None:
+def _find_company(client: httpx.Client, merchant_name: str, budget: _Budget | None = None) -> dict | None:
     """The hand-picked record if it still turns up; otherwise the most-shipped result for the merchant's name."""
+    budget = budget or _Budget()
     pick = _curated().get(_norm(merchant_name))
-    if pick:
+    if pick and budget.take():
         hits = _iy(client, "/company/search", page_size=10, offset=0, name=pick["query"])
         want = _norm(pick["title"])
         found = next((c for c in hits if _norm(c.get("title") or "") == want), None)
         if found:
             return found
+    if not budget.take():
+        return None
     # Same call as the team's script: company/search?page_size=10&offset=0&name=<merchant name>.
     return _pick_company(_iy(client, "/company/search", page_size=10, offset=0, name=merchant_name))
 
 
 def _build(merchant_id: str, merchant_name: str) -> SupplierReport:
+    budget = _Budget()
     with httpx.Client(timeout=15) as client:
-        company = _find_company(client, merchant_name)
+        company = _find_company(client, merchant_name, budget)
         if not company:
             return SupplierReport(merchant_id=merchant_id, suppliers=[], fetched_at=_now())
         # The company's own address from the company search record (parsed["data"][...]["address"] in the
@@ -313,11 +447,12 @@ def _build(merchant_id: str, merchant_name: str) -> SupplierReport:
                 # The importer's pin is a nice-to-have; a geocoder or Wikipedia hiccup must not lose the suppliers.
                 log.warning("importer place lookup failed for %s: %s", merchant_id, e)
 
-    names = [n for n in company.get("topSuppliers") or [] if n and n.strip().lower() not in JUNK_SUPPLIERS]
-    with ThreadPoolExecutor(max_workers=max(1, len(names))) as pool:
-        resolved = [s for s in pool.map(_one_supplier, dict.fromkeys(names)) if s]
-    # Different name spellings can resolve to the same supplier record; keep each once.
-    found = list({(s.name.lower(), round(s.lat, 2), round(s.lng, 2)): s for s in resolved}.values())
+    # Every supplier in the record, in ImportYeti's order and under ImportYeti's name. The searches left in this
+    # company's budget go to the first real names; the rest (and placeholders) are listed without a lookup.
+    names = [n.strip() for n in company.get("topSuppliers") or [] if n and n.strip() and n.strip().lower() not in PLACEHOLDER_SUPPLIERS]
+    plan = [(n, budget.take()) for n in names]
+    with ThreadPoolExecutor(max_workers=max(1, len(plan))) as pool:
+        found = list(pool.map(lambda p: _one_supplier(*p), plan))
 
     return SupplierReport(
         merchant_id=merchant_id, company_name=company["title"], importer=importer, suppliers=found, fetched_at=_now()
@@ -378,7 +513,7 @@ def add_nearby(db: Database) -> int:
                 report = SupplierReport(**{k: v for k, v in doc.items() if k != "_id"})
                 touched = False
                 for s in report.suppliers:
-                    if not s.nearby:
+                    if not s.nearby and s.lat is not None and s.lng is not None:
                         s.nearby = _nearby_articles(client, s.lat, s.lng, skip=s.place.title if s.place else None)
                         touched = True
                 imp = report.importer

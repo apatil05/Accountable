@@ -10,7 +10,7 @@ import type { MerchantSummary, SpendingSummary, SupplierReport } from "../api/ty
 import Globe, { type GlobeLayout } from "../components/Globe";
 import { footprintLead, formatKg } from "../lib/footprint";
 import { habits, whereItStarts } from "../lib/insights";
-import { supplierCountry, reportPoints, sphericalCenter, toGlobe, topSupplier } from "../lib/suppliers";
+import { isPlaced, supplierCountry, reportPoints, sphericalCenter, toGlobe, topSupplier } from "../lib/suppliers";
 
 const usd = (n: number) => n.toLocaleString("en-US", { style: "currency", currency: "USD" });
 const usd0 = (n: number) => n.toLocaleString("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 });
@@ -95,7 +95,7 @@ export default function Dashboard() {
     const globe = toGlobe(reps, names);
     // Frame one company on all its suppliers + importer; a group of companies on all of their suppliers.
     const spotFor = (ids: string[]): Spotlight | null => {
-      const pts = ids.length === 1 ? reportPoints(reportById.get(ids[0])) : ids.flatMap((id) => reportById.get(id)?.suppliers ?? []);
+      const pts = ids.length === 1 ? reportPoints(reportById.get(ids[0])) : ids.flatMap((id) => (reportById.get(id)?.suppliers ?? []).filter(isPlaced));
       const focus = sphericalCenter(pts);
       return focus ? { ids, focus } : null;
     };

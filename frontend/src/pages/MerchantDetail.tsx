@@ -17,7 +17,7 @@ import Globe from "../components/Globe";
 import MockBanner from "../components/MockBanner";
 import SupplierCard, { ImporterCard } from "../components/SupplierCard";
 import { useOnDemandResearch } from "../lib/useResearch";
-import { possessive, supplierCountry, reportPoints, sphericalCenter, supplierPointId, toGlobe } from "../lib/suppliers";
+import { isPlaced, possessive, supplierCountry, reportPoints, sphericalCenter, supplierPointId, toGlobe } from "../lib/suppliers";
 
 const usd = (n: number) => n.toLocaleString("en-US", { style: "currency", currency: "USD" });
 const HIDDEN_TOPICS = new Set(["political"]); // product decision: no political values
@@ -75,7 +75,7 @@ export default function MerchantDetail() {
   const globe = useMemo(() => toGlobe(real ? [real] : [], { [id]: name }), [real, id, name]);
   const supplier = real && typeof selected === "number" ? real.suppliers[selected] : undefined;
   const importer = real && selected === "importer" ? real.importer : null;
-  const focus: [number, number] | null = supplier
+  const focus: [number, number] | null = supplier && isPlaced(supplier)
     ? [supplier.lng, supplier.lat]
     : importer?.lat != null && importer.lng != null
       ? [importer.lng, importer.lat]
@@ -172,7 +172,7 @@ export default function MerchantDetail() {
                   <span className="co-supplier-text">
                     <span className="co-supplier-name">{s.name}</span>
                     <span className="co-supplier-where">
-                      {[s.place?.title, supplierCountry(s)].filter(Boolean).join(" · ")}
+                      {isPlaced(s) ? [s.place?.title, supplierCountry(s)].filter(Boolean).join(" · ") : "Not on the map"}
                       {s.shipments != null && ` · ${s.shipments.toLocaleString("en-US")} shipments`}
                     </span>
                   </span>

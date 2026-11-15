@@ -396,8 +396,11 @@ class Supplier(BaseModel):
     country: Optional[str] = None  # English country name, from geocoding the listed address
     country_code: Optional[str] = None  # ISO 3166-1 alpha-3 of that same geocoded country (e.g. "CHN")
     shipments: Optional[int] = None
-    lat: float  # approximate: geocoded from the supplier's listed address
-    lng: float
+    # Approximate, geocoded from the supplier's listed address. None when the records give no address we could
+    # place (or it was not looked up within the per-company request budget): the supplier is still listed.
+    lat: Optional[float] = None
+    lng: Optional[float] = None
+    approximate: bool = False  # True: the address could not be confirmed; the pin is the geocoder's best guess
     place: Optional[NearbyPlace] = None  # the town/district it is in
     nearby: list[NearbyPlace] = []  # other Wikipedia articles close to the geocoded point, nearest first
 

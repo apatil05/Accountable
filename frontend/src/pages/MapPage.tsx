@@ -10,7 +10,7 @@ import { api } from "../api/client";
 import type { SpendingSummary, SupplierReport } from "../api/types";
 import Globe from "../components/Globe";
 import SupplierCard, { ImporterCard } from "../components/SupplierCard";
-import { isLookup, possessive, supplierCountry, reportPoints, sphericalCenter, splitPointId, supplierPointId, toGlobe } from "../lib/suppliers";
+import { isLookup, isPlaced, possessive, supplierCountry, reportPoints, sphericalCenter, splitPointId, supplierPointId, toGlobe } from "../lib/suppliers";
 
 const usd = (n: number) => n.toLocaleString("en-US", { style: "currency", currency: "USD" });
 const num = (n: number) => n.toLocaleString("en-US");
@@ -72,7 +72,7 @@ export default function MapPage() {
   const importer = selPart === "importer" ? selReport?.importer ?? undefined : undefined;
   const lit = pinned ?? preview;
   const pinnedReport = pinned ? byId.get(pinned) : undefined;
-  const focus: [number, number] | null = supplier
+  const focus: [number, number] | null = supplier && isPlaced(supplier)
     ? [supplier.lng, supplier.lat]
     : importer?.lat != null && importer.lng != null
       ? [importer.lng, importer.lat]
@@ -264,7 +264,7 @@ export default function MapPage() {
                           {s.country && <span className="tag">{supplierCountry(s)}</span>}
                         </span>
                         <span className="mapx-item-sub">
-                          {s.place ? s.place.title : "Location from listed address"}
+                          {s.place ? s.place.title : isPlaced(s) ? "Location from listed address" : "Not on the map"}
                           {s.shipments != null && ` · ${num(s.shipments)} shipments`}
                         </span>
                       </button>

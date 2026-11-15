@@ -2,17 +2,18 @@
 // about the place. Owner: Person C. Used on the Map page and on company pages.
 import type { Importer, NearbyPlace, Supplier } from "../api/types";
 import { mapLinkFor } from "../lib/places";
-import { possessive } from "../lib/suppliers";
+import { isPlaced, possessive } from "../lib/suppliers";
 
 const num = (n: number) => n.toLocaleString("en-US");
 
-function Card({ label, title, address, at, place, nearby, onClose }: {
+function Card({ label, title, address, at, note, place, nearby, onClose }: {
   label: string;
   title: string;
   address?: string | null;
   at?: { lat: number; lng: number } | null;
   place?: NearbyPlace | null;
   nearby?: NearbyPlace[];
+  note?: string;
   onClose: () => void;
 }) {
   return (
@@ -24,6 +25,7 @@ function Card({ label, title, address, at, place, nearby, onClose }: {
       <div className="stop-detail">
         <h2>{title}</h2>
         {address && <p className="stop-stage">{address}</p>}
+        {note && <p className="stop-coords">{note}</p>}
         {at && (
           <p className="stop-coords">
             Approximate location · <a href={mapLinkFor(at)} target="_blank" rel="noreferrer">Open in OpenStreetMap</a>
@@ -74,7 +76,17 @@ export default function SupplierCard({ supplier, company, onClose }: { supplier:
     supplier.country,
     supplier.shipments != null ? `${num(supplier.shipments)} shipments` : null,
   ].filter(Boolean).join(" · ");
-  return <Card label={label} title={supplier.name} address={supplier.address} at={supplier} place={supplier.place} nearby={supplier.nearby} onClose={onClose} />;
+  const note = isPlaced(supplier)
+    ? supplier.approximate
+      ? "Approximate pin: this address couldn’t be confirmed, so it’s the geocoder’s best guess and may be off."
+      : undefined
+    : supplier.address
+      ? "Not on the map: this address could not be placed reliably."
+      : "Not on the map: the import records list this supplier without an address we looked up.";
+  return (
+    <Card label={label} title={supplier.name} address={supplier.address} at={isPlaced(supplier) ? supplier : null}
+      note={note} place={supplier.place} nearby={supplier.nearby} onClose={onClose} />
+  );
 }
 
 /** The company's own importing office in US records, where its suppliers' shipments go. */

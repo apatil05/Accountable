@@ -67,7 +67,8 @@ def test_report_is_real_filtered_and_stored(client, monkeypatch):
     assert body["importer"]["nearby"]
     assert body["importer"]["lat"] == 47.58
     assert body["importer"]["place"]["title"] == "Chapinero"  # the company's own address gets a place article too
-    assert [s["name"] for s in body["suppliers"]] == ["Carcafe"]  # junk supplier filtered out
+    # Every real supplier in the record; ImportYeti's "Missing in source document" placeholder names nobody.
+    assert [s["name"] for s in body["suppliers"]] == ["Carcafe"]
     assert body["suppliers"][0]["place"]["title"] == "Chapinero"
     assert body["suppliers"][0]["country"] == "Colombia"  # from the address, not the record's label
     client.get("/api/merchants/starbucks/suppliers")
@@ -185,3 +186,51 @@ def test_lookup_endpoint_searches_any_company_and_stores_it(client, monkeypatch)
     client.get("/api/suppliers/lookup?name=starbucks")
     assert calls["company"] == 1  # stored: the same company typed again costs no search
     assert client.get("/api/suppliers/lookup?name=a").status_code == 422
+
+
+def test_every_supplier_listed_within_five_importyeti_requests(monkeypatch):
+    calls = []
+
+    def fake_iy(_client, path, **params):
+        calls.append(path)
+        if path == "/company/search":
+            return [{"title": "Nike Usa", "totalShipments": 9, "address": "Beaverton, OR",
+                     "topSuppliers": [f"Factory {i}" for i in range(8)]}]
+        return [{"title": params["name"], "address": "Ho Chi Minh City, Vietnam", "totalShipments": 3}]
+
+    monkeypatch.setattr(suppliers, "_iy", fake_iy)
+    monkeypatch.setattr(suppliers, "_geocode", lambda _c, address, country=None: None)
+    monkeypatch.setattr(suppliers, "_locate_address", lambda _c, address: (10.8, 106.7, "Vietnam", "VNM"))
+    monkeypatch.setattr(suppliers, "_nearby_place", lambda _c, lat, lng: None)
+    monkeypatch.setattr(suppliers, "_nearby_articles", lambda _c, lat, lng, skip=None, limit=6: [])
+    report = suppliers._build("nike", "Nike")
+    assert len(calls) <= suppliers.MAX_IY_REQUESTS  # never more than 5 ImportYeti requests per company
+    assert [s.name for s in report.suppliers] == [f"Factory {i}" for i in range(8)]  # all eight still listed
+    assert sum(s.lat is not None for s in report.suppliers) >= 3  # at least three placed on the map
+
+
+def test_addresses_name_their_country_by_word_code_or_trade_city():
+    named = lambda a: suppliers._named_countries(a)[0]
+    assert named("Units 09A Laurels Industrial Centre 32 Hong Kong 999077 H") == ["HKG"]  # "Centre" is not Cameroon
+    assert named("B Section Export Processing Zone Yantai Cn") == ["CHN"]  # trailing ISO-2 code
+    assert named("Plot No S30902 Jebel Ali Free Zone Dubai Ae") == ["ARE"]
+    assert named("Po Box 17005 Jafza Dubai United Arab Emirates") == ["ARE"]
+    assert named("Organize Sanayi Bolgesi Gaziantep Tr") == ["TUR"]
+    assert named("Small Industrial Estate Sialkot 51310 Pk") == ["PAK"]
+    assert named("Str Fabricii 12 Cluj Napoca Romania") == ["ROU"]  # "Oman" inside "Romania" is not Oman
+
+
+def test_match_in_another_country_than_the_address_names_is_retried_inside_it():
+    class R:
+        def __init__(self, cand): self.cand = cand
+        def json(self): return {"candidates": [self.cand] if self.cand else []}
+
+    cameroon = {"score": 80, "location": {"x": 11.5, "y": 3.8}, "attributes": {"Country": "CMR", "CntryName": "Cameroun", "Region": "Centre"}}
+    hong_kong = {"score": 90, "location": {"x": 114.16, "y": 22.28}, "attributes": {"Country": "HKG", "CntryName": "Hong Kong", "Region": "Hong Kong"}}
+
+    class C:
+        def get(self, _url, params=None, **_k):
+            return R(hong_kong if params.get("sourceCountry") == "HKG" else cameroon)
+
+    found = suppliers._locate_address(C(), "Units 09A 01 2 F Laurels Industrial Centre 32 Hong Kong 999077 H")
+    assert found[2] == "Hong Kong" and round(found[0]) == 22
