@@ -24,12 +24,13 @@ from .models import (
     EthicsReport,
     LaborSummary,
     Purchase,
+    ResearchStatus,
     SpendingSummary,
     SupplierReport,
     SupplyChain,
     UserProfile,
 )
-from .services import aggregation, auth, ethics, ingest, labor, nessie, suppliers, supply_chain
+from .services import aggregation, auth, ethics, ingest, labor, nessie, research_jobs, suppliers, supply_chain
 
 logger = logging.getLogger(__name__)
 
@@ -256,6 +257,17 @@ def merchant_ethics(merchant_id: str, cid: str = Depends(viewer_customer), db: D
     if not report:
         raise HTTPException(404, "No ethics data yet for this merchant")
     return report
+
+
+@router.post("/merchants/{merchant_id}/research", response_model=ResearchStatus)
+def merchant_research(merchant_id: str, db: Database = Depends(get_database)):
+    """Ask for research on a company that has none yet. Starts it in the background (a few minutes, once per
+    company, capped per day); call again to see progress. Status: ready, started, running, busy, capped,
+    failed or unavailable. See services/research_jobs.py for the limits."""
+    status = research_jobs.request(db, merchant_id)
+    if status == "unknown":
+        raise HTTPException(404, f"Unknown merchant {merchant_id}")
+    return ResearchStatus(status=status)
 
 
 @router.get("/merchants/{merchant_id}/supply-chain", response_model=SupplyChain)

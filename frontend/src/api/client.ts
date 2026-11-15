@@ -2,6 +2,7 @@ import { clearSession, currentSession } from "../lib/session";
 import type {
   Alternative,
   AuthUser,
+  ResearchStatus,
   LoginResponse,
   CompanyEmissions,
   EthicsReport,
@@ -71,6 +72,8 @@ export const api = {
   profile: () => req<UserProfile>("/profile"),
   saveProfile: (p: UserProfile) => req<UserProfile>("/profile", { method: "PUT", body: JSON.stringify(p) }),
   ethics: (id: string) => req<EthicsReport>(`/merchants/${id}/ethics`),
+  /** Start (or check on) live research for a company that has none yet. */
+  requestResearch: (id: string) => req<ResearchStatus>(`/merchants/${id}/research`, { method: "POST" }),
   supplyChain: (id: string) => req<SupplyChain>(`/merchants/${id}/supply-chain`),
   alternatives: (id: string) => req<Alternative[]>(`/merchants/${id}/alternatives`),
   allSupplyChains: () => req<SupplyChain[]>("/supply-chains"),
