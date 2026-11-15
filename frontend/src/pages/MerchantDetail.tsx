@@ -107,6 +107,18 @@ export default function MerchantDetail() {
             {me?.category.map((c) => <span key={c} className="tag">{c}</span>)}
             {countries.map((c) => <span key={c} className="tag">Supplier in {c}</span>)}
           </div>
+          {real?.importer && (
+            <button
+              type="button"
+              className={`co-delivered ${selected === "importer" ? "is-active" : ""}`}
+              onClick={() => pick("importer")}
+              disabled={real.importer.lat == null}
+            >
+              <span className="co-delivered-label">Delivered to</span>
+              <span className="co-delivered-name">{real.importer.name}</span>
+              {real.importer.place && <span className="co-delivered-where">{real.importer.place.title}</span>}
+            </button>
+          )}
           {research?.verdict ? (
             <div className={`co-verdict is-${research.verdict.label}`}>
               <p className="co-verdict-label">{VERDICT_LABELS[research.verdict.label]}</p>
@@ -178,22 +190,6 @@ export default function MerchantDetail() {
               </li>
             ))}
           </ul>
-          {real.importer && (
-            <button
-              type="button"
-              className={`co-supplier co-importer-btn ${selected === "importer" ? "is-active" : ""}`}
-              onClick={() => pick("importer")}
-              disabled={real.importer.lat == null}
-            >
-              {real.importer.place?.thumbnail_url ? <img src={real.importer.place.thumbnail_url} alt="" /> : <span className="co-supplier-mark is-importer" aria-hidden="true" />}
-              <span className="co-supplier-text">
-                <span className="co-supplier-name">They ship to {real.importer.name}</span>
-                <span className="co-supplier-where">
-                  US importer{real.importer.place ? ` · ${real.importer.place.title}` : real.importer.address ? ` · ${real.importer.address}` : ""}
-                </span>
-              </span>
-            </button>
-          )}
         </section>
       )}
 
@@ -204,10 +200,6 @@ export default function MerchantDetail() {
       <section className="co-section" aria-labelledby="facts-title">
         <div className="co-section-head">
           <h2 id="facts-title">What we found</h2>
-          <p>
-            The key facts and verified sources behind the verdict above, grouped by topic.
-            Compare them against <Link to="/values">your values</Link> to see what matters most to you.
-          </p>
         </div>
         {research?.data_source === "mock" &&
           (progress === "working" ? (
@@ -260,7 +252,6 @@ export default function MerchantDetail() {
       <section className="co-section" aria-labelledby="alts-title">
         <div className="co-section-head">
           <h2 id="alts-title">Alternatives</h2>
-          <p>Other places to buy something similar.</p>
         </div>
         {alts.length === 0 ? (
           <p className="co-muted">No suggestions yet.</p>

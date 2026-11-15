@@ -232,7 +232,7 @@ export default function Dashboard() {
           <section aria-labelledby="companies-title" className="sheet-section">
             <div className="sheet-head">
               <h2 id="companies-title" className="sheet-title">Companies you buy from</h2>
-              <p>Most spent first. Point at one (or tap it once) to see its suppliers on the globe.</p>
+              <p>Point at one (or tap it once) to see its suppliers on the globe.</p>
             </div>
             {data.merchants.length === 0 ? (
               <p className="sheet-empty">
@@ -313,9 +313,7 @@ function CompanyRow({
         <span className="cr-nums">
           <span className="cr-spend">{usd(m.total_spent)}</span>
           <span className="cr-meta">
-            {pct(share)} · {m.purchase_count} {m.purchase_count === 1 ? "purchase" : "purchases"} · last {shortDate(m.last_purchase)}
-            {m.carbon && <> · ≈ {formatKg(m.carbon.kg_co2e)} CO₂e</>}
-          </span>
+            {m.purchase_count} {m.purchase_count === 1 ? "purchase" : "purchases"} · last {shortDate(m.last_purchase)}          </span>
         </span>
         {active && <span className="cr-open">Tap again to open</span>}
         <span className="cr-share" aria-hidden="true"><span style={{ width: `${Math.max(share * 100, 2)}%` }} /></span>

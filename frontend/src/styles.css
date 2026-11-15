@@ -467,7 +467,18 @@ body.on-field { background: var(--field); }
 .co-supplier-name { font-size: 15.5px; font-weight: 400; color: var(--on-field); }
 .co-supplier-where { font-size: 13px; color: var(--on-field-dim); }
 .co-importer, .mapx-importer { margin: 16px 0 0; font-size: 13.5px; color: var(--on-field-dim); }
-.co-importer-btn { margin-top: 14px; max-width: 520px; }
+.co-delivered {
+  all: unset; box-sizing: border-box; display: inline-flex; flex-wrap: wrap; align-items: baseline; gap: 4px 8px; margin-top: 14px; max-width: 100%;
+  padding: 8px 14px; border-radius: 999px; cursor: pointer; font-size: 13.5px;
+  background: rgba(var(--panel-rgb), 0.74); border: 1px solid var(--glass-line);
+  transition: background-color 0.2s var(--ease-out), border-color 0.2s var(--ease-out);
+}
+.co-delivered:hover, .co-delivered:focus-visible { background: rgba(var(--hi), 0.06); }
+.co-delivered.is-active { border-color: rgba(var(--route-rgb), 0.6); background: rgba(var(--route-rgb), 0.1); }
+.co-delivered:disabled { cursor: default; opacity: 0.7; }
+.co-delivered-label { color: var(--on-field-dim); }
+.co-delivered-name { color: var(--on-field); font-weight: 500; }
+.co-delivered-where { color: var(--on-field-dim); }
 .co-supplier-mark.is-importer {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ccircle cx='8' cy='8' r='5.5' fill='none' stroke='%23c95f24' stroke-width='2'/%3E%3C/svg%3E");
 }
