@@ -198,7 +198,7 @@ body.on-field { background: var(--field); }
 .dash-hero-copy { max-width: 720px; text-shadow: 0 2px 28px rgba(var(--field-rgb), 0.9); }
 .dash-display { font-size: clamp(56px, 7.2vw, 112px); font-weight: 300; font-variation-settings: "SHRP" 100; line-height: 0.95; letter-spacing: -0.045em; }
 .dash-total { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 18px; margin: 28px 0 0; }
-.dash-total .figure { margin: 0; font-size: clamp(44px, 4.8vw, 72px); }
+.dash-total .figure { margin: 0; font-size: clamp(44px, 4.8vw, 72px); color: var(--route); }
 .dash-total-note { font-size: 14px; color: var(--on-field-dim); }
 .dash-stats {
   display: grid; grid-template-columns: repeat(auto-fit, minmax(104px, 1fr)); margin: 32px 0 0; max-width: 660px;

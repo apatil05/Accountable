@@ -106,8 +106,8 @@ export default function Values() {
         <section className="vp-values" aria-labelledby="values-title">
           <h2 id="values-title" className="vp-title">What matters to you?</h2>
           <p className="vp-lede">
-            Accountable never rates companies. Tell us which issues you care about and we'll keep them in view as you
-            look at the companies you pay. Nothing here is shared.
+            Tell us which issues you care about and we'll keep them in mind as you look at the
+            companies you shop with. Nothing here is shared.
           </p>
 
           <ul className="vp-topics">

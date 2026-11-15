@@ -35,7 +35,7 @@ export default function Landing() {
         <h1>Know who you're paying.</h1>
         <p>
           Accountable turns your card purchases into a map of the companies you pay and where their products come
-          from. Facts with sources, never ratings, so you can decide what matters.
+          from. Facts with sources, so you can decide what matters.
         </p>
         <div className="landing-ctas">
           <Link to="/login" className="button-light button-lg">Log in</Link>
