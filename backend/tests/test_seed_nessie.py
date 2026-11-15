@@ -69,6 +69,11 @@ def test_every_purchase_is_created_with_a_status():
     assert all(p["status"] == "completed" for p in purchases)
 
 
+def test_purchase_status_keeps_nessie_statuses_and_defaults_the_rest():
+    statuses = [seed_nessie.purchase_status({"status": s}) for s in ("pending", "cancelled", "executed", None)]
+    assert statuses == ["pending", "cancelled", "completed", "completed"]
+
+
 def test_a_complete_run_creates_everything_once():
     fake = FakeNessie()
     record = seed_nessie.seed(_client(fake), DATA, seed_nessie.new_record(), lambda r: None)

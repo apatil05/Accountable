@@ -1,0 +1,232 @@
+{
+  "acehardware": {
+    "dol": {
+      "name_patterns": [
+        "ACE HARDWARE"
+      ],
+      "naics_prefixes": [
+        "444"
+      ]
+    }
+  },
+  "amazon": {
+    "dol": {
+      "name_patterns": [
+        "AMAZON"
+      ],
+      "naics_prefixes": [
+        "454",
+        "455",
+        "492",
+        "493"
+      ]
+    }
+  },
+  "apple": {
+    "dol": {
+      "name_patterns": [
+        "APPLE STORE",
+        "APPLE INC",
+        "APPLE RETAIL"
+      ],
+      "naics_prefixes": [
+        "443",
+        "449",
+        "334"
+      ]
+    }
+  },
+  "bluebottle": {
+    "dol": {
+      "name_patterns": [
+        "BLUE BOTTLE"
+      ],
+      "naics_prefixes": [
+        "7225",
+        "7222"
+      ]
+    }
+  },
+  "chipotle": {
+    "carbon_factor": "limited_service_restaurant",
+    "dol": {
+      "name_patterns": [
+        "CHIPOTLE"
+      ],
+      "naics_prefixes": [
+        "7225",
+        "7222"
+      ]
+    }
+  },
+  "foodlion": {
+    "dol": {
+      "name_patterns": [
+        "FOOD LION"
+      ],
+      "naics_prefixes": [
+        "445"
+      ]
+    }
+  },
+  "harristeeter": {
+    "dol": {
+      "name_patterns": [
+        "HARRIS TEETER"
+      ],
+      "naics_prefixes": [
+        "445"
+      ]
+    }
+  },
+  "heb": {
+    "dol": {
+      "name_patterns": [
+        "H-E-B",
+        "H E B GROCERY",
+        "HEB GROCERY"
+      ],
+      "naics_prefixes": [
+        "445"
+      ]
+    }
+  },
+  "hm": {
+    "dol": {
+      "name_patterns": [
+        "H & M",
+        "H&M"
+      ],
+      "naics_prefixes": [
+        "448",
+        "458"
+      ]
+    }
+  },
+  "nike": {
+    "carbon_factor": "footwear",
+    "dol": {
+      "name_patterns": [
+        "NIKE"
+      ],
+      "naics_prefixes": [
+        "448",
+        "458",
+        "316"
+      ]
+    }
+  },
+  "patelbrothers": {
+    "dol": {
+      "name_patterns": [
+        "PATEL BROTHERS",
+        "PATEL BROS"
+      ],
+      "naics_prefixes": [
+        "445"
+      ]
+    }
+  },
+  "planetfitness": {
+    "dol": {
+      "name_patterns": [
+        "PLANET FITNESS"
+      ],
+      "naics_prefixes": [
+        "7139"
+      ]
+    }
+  },
+  "shell": {
+    "climate_trace_owner": "E100000000746",
+    "dol": {
+      "name_patterns": [
+        "SHELL"
+      ],
+      "naics_prefixes": [
+        "447",
+        "457"
+      ]
+    }
+  },
+  "starbucks": {
+    "carbon_factor": "coffee_shop",
+    "dol": {
+      "name_patterns": [
+        "STARBUCKS"
+      ],
+      "naics_prefixes": [
+        "7225",
+        "7222"
+      ]
+    }
+  },
+  "target": {
+    "dol": {
+      "name_patterns": [
+        "TARGET STORE",
+        "TARGET STORES",
+        "TARGET CORP",
+        "TARGET CORPORATION"
+      ],
+      "naics_prefixes": [
+        "452",
+        "455"
+      ]
+    }
+  },
+  "torchys": {
+    "dol": {
+      "name_patterns": [
+        "TORCHY"
+      ],
+      "naics_prefixes": [
+        "7225",
+        "7222"
+      ]
+    }
+  },
+  "traderjoes": {
+    "dol": {
+      "name_patterns": [
+        "TRADER JOE"
+      ],
+      "naics_prefixes": [
+        "445"
+      ]
+    }
+  },
+  "walmart": {
+    "dol": {
+      "name_patterns": [
+        "WAL-MART",
+        "WALMART"
+      ],
+      "naics_prefixes": [
+        "452",
+        "455"
+      ]
+    }
+  },
+  "wegmans": {
+    "dol": {
+      "name_patterns": [
+        "WEGMANS"
+      ],
+      "naics_prefixes": [
+        "445"
+      ]
+    }
+  },
+  "whataburger": {
+    "dol": {
+      "name_patterns": [
+        "WHATABURGER"
+      ],
+      "naics_prefixes": [
+        "7225",
+        "7222"
+      ]
+    }
+  }
+}

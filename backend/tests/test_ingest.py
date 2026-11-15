@@ -4,7 +4,7 @@ import pytest
 
 from app.db import repos
 from app.models import UserProfile
-from app.services import aggregation, ethics, ingest, nessie
+from app.services import aggregation, ingest, nessie
 
 COLLECTIONS = ("customers", "merchants", "purchases", "brands")
 
@@ -13,14 +13,15 @@ def _counts(db) -> dict[str, int]:
     return {name: db[name].count_documents({}) for name in COLLECTIONS}
 
 
-def test_mock_sync_loads_everything(db):
+def test_mock_sync_loads_everything(db, mock_data):
     result = ingest.sync_customer(db, "cust_demo")
-    assert (result["merchants"], result["purchases"], result["brands_created"]) == (10, 60, 0)
+    purchase_count = len(mock_data.purchases)
+    assert (result["merchants"], result["purchases"], result["brands_created"]) == (10, purchase_count, 0)
     assert result["errors"] == []
     assert _counts(db) == {
         "customers": 1,
         "merchants": 10,
-        "purchases": 60,
+        "purchases": purchase_count,
         "brands": len(ingest.curated_brands()),
     }
 
@@ -33,16 +34,40 @@ def test_sync_is_idempotent(db):
     assert db.sync_runs.count_documents({}) == 2  # the log grows, the data does not
 
 
+def test_sync_removes_purchases_the_source_no_longer_has(db):
+    """Regenerated demo data must replace the old purchases, not pile on top of them."""
+    db.purchases.insert_one({"_id": "old-purchase", "customer_id": "cust_demo", "account_id": "acct_demo", "amount_cents": 9999})
+    db.purchases.insert_one({"_id": "other-customer", "customer_id": "someone-else", "account_id": "acct_x", "amount_cents": 1})
+
+    result = ingest.sync_customer(db, "cust_demo")
+
+    assert db.purchases.find_one({"_id": "old-purchase"}) is None
+    assert db.purchases.find_one({"_id": "other-customer"}) is not None
+    assert db.purchases.count_documents({"customer_id": "cust_demo"}) == result["purchases"]
+    assert result["purchases_removed"] == 1
+
+
+def test_an_account_that_came_back_empty_keeps_its_purchases(db):
+    """A partial Nessie answer (one account's purchases missing) must not delete that account's history."""
+    db.purchases.insert_one({"_id": "card-2-purchase", "customer_id": "cust_demo", "account_id": "acct_second",
+                             "amount_cents": 500})
+
+    ingest.sync_customer(db, "cust_demo")
+
+    assert db.purchases.find_one({"_id": "card-2-purchase"}) is not None
+
+
 def test_merchants_resolve_to_curated_brands(db):
     ingest.sync_customer(db, "cust_demo")
     assert db.merchants.find_one({"_id": "m_amazon"})["brand_id"] == "amazon"
     assert {m["match"]["method"] for m in db.merchants.find()} == {"alias"}
 
 
-def test_purchase_documents_use_cents_and_dates(db):
+def test_purchase_documents_use_cents_and_dates(db, mock_data):
     ingest.sync_customer(db, "cust_demo")
-    purchase = db.purchases.find_one({"_id": "p_015"})
-    assert purchase["amount_cents"] == 678
+    expected = mock_data.first("m_starbucks")
+    purchase = db.purchases.find_one({"_id": expected["_id"]})
+    assert purchase["amount_cents"] == round(expected["amount"] * 100)
     assert purchase["brand_id"] == "starbucks"
     assert purchase["purchase_date"].year == 2026
 
@@ -91,7 +116,8 @@ def test_messy_nessie_style_data_is_normalized(db, monkeypatch):
     amazon = next(m for m in summary.merchants if m.merchant_id == "amazon")
     assert amazon.total_spent == 30.15  # cancelled excluded, pending included
     assert amazon.purchase_count == 2
-    assert ethics.cached_report("junk-demo-groceries") is None  # junk is never researched
+    assert repos.get_ethics_research(db, "junk-demo-groceries") is None  # junk is never researched
+    assert next(m for m in summary.merchants if m.merchant_id == "junk-demo-groceries").personalized_score is None
 
 
 def test_unusable_amounts_are_skipped_not_fatal(db, monkeypatch):

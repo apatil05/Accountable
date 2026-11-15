@@ -1,6 +1,6 @@
-// Dashboard insights, computed only from data the API already returns
-// (/spending/summary + /supply-chains). Facts only, never scores. Owner: Person C.
-import type { MerchantSummary, SupplyChain } from "../api/types";
+// Dashboard insights, computed only from real data the API returns
+// (/spending/summary + /suppliers import records). Facts only, never scores. Owner: Person C.
+import type { MerchantSummary, SupplierReport } from "../api/types";
 
 export type Continent = "Asia" | "South America" | "North America" | "Africa" | "Europe" | "Oceania";
 
@@ -14,65 +14,66 @@ export function continentOf(lat: number, lng: number): Continent {
   return "Asia";
 }
 
-// Contiguous US bounding box. Origins inside count as "starts in the US".
-const inUS = (lat: number, lng: number) => lat > 24 && lat < 50 && lng > -125 && lng < -66;
-
 export interface ContinentShare {
   continent: Continent;
   amount: number;
   share: number;
   merchantIds: string[];
-  /** A representative point to turn the globe to (spend-weighted centroid of origins). */
-  center: [number, number];
 }
 
 export interface WhereItStarts {
   continents: ContinentShare[]; // most money first
   abroadAmount: number;
   abroadShare: number;
-  abroadIds: string[];
-  coveredTotal: number; // spend that has an example route at all
+  abroadIds: string[]; // companies with at least one supplier outside the US
+  countries: string[]; // supplier countries (ISO codes)
+  coveredTotal: number; // spend at companies that have import records
 }
 
-export function whereItStarts(merchants: MerchantSummary[], chains: SupplyChain[]): WhereItStarts {
-  const byId = new Map(chains.map((c) => [c.merchant_id, c]));
-  const groups = new Map<Continent, { amount: number; ids: string[]; lat: number; lng: number }>();
+/**
+ * Where your spending traces to, from real import records. Each company's spend is split across its top
+ * suppliers by their shipment counts (equal split when counts are missing), then grouped by the supplier's
+ * continent and by whether it's outside the US.
+ */
+export function whereItStarts(merchants: MerchantSummary[], reports: SupplierReport[]): WhereItStarts {
+  const byId = new Map(reports.map((r) => [r.merchant_id, r]));
+  const groups = new Map<Continent, { amount: number; ids: Set<string> }>();
+  const countries = new Set<string>();
+  const abroadIds = new Set<string>();
   let abroadAmount = 0;
   let coveredTotal = 0;
-  const abroadIds: string[] = [];
 
   for (const m of merchants) {
-    const origin = byId.get(m.merchant_id)?.stages[0];
-    if (!origin) continue;
+    const sups = byId.get(m.merchant_id)?.suppliers ?? [];
+    if (!sups.length) continue;
     coveredTotal += m.total_spent;
-    const c = continentOf(origin.lat, origin.lng);
-    const g = groups.get(c) ?? { amount: 0, ids: [], lat: 0, lng: 0 };
-    g.amount += m.total_spent;
-    g.ids.push(m.merchant_id);
-    g.lat += origin.lat * m.total_spent;
-    g.lng += origin.lng * m.total_spent;
-    groups.set(c, g);
-    if (!inUS(origin.lat, origin.lng)) {
-      abroadAmount += m.total_spent;
-      abroadIds.push(m.merchant_id);
-    }
+    const weights = sups.map((s) => (s.shipments && s.shipments > 0 ? s.shipments : 1));
+    const total = weights.reduce((a, b) => a + b, 0);
+    sups.forEach((s, i) => {
+      const amount = (m.total_spent * weights[i]) / total;
+      const c = continentOf(s.lat, s.lng);
+      const g = groups.get(c) ?? { amount: 0, ids: new Set<string>() };
+      g.amount += amount;
+      g.ids.add(m.merchant_id);
+      groups.set(c, g);
+      if (s.country) countries.add(s.country);
+      if (s.country_code !== "USA") {
+        abroadAmount += amount;
+        abroadIds.add(m.merchant_id);
+      }
+    });
   }
 
   const continents = [...groups.entries()]
-    .map(([continent, g]) => ({
-      continent,
-      amount: g.amount,
-      share: coveredTotal ? g.amount / coveredTotal : 0,
-      merchantIds: g.ids,
-      center: [g.lng / g.amount, g.lat / g.amount] as [number, number],
-    }))
+    .map(([continent, g]) => ({ continent, amount: g.amount, share: coveredTotal ? g.amount / coveredTotal : 0, merchantIds: [...g.ids] }))
     .sort((a, b) => b.amount - a.amount);
 
   return {
     continents,
     abroadAmount,
     abroadShare: coveredTotal ? abroadAmount / coveredTotal : 0,
-    abroadIds,
+    abroadIds: [...abroadIds],
+    countries: [...countries],
     coveredTotal,
   };
 }

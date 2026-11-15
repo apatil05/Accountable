@@ -1,3 +1,7 @@
 -r requirements.txt
 pytest>=8.0
 pytest-cov>=5.0
+# Data loaders run from a laptop, not on the API server:
+openpyxl>=3.1   # scripts/build_emission_factors.py reads the EPA/Cornerstone workbook
+pypdf>=5.0      # scripts/load_data.py reports: extracts the emissions page from report PDFs
+cryptography>=42  # lets pypdf open AES-encrypted reports (Target's are)

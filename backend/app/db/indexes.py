@@ -6,8 +6,17 @@ from pymongo.database import Database
 
 
 def ensure_indexes(db: Database) -> None:
+    # Expired sessions are deleted by MongoDB itself (lookups also check expires_at).
+    db.sessions.create_index([("expires_at", ASCENDING)], expireAfterSeconds=0)
+    db.users.create_index([("customer_id", ASCENDING)])
     db.purchases.create_index([("customer_id", ASCENDING), ("purchase_date", DESCENDING)])
     db.purchases.create_index([("customer_id", ASCENDING), ("brand_id", ASCENDING)])
     db.merchants.create_index([("brand_id", ASCENDING)])
     db.sync_runs.create_index([("customer_id", ASCENDING), ("started_at", DESCENDING)])
     db.sync_runs.create_index([("ok", ASCENDING), ("started_at", DESCENDING)])
+    db.company_emissions.create_index([("brand_id", ASCENDING), ("data_year", DESCENDING)])
+    db.labor_cases.create_index([("brand_id", ASCENDING), ("findings_end", DESCENDING)])
+    db.osha_inspections.create_index([("brand_id", ASCENDING), ("opened", DESCENDING)])
+    db.nlrb_cases.create_index([("brand_id", ASCENDING), ("filed", DESCENDING)])
+    db.pipeline_runs.create_index([("source", ASCENDING), ("started_at", DESCENDING)])
+    db.pipeline_runs.create_index([("source", ASCENDING), ("loaded_brands", ASCENDING)])

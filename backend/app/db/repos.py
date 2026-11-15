@@ -29,6 +29,13 @@ def bulk_upsert(db: Database, collection: str, docs: Sequence[Mapping[str, Any]]
     return len(ops)
 
 
+def delete_purchases_except(db: Database, customer_id: str, account_ids: Iterable[str], keep_ids: Iterable[str]) -> int:
+    """Remove purchases the source no longer has (e.g. regenerated demo data), but only on accounts the
+    source just returned purchases for: an account that came back empty may be a partial answer."""
+    stale = {"customer_id": customer_id, "account_id": {"$in": list(account_ids)}, "_id": {"$nin": list(keep_ids)}}
+    return db.purchases.delete_many(stale).deleted_count
+
+
 # ---------- brands ----------
 def seed_brands(db: Database, curated: Sequence[Mapping[str, Any]]) -> int:
     """Curated brands (data/brands.json) are the source of truth for their own fields,
@@ -102,6 +109,11 @@ def distinct_brand_ids(db: Database, customer_id: str) -> list[str]:
 
 
 # ---------- profiles ----------
+def customer_source(db: Database, customer_id: str) -> str | None:
+    doc = db.customers.find_one({"_id": customer_id}, {"source": 1})
+    return doc.get("source") if doc else None
+
+
 def get_profile(db: Database, customer_id: str) -> dict | None:
     return db.profiles.find_one({"_id": customer_id})
 
@@ -109,6 +121,135 @@ def get_profile(db: Database, customer_id: str) -> dict | None:
 def save_profile(db: Database, customer_id: str, profile: Mapping[str, Any]) -> None:
     doc = {**profile, "updated_at": utcnow()}
     db.profiles.update_one({"_id": customer_id}, {"$set": doc}, upsert=True)
+
+
+# ---------- research cache ----------
+# One document per brand slug, independent of any user's profile. Only real research is
+# stored here; mock data is served from data/*.json and never written to these collections.
+ETHICS_REPORTS = "ethics_reports"
+SUPPLY_CHAINS = "supply_chains"
+
+
+def _save_research(db: Database, collection: str, brand_id: str, fields: Mapping[str, Any],
+                   researched_at: datetime | None) -> None:
+    doc = {**fields, "researched_at": researched_at or utcnow()}
+    db[collection].replace_one({"_id": brand_id}, doc, upsert=True)
+
+
+def save_ethics_research(db: Database, brand_id: str, merchant_name: str, categories: Sequence[Mapping[str, Any]],
+                         data_source: str, researched_at: datetime | None = None) -> None:
+    fields = {"merchant_name": merchant_name, "categories": list(categories), "data_source": data_source}
+    _save_research(db, ETHICS_REPORTS, brand_id, fields, researched_at)
+
+
+def get_ethics_research(db: Database, brand_id: str) -> dict | None:
+    return db[ETHICS_REPORTS].find_one({"_id": brand_id})
+
+
+def get_ethics_researches(db: Database, ids: Iterable[str]) -> list[dict]:
+    return list(db[ETHICS_REPORTS].find({"_id": {"$in": list(ids)}}))
+
+
+# ---------- verdict blurbs ----------
+# Gemini-written verdict blurbs, one per (customer, brand), written only by prewarm. Each carries
+# a fingerprint of the profile + research it was written for; a mismatch on read means stale,
+# and the page falls back to the template blurb (services/verdict.py).
+VERDICT_BLURBS = "verdict_blurbs"
+
+
+def _blurb_id(customer_id: str, brand_id: str) -> str:
+    return f"{customer_id}:{brand_id}"
+
+
+def save_verdict_blurb(db: Database, customer_id: str, brand_id: str, blurb: str, fingerprint: str) -> None:
+    doc = {"customer_id": customer_id, "brand_id": brand_id, "blurb": blurb, "fingerprint": fingerprint,
+           "created_at": utcnow()}
+    db[VERDICT_BLURBS].replace_one({"_id": _blurb_id(customer_id, brand_id)}, doc, upsert=True)
+
+
+def get_verdict_blurb(db: Database, customer_id: str, brand_id: str) -> dict | None:
+    return db[VERDICT_BLURBS].find_one({"_id": _blurb_id(customer_id, brand_id)})
+
+
+def get_verdict_blurbs(db: Database, customer_id: str, brand_ids: Iterable[str]) -> dict[str, dict]:
+    ids = [_blurb_id(customer_id, b) for b in brand_ids]
+    return {d["brand_id"]: d for d in db[VERDICT_BLURBS].find({"_id": {"$in": ids}})}
+
+
+def save_supply_chain(db: Database, brand_id: str, product: str, stages: Sequence[Mapping[str, Any]],
+                      data_source: str, researched_at: datetime | None = None) -> None:
+    fields = {"product": product, "stages": list(stages), "data_source": data_source}
+    _save_research(db, SUPPLY_CHAINS, brand_id, fields, researched_at)
+
+
+def get_supply_chain(db: Database, brand_id: str) -> dict | None:
+    return db[SUPPLY_CHAINS].find_one({"_id": brand_id})
+
+
+def get_supply_chains(db: Database, ids: Iterable[str]) -> dict[str, dict]:
+    return {d["_id"]: d for d in db[SUPPLY_CHAINS].find({"_id": {"$in": list(ids)}})}
+
+
+def researched_at_by_id(db: Database, collection: str, ids: Iterable[str]) -> dict[str, datetime]:
+    """When each cached brand was last researched; brands with no cache entry are absent."""
+    cursor = db[collection].find({"_id": {"$in": list(ids)}}, {"researched_at": 1})
+    return {d["_id"]: d["researched_at"] for d in cursor}
+
+
+def researchable_brands(db: Database, ids: Iterable[str] | None = None) -> list[tuple[str, str]]:
+    """(slug, name) of non-junk brands, optionally limited to `ids`, sorted by slug."""
+    query: dict[str, Any] = {"is_junk": {"$ne": True}}
+    if ids is not None:
+        query["_id"] = {"$in": list(ids)}
+    return [(d["_id"], d["name"]) for d in db.brands.find(query, {"name": 1}).sort("_id", 1)]
+
+
+# ---------- outside-source facts ----------
+COMPANY_EMISSIONS = "company_emissions"
+LABOR_CASES = "labor_cases"
+
+
+def get_company_emissions(db: Database, brand_id: str) -> list[dict]:
+    """Every emissions document for a brand (all sources and years), newest year first."""
+    return list(db[COMPANY_EMISSIONS].find({"brand_id": brand_id}).sort([("data_year", -1), ("_id", 1)]))
+
+
+EMPTY_LABOR_TOTALS = {"cases": 0, "violations": 0, "employees": 0, "back_wages_cents": 0,
+                      "penalties_cents": 0, "child_labor_cases": 0, "earliest": None, "latest": None}
+
+
+def labor_totals(db: Database, brand_id: str, since: datetime | None = None) -> dict:
+    """Sums over a brand's cases (concluded on or after `since`), computed by MongoDB."""
+    match: dict[str, Any] = {"brand_id": brand_id}
+    if since is not None:
+        match["findings_end"] = {"$gte": since}
+    pipeline = [
+        {"$match": match},
+        {"$group": {
+            "_id": None,
+            "cases": {"$sum": 1},
+            "violations": {"$sum": "$violations"},
+            "employees": {"$sum": "$employees_affected"},
+            "back_wages_cents": {"$sum": "$back_wages_cents"},
+            "penalties_cents": {"$sum": "$penalties_cents"},
+            "child_labor_cases": {"$sum": {"$cond": [{"$gt": [{"$ifNull": ["$child_labor_violations", 0]}, 0]}, 1, 0]}},
+            "earliest": {"$min": "$findings_start"},
+            "latest": {"$max": "$findings_end"},
+        }},
+    ]
+    rows = list(db[LABOR_CASES].aggregate(pipeline))
+    return {**EMPTY_LABOR_TOTALS, **{k: v for k, v in rows[0].items() if k != "_id"}} if rows else dict(EMPTY_LABOR_TOTALS)
+
+
+def delete_company_reports_except(db: Database, keep_ids: Iterable[str]) -> int:
+    """Remove report entries that were deleted or re-dated in company_reports.json."""
+    stale = {"provenance.source": {"$in": ["company_report", "manual"]}, "_id": {"$nin": list(keep_ids)}}
+    return db[COMPANY_EMISSIONS].delete_many(stale).deleted_count
+
+
+def delete_labor_cases_except(db: Database, brand_id: str, keep_ids: Iterable[str]) -> int:
+    """Drop a brand's cases that a fresh load no longer matched (e.g. after narrowing its patterns)."""
+    return db[LABOR_CASES].delete_many({"brand_id": brand_id, "_id": {"$nin": list(keep_ids)}}).deleted_count
 
 
 # ---------- sync log ----------

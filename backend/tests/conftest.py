@@ -2,15 +2,43 @@
 MongoDB Atlas cluster (never the shared `accountable` database) and skip cleanly
 when MONGODB_URI is not configured."""
 
+import json
 import uuid
+from dataclasses import dataclass
 
 import pytest
 
 from app import config
 from app.db.client import new_client
-from app.services import ethics
 
 TEST_DB_PREFIX = "accountable_test_"
+EXCLUDED_STATUSES = ("cancelled",)
+
+
+@dataclass(frozen=True)
+class MockData:
+    """Expected values derived from mock_nessie.json, so regenerating it doesn't break tests."""
+
+    purchases: tuple[dict, ...]
+
+    def counted(self, merchant_id: str | None = None) -> list[dict]:
+        """Purchases that count toward spend (cancelled ones don't), optionally for one merchant."""
+        return [
+            p for p in self.purchases
+            if p["status"] not in EXCLUDED_STATUSES and merchant_id in (None, p["merchant_id"])
+        ]
+
+    def total(self, merchant_id: str | None = None) -> float:
+        return round(sum(round(p["amount"] * 100) for p in self.counted(merchant_id)) / 100, 2)
+
+    def first(self, merchant_id: str) -> dict:
+        return next(p for p in self.counted(merchant_id))
+
+
+@pytest.fixture(scope="session")
+def mock_data() -> MockData:
+    raw = json.loads((config.DATA_DIR / "mock_nessie.json").read_text())
+    return MockData(tuple(raw["purchases"]))
 
 
 @pytest.fixture(autouse=True)
@@ -20,10 +48,24 @@ def mock_mode(monkeypatch):
 
 
 @pytest.fixture(autouse=True)
-def clean_ethics_cache():
-    ethics._cache.clear()
-    yield
-    ethics._cache.clear()
+def no_real_gemini(monkeypatch):
+    """Tests never reach the paid Gemini API, even when a real key is in backend/.env.
+    A test that needs research fakes the pipeline functions itself."""
+    from app.services import gemini
+
+    def blocked():
+        raise RuntimeError("Gemini is blocked in tests")
+
+    monkeypatch.setattr(config, "GEMINI_API_KEY", "")
+    monkeypatch.setattr(gemini, "client", blocked)
+
+
+@pytest.fixture(autouse=True)
+def isolated_labordata_cache(tmp_path, monkeypatch):
+    """Loaders delete the cache after a run; tests must never touch the real multi-GB downloads."""
+    from app.services import labordata
+
+    monkeypatch.setattr(labordata, "CACHE_DIR", tmp_path / "labordata-cache")
 
 
 @pytest.fixture

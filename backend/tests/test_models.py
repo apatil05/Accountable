@@ -37,9 +37,15 @@ def test_text_fields_are_length_limited():
     assert UserProfile(name="n" * 100, stances="s" * 2000)
 
 
-def test_trusted_sources_are_limited_in_count_and_length():
-    with pytest.raises(ValidationError):
-        UserProfile(trusted_sources=["a.com"] * 21)
-    with pytest.raises(ValidationError, match="200 characters"):
-        UserProfile(trusted_sources=["x" * 201])
-    assert UserProfile(trusted_sources=["a.com"] * 20)
+def test_a_stored_profile_with_a_retired_category_still_loads(db):
+    """Profiles saved before a category was removed must not break every page that reads them."""
+    from app import store
+    from app.db import repos
+
+    repos.save_profile(db, "cust-1", {"name": "Ana", "weights": {"labor": 5, "political": 4}, "stances": "",
+                                      "prefer_local": False})
+
+    profile = store.load_profile(db, "cust-1")
+
+    assert profile.weights == {"labor": 5}
+    assert profile.name == "Ana" and profile.prefer_local is False

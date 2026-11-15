@@ -18,3 +18,6 @@ frontend/dist/
 .DS_Store
 .vscode/
 .idea/
+
+# Downloaded labor databases (labordata nightly builds); large, never commit
+backend/.cache/

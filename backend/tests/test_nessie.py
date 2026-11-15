@@ -106,14 +106,14 @@ def test_http_request_logging_is_silenced_because_urls_contain_the_key(name):
 
 
 # ---------- mock mode ----------
-def test_mock_mode_serves_demo_customer(monkeypatch):
+def test_mock_mode_serves_demo_customer(monkeypatch, mock_data):
     monkeypatch.setattr(config, "USE_MOCK_DATA", True)
     cid = nessie.default_customer_id()
     assert cid == "cust_demo"
     assert nessie.fetch_customer(cid)["_id"] == "cust_demo"
     accounts = nessie.fetch_accounts(cid)
     assert [a["_id"] for a in accounts] == ["acct_demo"]
-    assert len(nessie.fetch_purchases("acct_demo")) == 60
+    assert len(nessie.fetch_purchases("acct_demo")) == len(mock_data.purchases)
 
 
 def test_mock_mode_unknown_customer_is_none(monkeypatch):

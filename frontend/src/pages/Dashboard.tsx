@@ -1,20 +1,22 @@
 // Spending dashboard: your money over a living globe. Owner: Person C.
 // Scores are computed by the backend but intentionally not shown: we present facts, not ratings.
 // The globe is a fixed backdrop. It starts huge; as you scroll it eases aside and the content sheet slides
-// over it. Hovering a company (or an insight) turns the globe to that route and lights it.
+// over it. Hovering a company (or an insight) turns the globe to its real suppliers and lights their routes.
+// Routes come only from US import records (ImportYeti): each line runs from a supplier to the company's US importer.
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { api } from "../api/client";
-import type { MerchantSummary, SpendingSummary, SupplyChain } from "../api/types";
+import type { MerchantSummary, SpendingSummary, SupplierReport } from "../api/types";
 import Globe, { type GlobeLayout } from "../components/Globe";
-import MockBanner from "../components/MockBanner";
-import { continentOf, habits, whereItStarts } from "../lib/insights";
+import { footprintLead, formatKg } from "../lib/footprint";
+import { habits, whereItStarts } from "../lib/insights";
+import { supplierCountry, reportPoints, sphericalCenter, toGlobe, topSupplier } from "../lib/suppliers";
 
 const usd = (n: number) => n.toLocaleString("en-US", { style: "currency", currency: "USD" });
 const usd0 = (n: number) => n.toLocaleString("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 });
 const pct = (x: number) => `${Math.round(x * 100)}%`;
-// Explicit tints of the route accent for ranked shares (opacity fades go muddy on the dark field).
-const TINTS = ["#f2b04a", "#f4bf6a", "#f5cb88", "#f6d49e", "#f7dbb0"];
+// Ranked shares: lime for the lead (the one signal), then explicit steel steps (opacity fades go muddy on the dark field).
+const TINTS = ["#c5f05a", "#8fa6b6", "#6f8597", "#566b7c", "#455766"];
 
 // Nessie dates are "YYYY-MM-DD"; parse as a local date (new Date(iso) would read UTC and slip a day).
 function localDate(iso: string) {
@@ -22,18 +24,6 @@ function localDate(iso: string) {
   return new Date(y, m - 1, d);
 }
 const shortDate = (iso: string) => localDate(iso).toLocaleDateString("en-US", { month: "short", day: "numeric" });
-
-// Mean of points on a sphere (so averaging Asia and the Americas doesn't land in the wrong ocean).
-function sphericalMean(points: [number, number][]): [number, number] {
-  let x = 0, y = 0, z = 0;
-  for (const [lng, lat] of points) {
-    const l = (lng * Math.PI) / 180, p = (lat * Math.PI) / 180;
-    x += Math.cos(p) * Math.cos(l);
-    y += Math.cos(p) * Math.sin(l);
-    z += Math.sin(p);
-  }
-  return [(Math.atan2(y, x) * 180) / Math.PI, (Math.atan2(z, Math.hypot(x, y)) * 180) / Math.PI];
-}
 
 // Globe placement at the top of the page (huge, centered) and once docked beside the sheet.
 const LAYOUTS = {
@@ -51,7 +41,7 @@ interface Spotlight {
 export default function Dashboard() {
   const [data, setData] = useState<SpendingSummary | null>(null);
   const [err, setErr] = useState<string | null>(null);
-  const [chains, setChains] = useState<SupplyChain[] | null>(null);
+  const [reports, setReports] = useState<SupplierReport[] | null>(null);
   const [spot, setSpot] = useState<Spotlight | null>(null);
   const layout = useRef<GlobeLayout>({ ...LAYOUTS.wide.entry });
   const dashRef = useRef<HTMLDivElement>(null);
@@ -59,9 +49,9 @@ export default function Dashboard() {
   const load = useCallback(() => {
     setErr(null);
     setData(null);
-    setChains(null);
+    setReports(null);
     api.summary().then(setData).catch((e) => setErr(String(e)));
-    api.allSupplyChains().then(setChains).catch(() => setChains([]));
+    api.allSuppliers().then(setReports).catch(() => setReports([]));
   }, []);
   useEffect(load, [load]);
 
@@ -96,21 +86,22 @@ export default function Dashboard() {
 
   const model = useMemo(() => {
     if (!data) return null;
-    const ch = chains ?? [];
-    const chainById = new Map(ch.map((c) => [c.merchant_id, c]));
-    const originOf = (id: string) => chainById.get(id)?.stages[0];
-    const where = whereItStarts(data.merchants, ch);
+    const reps = reports ?? [];
+    const reportById = new Map(reps.map((r) => [r.merchant_id, r]));
+    const where = whereItStarts(data.merchants, reps);
     const hab = habits(data.merchants, data.total_spent);
     const latest = data.merchants.reduce((a, m) => (m.last_purchase > a ? m.last_purchase : a), "");
     const names = Object.fromEntries(data.merchants.map((m) => [m.merchant_id, m.name]));
-    // Frame a single route on all of its stops (so it sits on the visible face); a group on its origins.
+    const globe = toGlobe(reps, names);
+    // Frame one company on all its suppliers + importer; a group of companies on all of their suppliers.
     const spotFor = (ids: string[]): Spotlight | null => {
-      const stops = ids.length === 1 ? chainById.get(ids[0])?.stages ?? [] : ids.map(originOf).filter(Boolean);
-      const pts = stops.map((p) => [p!.lng, p!.lat] as [number, number]);
-      return pts.length ? { ids, focus: sphericalMean(pts) } : null;
+      const pts = ids.length === 1 ? reportPoints(reportById.get(ids[0])) : ids.flatMap((id) => reportById.get(id)?.suppliers ?? []);
+      const focus = sphericalCenter(pts);
+      return focus ? { ids, focus } : null;
     };
-    return { chainById, originOf, where, hab, latest, names, spotFor };
-  }, [data, chains]);
+    const lead = footprintLead(data.merchants);
+    return { reportById, where, hab, latest, names, globe, spotFor, lead };
+  }, [data, reports]);
 
   if (err) {
     return (
@@ -126,7 +117,7 @@ export default function Dashboard() {
     );
   }
 
-  const hasRoutes = !!chains?.length;
+  const hasRoutes = !!model?.globe.routes.length;
   const lightUp = (ids: string[]) => () => setSpot(model?.spotFor(ids) ?? null);
   const clear = () => setSpot(null);
 
@@ -135,11 +126,13 @@ export default function Dashboard() {
       <div className="globe-backdrop">
         {hasRoutes && (
           <Globe
-            chains={chains!}
+            routes={model!.globe.routes}
+            points={model!.globe.points}
             highlight={spot?.ids ?? null}
             focus={spot?.focus ?? null}
-            labels={model?.names}
             layoutRef={layout}
+            zoomable
+            touchZoom={false}
             tweenMs={1100}
           />
         )}
@@ -159,12 +152,16 @@ export default function Dashboard() {
             <dl className="dash-stats">
               <div><dt>companies</dt><dd>{data.merchant_count}</dd></div>
               <div><dt>purchases</dt><dd>{model.hab.purchases}</dd></div>
-              {hasRoutes && <div><dt>continents of origin</dt><dd>{model.where.continents.length}</dd></div>}
-              {hasRoutes && <div><dt>starts outside the US</dt><dd>{pct(model.where.abroadShare)}</dd></div>}
+              {hasRoutes && <div><dt>supplier countries</dt><dd>{model.where.countries.length}</dd></div>}
+              {hasRoutes && <div><dt>real suppliers found</dt><dd>{model.globe.points.filter((p) => p.kind === "supplier").length}</dd></div>}
+              {data.estimated_kg_co2e != null && (
+                <div><dt>CO₂e, estimated</dt><dd>≈ {formatKg(data.estimated_kg_co2e)}</dd></div>
+              )}
             </dl>
             {hasRoutes && (
               <p className="dash-hero-caption">
-                Each line is one example product's route to you, not yet verified. Drag the globe to spin it.
+                Each line runs from a company's real supplier to its US importer, from US import records (ImportYeti).
+                Drag the globe to spin it; pinch or Ctrl + scroll to zoom.
               </p>
             )}
           </div>
@@ -175,25 +172,33 @@ export default function Dashboard() {
       {/* 2. The sheet slides up over the globe. */}
       {data && model && (
         <div className="dash-sheet">
-          <MockBanner />
 
-          {hasRoutes && (
+          {(hasRoutes || model.lead) && (
             <section aria-labelledby="glance-title">
               <h2 id="glance-title" className="sheet-title">At a glance</h2>
               <ul className="glance" onMouseLeave={clear}>
-                {model.where.abroadIds.length > 0 && (
+                {model.lead && (
                   <li>
-                    <button type="button" className="glance-item" onClick={lightUp(model.where.abroadIds)} onMouseEnter={lightUp(model.where.abroadIds)} onFocus={lightUp(model.where.abroadIds)} onBlur={clear}>
-                      <span className="glance-figure">{pct(model.where.abroadShare)}</span>
-                      <span>of your spending goes to companies whose example product starts outside the US</span>
+                    <button type="button" className="glance-item" onClick={lightUp([model.lead.merchant.merchant_id])} onMouseEnter={lightUp([model.lead.merchant.merchant_id])} onFocus={lightUp([model.lead.merchant.merchant_id])} onBlur={clear}>
+                      <span className="glance-figure">{pct(model.lead.footprintShare)}</span>
+                      <span>
+                        of your estimated footprint comes from {model.lead.merchant.name}, which is only{" "}
+                        {pct(model.lead.spendShare)} of your spending
+                        {model.lead.merchant.carbon?.includes_use_phase ? " (burning fuel counts)" : ""}
+                      </span>
+                      <span className="split" aria-hidden="true">
+                        <span style={{ flexGrow: model.lead.footprintShare, background: TINTS[0] }} />
+                        <span style={{ flexGrow: 1 - model.lead.footprintShare, background: "rgba(160, 185, 205, 0.16)" }} />
+                      </span>
+                      <span className="split-key"><span>Estimates from US industry averages, not company data</span></span>
                     </button>
                   </li>
                 )}
-                {model.where.continents[0] && (
+                {hasRoutes && model.where.continents[0] && (
                   <li>
                     <button type="button" className="glance-item" onClick={lightUp(model.where.continents[0].merchantIds)} onMouseEnter={lightUp(model.where.continents[0].merchantIds)} onFocus={lightUp(model.where.continents[0].merchantIds)} onBlur={clear}>
                       <span className="glance-figure">{pct(model.where.continents[0].share)}</span>
-                      <span>starts in {model.where.continents[0].continent}, the most of any continent</span>
+                      <span>traces to suppliers in {model.where.continents[0].continent}, the most of any continent</span>
                       <span className="split" aria-hidden="true">
                         {model.where.continents.map((c, i) => (
                           <span key={c.continent} style={{ flexGrow: c.amount, background: TINTS[Math.min(i, TINTS.length - 1)] }} />
@@ -228,7 +233,7 @@ export default function Dashboard() {
           <section aria-labelledby="companies-title" className="sheet-section">
             <div className="sheet-head">
               <h2 id="companies-title" className="sheet-title">Companies you buy from</h2>
-              <p>Most spent first. Point at one (or tap it once) to see its route; example origins are not yet verified.</p>
+              <p>Most spent first. Point at one (or tap it once) to see its real suppliers on the globe.</p>
             </div>
             {data.merchants.length === 0 ? (
               <p className="sheet-empty">
@@ -241,7 +246,7 @@ export default function Dashboard() {
                     key={m.merchant_id}
                     m={m}
                     total={data.total_spent}
-                    chain={model.chainById.get(m.merchant_id)}
+                    report={model.reportById.get(m.merchant_id)}
                     active={spot?.ids.length === 1 && spot.ids[0] === m.merchant_id}
                     onEnter={lightUp([m.merchant_id])}
                     onLeave={clear}
@@ -266,16 +271,16 @@ export default function Dashboard() {
 }
 
 function CompanyRow({
-  m, total, chain, active, onEnter, onLeave,
+  m, total, report, active, onEnter, onLeave,
 }: {
   m: MerchantSummary;
   total: number;
-  chain?: SupplyChain;
+  report?: SupplierReport;
   active: boolean;
   onEnter: () => void;
   onLeave: () => void;
 }) {
-  const o = chain?.stages[0];
+  const top = topSupplier(report);
   const share = total ? m.total_spent / total : 0;
   return (
     <li>
@@ -296,11 +301,13 @@ function CompanyRow({
         <span className="cr-main">
           <span className="cr-name">
             {m.name}
-            {o && <span className="tag">{continentOf(o.lat, o.lng)}</span>}
+            {top?.country && <span className="tag">{supplierCountry(top)}</span>}
           </span>
-          {chain && o && (
+          {report && (
             <span className="cr-origin">
-              {chain.product}, starts in {o.place} <span className="unverified">(unverified)</span>
+              {top
+                ? `Top supplier: ${top.name}${top.place ? `, ${top.place.title}` : ""}${report.suppliers.length > 1 ? ` + ${report.suppliers.length - 1} more` : ""}`
+                : "No US import records found"}
             </span>
           )}
         </span>
@@ -308,6 +315,7 @@ function CompanyRow({
           <span className="cr-spend">{usd(m.total_spent)}</span>
           <span className="cr-meta">
             {pct(share)} · {m.purchase_count} {m.purchase_count === 1 ? "purchase" : "purchases"} · last {shortDate(m.last_purchase)}
+            {m.carbon && <> · ≈ {formatKg(m.carbon.kg_co2e)} CO₂e</>}
           </span>
         </span>
         {active && <span className="cr-open">Tap again to open</span>}

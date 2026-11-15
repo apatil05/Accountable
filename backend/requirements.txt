@@ -7,4 +7,5 @@ pymongo>=4.10
 certifi>=2024.0
 rapidfuzz>=3.0
 # Added later by the research-engine owner:
-# google-genai>=1.0
+google-genai>=1.0
+pypdf>=5.0

@@ -34,7 +34,7 @@ def test_unreachable_atlas_gives_an_actionable_error_without_leaking_the_uri(mon
     assert "hunter2" not in message and "mongodb+srv" not in message
 
 
-def test_startup_creates_indexes_seeds_brands_and_syncs_mock_customer(db, monkeypatch):
+def test_startup_creates_indexes_seeds_brands_and_syncs_mock_customer(db, monkeypatch, mock_data):
     monkeypatch.setattr(config, "MONGODB_URI", "mongodb://configured")
     monkeypatch.setattr(main, "get_db", lambda: db)
     monkeypatch.setattr(main, "ping", lambda database: None)
@@ -42,7 +42,7 @@ def test_startup_creates_indexes_seeds_brands_and_syncs_mock_customer(db, monkey
     with TestClient(main.app):
         assert db.brands.count_documents({}) == len(ingest.curated_brands())
         assert db.customers.count_documents({"_id": "cust_demo"}) == 1
-        assert db.purchases.count_documents({}) == 60
+        assert db.purchases.count_documents({}) == len(mock_data.purchases)
         assert "customer_id_1_purchase_date_-1" in db.purchases.index_information()
 
 
